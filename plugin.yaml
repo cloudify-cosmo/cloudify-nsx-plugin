@@ -1,0 +1,118 @@
+plugins:
+  nsx:
+    executor: central_deployment_agent
+    # source: https://github.com/Cloudify-PS/cloudify-nsx-plugin/archive/master.zip
+    package_name: cloudify-nsx-plugin
+    package_version: '0.1'
+
+node_types:
+
+  # logical switches
+  cloudify.nsx.lswitch:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
+          inputs: {}
+        configure:
+          implementation: nsx.cloudify_nsx.stub.configure
+          inputs: {}
+        start:
+          implementation: nsx.cloudify_nsx.stub.start
+          inputs: {}
+        stop:
+          implementation: nsx.cloudify_nsx.stub.stop
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
+
+  # distributed logical routers
+  cloudify.nsx.dlr:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
+          inputs: {}
+        configure:
+          implementation: nsx.cloudify_nsx.stub.configure
+          inputs: {}
+        start:
+          implementation: nsx.cloudify_nsx.stub.start
+          inputs: {}
+        stop:
+          implementation: nsx.cloudify_nsx.stub.stop
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
+
+  # edge services gateways
+  cloudify.nsx.esg:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
+          inputs: {}
+        configure:
+          implementation: nsx.cloudify_nsx.stub.configure
+          inputs: {}
+        start:
+          implementation: nsx.cloudify_nsx.stub.start
+          inputs: {}
+        stop:
+          implementation: nsx.cloudify_nsx.stub.stop
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
+
+  # Edge DHCP
+  cloudify.nsx.dhcp:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
+          inputs: {}
+        configure:
+          implementation: nsx.cloudify_nsx.stub.configure
+          inputs: {}
+        start:
+          implementation: nsx.cloudify_nsx.stub.start
+          inputs: {}
+        stop:
+          implementation: nsx.cloudify_nsx.stub.stop
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
+
+  # distributed firewall
+  cloudify.nsx.dfw:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
+          inputs: {}
+        configure:
+          implementation: nsx.cloudify_nsx.stub.configure
+          inputs: {}
+        start:
+          implementation: nsx.cloudify_nsx.stub.start
+          inputs: {}
+        stop:
+          implementation: nsx.cloudify_nsx.stub.stop
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
