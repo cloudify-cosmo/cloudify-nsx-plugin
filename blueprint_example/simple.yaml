@@ -5,7 +5,129 @@ imports:
 #  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-nsx-plugin/master/plugin.yaml
   - ../plugin.yaml
 
+inputs:
+
+  nsx_ip:
+    type: string
+    description: >
+       nsx server ip
+    default: 127.0.0.1
+
+  nsx_user:
+    type: string
+    description: >
+       nsx server user
+    default: nsx
+
+  nsx_password:
+    type: string
+    description: >
+       nsx server user password
+    default: nsx
+
+  nsx_raml:
+    type: string
+    description: >
+       raml file path
+    default: ""
+
+  vcenter_ip:
+    type: string
+    description: >
+       vcenter server ip
+    default: 127.0.0.1
+
+  vcenter_user:
+    type: string
+    description: >
+       vcenter server user
+    default: nsx
+
+  vcenter_password:
+    type: string
+    description: >
+       vcenter server user password
+    default: nsx
+
 node_templates:
 
-  nsx_node:
-    type: cloudify.nsx.raw
+  nsx_lswith:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth:
+        user: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        ip: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+      switch:
+        name: some_swith_name
+        transport_zone: Main_Zone
+
+  vresourcepool:
+    type: cloudify.vcenter.resource_pool
+    properties:
+      vcenter_auth:
+        user: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        ip: { get_input: vcenter_ip }
+      resource_pool:
+        name: Cluster
+        use_external_resource: True
+
+  datastore:
+    type: cloudify.vcenter.datastore
+    properties:
+      vcenter_auth:
+        user: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        ip: { get_input: vcenter_ip }
+      datastore:
+        name: datastore1
+        use_external_resource: True
+
+  datacenter:
+    type: cloudify.vcenter.datacenter
+    properties:
+      vcenter_auth:
+        user: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        ip: { get_input: vcenter_ip }
+      datacenter:
+        name: Datacenter
+        use_external_resource: True
+
+  nsx_dlr:
+    type: cloudify.nsx.dlr
+    properties:
+      nsx_auth:
+        user: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        ip: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+      router:
+        name: some_router_name
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            router:
+              dlr_pwd: SeCrEt010203!
+              # compact, large, quadlarge, xlarge
+              dlr_size: compact
+              datacentermoid: { get_attribute: [ datacenter, resource_id ] }
+              datastoremoid: { get_attribute: [ datastore, resource_id ] }
+              resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
+              ha_ls_id: { get_attribute: [ nsx_lswith, resource_id ] }
+              uplink_ls_id: { get_attribute: [ nsx_lswith, resource_id ] }
+              uplink_ip: 192.168.1.11
+              uplink_subnet: 255.255.255.0
+              uplink_dgw: 192.168.1.1
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: nsx_lswith
+      - type: cloudify.relationships.depends_on
+        target: vresourcepool
+      - type: cloudify.relationships.depends_on
+        target: datastore
+      - type: cloudify.relationships.depends_on
+        target: datacenter
