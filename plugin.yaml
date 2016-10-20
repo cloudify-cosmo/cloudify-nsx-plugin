@@ -7,49 +7,97 @@ plugins:
 
 node_types:
 
-  # logical switches
-  cloudify.nsx.lswitch:
+  # vcenter resource pool
+  cloudify.vcenter.resource_pool:
     derived_from: cloudify.nodes.Root
-
+    properties:
+      vcenter_auth:
+        default: {}
+      resource_pool:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
-          inputs: {}
-        configure:
-          implementation: nsx.cloudify_nsx.stub.configure
-          inputs: {}
-        start:
-          implementation: nsx.cloudify_nsx.stub.start
-          inputs: {}
-        stop:
-          implementation: nsx.cloudify_nsx.stub.stop
-          inputs: {}
+          implementation: nsx.cloudify_nsx.vcenter_resource_pool.create
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
-          inputs: {}
+          implementation: nsx.cloudify_nsx.vcenter_resource_pool.delete
+
+  # vcenter datastore
+  cloudify.vcenter.datastore:
+    derived_from: cloudify.nodes.Root
+    properties:
+      vcenter_auth:
+        default: {}
+      datastore:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.vcenter_datastore.create
+        delete:
+          implementation: nsx.cloudify_nsx.vcenter_datastore.delete
+
+  # vcenter datacenter
+  cloudify.vcenter.datacenter:
+    derived_from: cloudify.nodes.Root
+    properties:
+      vcenter_auth:
+        default: {}
+      datacenter:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.vcenter_datacenter.create
+        delete:
+          implementation: nsx.cloudify_nsx.vcenter_datacenter.delete
+
+  # logical switches
+  cloudify.nsx.lswitch:
+    derived_from: cloudify.nodes.Root
+    properties:
+      nsx_auth:
+        default: {}
+      switch:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.nsx_lswitch.create
+        delete:
+          implementation: nsx.cloudify_nsx.nsx_lswitch.delete
 
   # distributed logical routers
   cloudify.nsx.dlr:
     derived_from: cloudify.nodes.Root
+    properties:
+      nsx_auth:
+        default: {}
+      router:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.nsx_dlr.create
+        delete:
+          implementation: nsx.cloudify_nsx.nsx_dlr.delete
+
+  # distributed logical routers interface
+  cloudify.nsx.dlr_interface:
+    derived_from: cloudify.nodes.Root
 
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
-          inputs: {}
+          implementation: nsx.cloudify_nsx.nsx_dlr_interface.create
         configure:
-          implementation: nsx.cloudify_nsx.stub.configure
-          inputs: {}
+          implementation: nsx.cloudify_nsx.nsx_dlr_interface.configure
         start:
-          implementation: nsx.cloudify_nsx.stub.start
-          inputs: {}
+          implementation: nsx.cloudify_nsx.nsx_dlr_interface.start
         stop:
-          implementation: nsx.cloudify_nsx.stub.stop
-          inputs: {}
+          implementation: nsx.cloudify_nsx.nsx_dlr_interface.stop
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
-          inputs: {}
+          implementation: nsx.cloudify_nsx.nsx_dlr_interface.delete
 
   # edge services gateways
   cloudify.nsx.esg:
