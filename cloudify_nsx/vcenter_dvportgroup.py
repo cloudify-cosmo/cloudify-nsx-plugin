@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.libutils as nsx_utils
-from nsx_common import vcenter_state
+from nsx_common import vcenter_state, get_vdsportgroupname
 from cloudify import exceptions as cfy_exc
 
 
@@ -27,26 +27,41 @@ def create(**kwargs):
     vcenter_auth.update(kwargs.get('vcenter_auth', {}))
     vccontent = vcenter_state(vcenter_auth)
 
-    datastore = properties.get('datastore', {})
-    datastore.update(kwargs.get('datastore', {}))
-    use_existed = datastore.get('use_external_resource', False)
+    dvportgroup = properties.get('dvportgroup', {})
+    dvportgroup.update(kwargs.get('dvportgroup', {}))
+    use_existed = dvportgroup.get('use_external_resource', False)
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
-    ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_datastoremoid(
-        vccontent, str(datastore['name'])
-    )
+    if 'name' in dvportgroup:
+        ctx.instance.runtime_properties['resource_name'] = str(dvportgroup['name'])
+        ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_vdsportgroupid(
+            vccontent, str(dvportgroup['name'])
+        )
+    elif 'id' in dvportgroup:
+        ctx.instance.runtime_properties['resource_id'] = dvportgroup['id']
+        ctx.instance.runtime_properties['resource_name'] = get_vdsportgroupname(
+            vccontent, str(dvportgroup['id'])
+        )
+    else:
+        raise cfy_exc.NonRecoverableError(
+            "Validation failed, please provice id or name"
+        )
 
+    ctx.logger.info("created %s | %s" % (
+        ctx.instance.runtime_properties['resource_id'],
+        ctx.instance.runtime_properties['resource_name']
+    ))
 
 @operation
 def delete(**kwargs):
     # credentials
     properties = ctx.node.properties
 
-    datastore = properties.get('datastore', {})
-    datastore.update(kwargs.get('datastore', {}))
-    use_existed = datastore.get('use_external_resource', False)
+    dvportgroup = properties.get('dvportgroup', {})
+    dvportgroup.update(kwargs.get('dvportgroup', {}))
+    use_existed = dvportgroup.get('use_external_resource', False)
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented!"

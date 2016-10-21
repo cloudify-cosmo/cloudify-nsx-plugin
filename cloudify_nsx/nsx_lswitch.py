@@ -33,25 +33,34 @@ def create(**kwargs):
 
     ctx.logger.info("checking %s" % str(switch_dict["name"]))
 
-    resource_id, _ = nsx_logical_switch.logical_switch_read(client_session, str(switch_dict["name"]))
+    resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, str(switch_dict["name"]))
     if use_existed:
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.logger.info("Used existed %s" % str(resource_id))
-        return
-    if resource_id:
+
+    elif resource_id:
         raise cfy_exc.NonRecoverableError(
             "We already have such switch"
         )
 
-    # nsx does not understand unicode strings
-    ctx.logger.info("creating %s" % str(switch_dict["name"]))
-    resource_id, location = nsx_logical_switch.logical_switch_create(
-        client_session, switch_dict["transport_zone"],
-        str(switch_dict["name"]), switch_mode
-    )
+    if not use_existed:
+        # nsx does not understand unicode strings
+        ctx.logger.info("creating %s" % str(switch_dict["name"]))
+        resource_id, location = nsx_logical_switch.logical_switch_create(
+            client_session, switch_dict["transport_zone"],
+            str(switch_dict["name"]), switch_mode
+        )
+        ctx.instance.runtime_properties['location'] = location
+        ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+        switch_params = None
+
+    if not switch_params:
+        resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, str(switch_dict["name"]))
+
+    resource_dvportgroup_id = switch_params.get('vdsContextWithBacking', {}).get('backingValue')
+
+    ctx.instance.runtime_properties['resource_dvportgroup_id'] = resource_dvportgroup_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
 
 
 @operation

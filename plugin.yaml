@@ -52,6 +52,21 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.vcenter_datacenter.delete
 
+  # vcenter datacenter
+  cloudify.vcenter.dvportgroup:
+    derived_from: cloudify.nodes.Root
+    properties:
+      vcenter_auth:
+        default: {}
+      dvportgroup:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.vcenter_dvportgroup.create
+        delete:
+          implementation: nsx.cloudify_nsx.vcenter_dvportgroup.delete
+
   # logical switches
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Root
