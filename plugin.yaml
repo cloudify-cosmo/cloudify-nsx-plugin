@@ -85,19 +85,32 @@ node_types:
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
     derived_from: cloudify.nodes.Root
-
+    properties:
+      nsx_auth:
+        default: {}
+      interface:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.nsx_dlr_interface.create
-        configure:
-          implementation: nsx.cloudify_nsx.nsx_dlr_interface.configure
-        start:
-          implementation: nsx.cloudify_nsx.nsx_dlr_interface.start
-        stop:
-          implementation: nsx.cloudify_nsx.nsx_dlr_interface.stop
         delete:
           implementation: nsx.cloudify_nsx.nsx_dlr_interface.delete
+
+  # distributed logical routers gateway
+  cloudify.nsx.dlr_dgw:
+    derived_from: cloudify.nodes.Root
+    properties:
+      nsx_auth:
+        default: {}
+      gateway:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
 
   # edge services gateways
   cloudify.nsx.esg:

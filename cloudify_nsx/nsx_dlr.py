@@ -29,6 +29,20 @@ def create(**kwargs):
 
     router_dict = properties.get('router', {})
     router_dict.update(kwargs.get('router', {}))
+    use_existed = router_dict.get('use_external_resource', False)
+
+    ctx.logger.info("checking %s" % str(router_dict["name"]))
+
+    resource_id, _ = nsx_router.dlr_read(client_session, str(router_dict["name"]))
+    if use_existed:
+        ctx.instance.runtime_properties['resource_id'] = resource_id
+        ctx.logger.info("Used existed %s" % str(resource_id))
+        return
+    if resource_id:
+        raise cfy_exc.NonRecoverableError(
+            "We already have such router"
+        )
+
     resource_id, location = nsx_router.dlr_create(client_session,
         str(router_dict['name']),
         str(router_dict['dlr_pwd']),
@@ -56,7 +70,15 @@ def delete(**kwargs):
 
     router_dict = properties.get('router', {})
     router_dict.update(kwargs.get('router', {}))
-    print router_dict
+    use_existed = router_dict.get('use_external_resource', False)
+
+    ctx.logger.info("checking %s" % str(router_dict["name"]))
+
+    resource_id, _ = nsx_router.dlr_read(client_session, str(router_dict["name"]))
+    if use_existed:
+        ctx.logger.info("Used existed %s" % str(resource_id))
+        return
+
     status, resource_id = nsx_router.dlr_delete(client_session, str(router_dict['name']))
     if not status:
         raise cfy_exc.NonRecoverableError(

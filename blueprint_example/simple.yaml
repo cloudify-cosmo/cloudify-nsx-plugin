@@ -60,8 +60,24 @@ node_templates:
         ip: { get_input: nsx_ip }
         raml: { get_input: nsx_raml }
       switch:
-        name: some_swith_name
+        name: master_swith_name
         transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
+  slave_lswith:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth:
+        user: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        ip: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+      switch:
+        name: slave_swith_name
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
 
   vresourcepool:
     type: cloudify.vcenter.resource_pool
@@ -131,3 +147,26 @@ node_templates:
         target: datastore
       - type: cloudify.relationships.depends_on
         target: datacenter
+
+  interface:
+    type: cloudify.nsx.dlr_interface
+    properties:
+      nsx_auth:
+        user: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        ip: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+                dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+                interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
+                interface_ip: 192.168.2.11
+                interface_subnet: 255.255.255.0
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: nsx_dlr
+      - type: cloudify.relationships.depends_on
+        target: slave_lswith
