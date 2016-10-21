@@ -27,31 +27,28 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    interface = properties.get('interface', {})
-    interface.update(kwargs.get('interface', {}))
+    interface = properties.get('gateway', {})
+    interface.update(kwargs.get('gateway', {}))
     use_existed = interface.get('use_external_resource', False)
 
     if use_existed:
         ctx.logger.info("Used existed")
         return
 
-    result_raw = nsx_router.dlr_add_interface(client_session,
+    result_raw = nsx_router.dlr_set_dgw(client_session,
         str(interface['dlr_id']),
-        str(interface['interface_ls_id']),
-        str(interface['interface_ip']),
-        str(interface['interface_subnet'])
+        str(interface['address'])
     )
+
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
-            "Can't create interface."
+            "Can't create gateway."
         )
-    resource_id = result_raw['body']['interfaces']['interface']['index']
-    location = result_raw['body']['interfaces']['interface']['name']
+
     ctx.instance.runtime_properties['resource_dlr_id'] =  str(interface['dlr_id'])
-    ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+    ctx.instance.runtime_properties['resource_id'] = interface['address']
+    ctx.logger.info("created %s" % str(interface['address']))
 
 @operation
 def delete(**kwargs):
@@ -61,8 +58,8 @@ def delete(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    interface = properties.get('interface', {})
-    interface.update(kwargs.get('interface', {}))
+    interface = properties.get('gateway', {})
+    interface.update(kwargs.get('gateway', {}))
     use_existed = interface.get('use_external_resource', False)
 
     if use_existed:
@@ -72,16 +69,15 @@ def delete(**kwargs):
     if 'resource_id' not in ctx.instance.runtime_properties:
         ctx.logger.info("Not fully created, skip")
         return
-    result_raw = nsx_router.dlr_del_interface(
-        client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
-        ctx.instance.runtime_properties['resource_id']
+
+    result_raw = nsx_router.dlr_del_dgw(client_session,
+        str(ctx.instance.runtime_properties['resource_dlr_id'])
     )
 
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
-            "Can't delete interface."
+            "Can't delete gateway."
         )
 
     ctx.logger.info("delete %s" % ctx.instance.runtime_properties['resource_id'])

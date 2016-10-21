@@ -108,9 +108,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.nsx_dlr_dgw.create
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.nsx_dlr_dgw.delete
 
   # edge services gateways
   cloudify.nsx.esg:
