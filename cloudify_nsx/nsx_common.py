@@ -44,3 +44,18 @@ def nsx_login(nsx_auth):
         )
 
     return NsxClient(raml_file, ip, user, password)
+
+def get_mo_by_id(content, searchedid, vim_type):
+    mo_dict = nsx_utils.get_all_objs(content, vim_type)
+    for obj in mo_dict:
+        if obj._moId == searchedid:
+            return obj
+    return None
+
+
+def get_vdsportgroupname(content, searchedid):
+    portgroup_mo = get_mo_by_id(content, searchedid, nsx_utils.VIM_TYPES['dportgroup'])
+    if portgroup_mo:
+        return str(portgroup_mo.name)
+    else:
+        return None

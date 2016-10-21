@@ -54,7 +54,7 @@ node_templates:
   nsx_lswith:
     type: cloudify.nsx.lswitch
     properties:
-      nsx_auth:
+      nsx_auth: &nsx_auth
         user: { get_input: nsx_user }
         password: { get_input: nsx_password }
         ip: { get_input: nsx_ip }
@@ -68,11 +68,7 @@ node_templates:
   slave_lswith:
     type: cloudify.nsx.lswitch
     properties:
-      nsx_auth:
-        user: { get_input: nsx_user }
-        password: { get_input: nsx_password }
-        ip: { get_input: nsx_ip }
-        raml: { get_input: nsx_raml }
+      nsx_auth: *nsx_auth
       switch:
         name: slave_swith_name
         transport_zone: Main_Zone
@@ -82,7 +78,7 @@ node_templates:
   vresourcepool:
     type: cloudify.vcenter.resource_pool
     properties:
-      vcenter_auth:
+      vcenter_auth: &vcenter_auth
         user: { get_input: vcenter_user }
         password: { get_input: vcenter_password }
         ip: { get_input: vcenter_ip }
@@ -93,10 +89,7 @@ node_templates:
   datastore:
     type: cloudify.vcenter.datastore
     properties:
-      vcenter_auth:
-        user: { get_input: vcenter_user }
-        password: { get_input: vcenter_password }
-        ip: { get_input: vcenter_ip }
+      vcenter_auth: *vcenter_auth
       datastore:
         name: datastore1
         use_external_resource: True
@@ -104,10 +97,7 @@ node_templates:
   datacenter:
     type: cloudify.vcenter.datacenter
     properties:
-      vcenter_auth:
-        user: { get_input: vcenter_user }
-        password: { get_input: vcenter_password }
-        ip: { get_input: vcenter_ip }
+      vcenter_auth: *vcenter_auth
       datacenter:
         name: Datacenter
         use_external_resource: True
@@ -115,11 +105,7 @@ node_templates:
   nsx_dlr:
     type: cloudify.nsx.dlr
     properties:
-      nsx_auth:
-        user: { get_input: nsx_user }
-        password: { get_input: nsx_password }
-        ip: { get_input: nsx_ip }
-        raml: { get_input: nsx_raml }
+      nsx_auth: *nsx_auth
       router:
         name: some_router_name
     interfaces:
@@ -151,11 +137,7 @@ node_templates:
   interface:
     type: cloudify.nsx.dlr_interface
     properties:
-      nsx_auth:
-        user: { get_input: nsx_user }
-        password: { get_input: nsx_password }
-        ip: { get_input: nsx_ip }
-        raml: { get_input: nsx_raml }
+      nsx_auth: *nsx_auth
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -174,11 +156,7 @@ node_templates:
   dlr_static_gateway:
     type: cloudify.nsx.dlr_dgw
     properties:
-      nsx_auth:
-        user: { get_input: nsx_user }
-        password: { get_input: nsx_password }
-        ip: { get_input: nsx_ip }
-        raml: { get_input: nsx_raml }
+      nsx_auth: *nsx_auth
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -189,3 +167,23 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: nsx_dlr
+
+  dvportgroup:
+    type: cloudify.vcenter.dvportgroup
+    properties:
+      vcenter_auth: *vcenter_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            dvportgroup:
+              id: { get_attribute: [ slave_lswith, resource_dvportgroup_id ] }
+              use_external_resource: True
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: slave_lswith
+
+outputs:
+  network:
+    description: real network name
+    value: { get_attribute: [ dvportgroup, resource_name ] }
