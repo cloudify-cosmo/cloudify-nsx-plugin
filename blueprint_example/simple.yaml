@@ -161,12 +161,31 @@ node_templates:
         create:
           inputs:
             interface:
-                dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-                interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
-                interface_ip: 192.168.2.11
-                interface_subnet: 255.255.255.0
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
+              interface_ip: 192.168.2.11
+              interface_subnet: 255.255.255.0
     relationships:
       - type: cloudify.relationships.depends_on
         target: nsx_dlr
       - type: cloudify.relationships.depends_on
         target: slave_lswith
+
+  dlr_static_gateway:
+    type: cloudify.nsx.dlr_dgw
+    properties:
+      nsx_auth:
+        user: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        ip: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            gateway:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              address: 192.168.1.12
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: nsx_dlr
