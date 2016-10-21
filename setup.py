@@ -23,6 +23,6 @@ setup(
     packages=['cloudify_nsx'],
     install_requires=[
         'cloudify-plugins-common>=3.3',
-        'pynsxv',
+        'pynsxv==0.4.1',
     ],
 )

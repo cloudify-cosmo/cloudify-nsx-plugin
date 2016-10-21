@@ -43,9 +43,6 @@ def create(**kwargs):
 def delete(**kwargs):
     # credentials
     properties = ctx.node.properties
-    vcenter_auth = properties.get('vcenter_auth', {})
-    vcenter_auth.update(kwargs.get('vcenter_auth', {}))
-    vccontent = vcenter_state(vcenter_auth)
 
     datastore = properties.get('datastore', {})
     datastore.update(kwargs.get('datastore', {}))
