@@ -18,15 +18,15 @@ import pynsxv.library.libutils as nsx_utils
 from cloudify import exceptions as cfy_exc
 
 def vcenter_state(vcenter_auth):
-    user = vcenter_auth.get('user')
+    user = vcenter_auth.get('username')
     password = vcenter_auth.get('password')
-    ip = vcenter_auth.get('ip')
+    ip = vcenter_auth.get('host')
     return nsx_utils.connect_to_vc(ip, user, password)
 
 def nsx_login(nsx_auth):
-    user = nsx_auth.get('user')
+    user = nsx_auth.get('username')
     password = nsx_auth.get('password')
-    ip = nsx_auth.get('ip')
+    ip = nsx_auth.get('host')
     # if node contained in some other node, try to overwrite ip
     if not ip:
         ip = ctx.instance.host_ip

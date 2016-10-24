@@ -130,20 +130,54 @@ node_types:
   # edge services gateways
   cloudify.nsx.esg:
     derived_from: cloudify.nodes.Root
+    properties:
+      nsx_auth:
+        default: {}
+      edge:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.nsx_esg.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.nsx_esg.delete
+          inputs: {}
+
+  # edge services gateways interfaces
+  cloudify.nsx.esg_interface:
+    derived_from: cloudify.nodes.Root
 
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.stub.create
           inputs: {}
-        configure:
-          implementation: nsx.cloudify_nsx.stub.configure
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
           inputs: {}
-        start:
-          implementation: nsx.cloudify_nsx.stub.start
+
+  # edge services gateways firewall
+  cloudify.nsx.esg_firewall:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
           inputs: {}
-        stop:
-          implementation: nsx.cloudify_nsx.stub.stop
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
+
+  # edge services gateways route
+  cloudify.nsx.esg_route:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
           inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.stub.delete
@@ -158,21 +192,12 @@ node_types:
         create:
           implementation: nsx.cloudify_nsx.stub.create
           inputs: {}
-        configure:
-          implementation: nsx.cloudify_nsx.stub.configure
-          inputs: {}
-        start:
-          implementation: nsx.cloudify_nsx.stub.start
-          inputs: {}
-        stop:
-          implementation: nsx.cloudify_nsx.stub.stop
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.stub.delete
           inputs: {}
 
-  # distributed firewall
-  cloudify.nsx.dfw:
+  # Edge DHCP pool
+  cloudify.nsx.dhcp_pool:
     derived_from: cloudify.nodes.Root
 
     interfaces:
@@ -180,14 +205,44 @@ node_types:
         create:
           implementation: nsx.cloudify_nsx.stub.create
           inputs: {}
-        configure:
-          implementation: nsx.cloudify_nsx.stub.configure
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
           inputs: {}
-        start:
-          implementation: nsx.cloudify_nsx.stub.start
+
+  # Edge DHCP binding
+  cloudify.nsx.dhcp_binding:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
           inputs: {}
-        stop:
-          implementation: nsx.cloudify_nsx.stub.stop
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
+
+  # distributed firewall
+  cloudify.nsx.dfw_section:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.stub.delete
+          inputs: {}
+
+  # distributed firewall
+  cloudify.nsx.dfw_rule:
+    derived_from: cloudify.nodes.Root
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.stub.create
           inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.stub.delete

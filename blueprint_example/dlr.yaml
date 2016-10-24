@@ -65,11 +65,21 @@ node_templates:
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
 
+  slave_lswith:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: *nsx_auth
+      switch:
+        username: slave_swith_name
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
   vresourcepool:
     type: cloudify.vcenter.resource_pool
     properties:
       vcenter_auth: &vcenter_auth
-        username: { get_input: vcenter_user }
+        user: { get_input: vcenter_user }
         password: { get_input: vcenter_password }
         host: { get_input: vcenter_ip }
       resource_pool:
@@ -92,26 +102,89 @@ node_templates:
         name: Datacenter
         use_external_resource: True
 
-  esg:
-    type: cloudify.nsx.esg
+  nsx_dlr:
+    type: cloudify.nsx.dlr
     properties:
       nsx_auth: *nsx_auth
-      edge:
-        name: real_edge
-        esg_pwd: SeCrEt010203!
+      router:
+        name: some_router_name
+        dlr_pwd: SeCrEt010203!
         # compact, large, quadlarge, xlarge
-        esg_size: compact
-        esg_username: admin
-        esg_remote_access: True
+        dlr_size: compact
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            edge:
+            router:
               datacentermoid: { get_attribute: [ datacenter, resource_id ] }
               datastoremoid: { get_attribute: [ datastore, resource_id ] }
               resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
-              default_pg: { get_attribute: [ nsx_lswith, resource_dvportgroup_id ] }
+              ha_ls_id: { get_attribute: [ nsx_lswith, resource_id ] }
+              uplink_ls_id: { get_attribute: [ nsx_lswith, resource_id ] }
+              uplink_ip: 192.168.1.11
+              uplink_subnet: 255.255.255.0
+              uplink_dgw: 192.168.1.1
     relationships:
       - type: cloudify.relationships.depends_on
         target: nsx_lswith
+      - type: cloudify.relationships.depends_on
+        target: vresourcepool
+      - type: cloudify.relationships.depends_on
+        target: datastore
+      - type: cloudify.relationships.depends_on
+        target: datacenter
+
+  interface:
+    type: cloudify.nsx.dlr_interface
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
+              interface_ip: 192.168.2.11
+              interface_subnet: 255.255.255.0
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: nsx_dlr
+      - type: cloudify.relationships.depends_on
+        target: slave_lswith
+
+  dlr_static_gateway:
+    type: cloudify.nsx.dlr_dgw
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            gateway:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              address: 192.168.1.12
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: nsx_dlr
+
+  dvportgroup:
+    type: cloudify.vcenter.dvportgroup
+    properties:
+      vcenter_auth: *vcenter_auth
+      dvportgroup:
+        use_external_resource: True
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            dvportgroup:
+              id: { get_attribute: [ slave_lswith, resource_dvportgroup_id ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: slave_lswith
+
+outputs:
+  network:
+    description: real network name
+    value: { get_attribute: [ dvportgroup, resource_name ] }
