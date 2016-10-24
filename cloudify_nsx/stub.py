@@ -22,22 +22,6 @@ from cloudify.decorators import operation
 def create(**kwargs):
     ctx.logger.info("create")
 
-
-@operation
-def configure(**kwargs):
-    ctx.logger.info("configure")
-
-
-@operation
-def start(**kwargs):
-    ctx.logger.info("start")
-
-
-@operation
-def stop(**kwargs):
-    ctx.logger.info("stop")
-
-
 @operation
 def delete(**kwargs):
     ctx.logger.info("delete")
