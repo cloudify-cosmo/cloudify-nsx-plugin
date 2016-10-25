@@ -77,12 +77,12 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    nsx_edge = properties.get('edge', {})
-    nsx_edge.update(kwargs.get('edge', {}))
-    use_existed = nsx_edge.get('use_external_resource', False)
+    edge_dict = properties.get('edge', {})
+    edge_dict.update(kwargs.get('edge', {}))
+    use_existed = edge_dict.get('use_external_resource', False)
 
     if use_existed:
-        ctx.logger.info("Used existed %s" % str(resource_id))
+        ctx.logger.info("Used existed %s" % str(edge_dict.get('name')))
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

@@ -120,3 +120,42 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: nsx_lswith
+
+  slave_lswith:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: *nsx_auth
+      switch:
+        name: slave_swith_name
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
+  esg_interface:
+    type: cloudify.nsx.esg_interface
+    properties:
+      nsx_auth: *nsx_auth
+      interface:
+        ifindex: 3
+        ipaddr: 192.168.3.1
+        netmask: 255.255.255.0
+        prefixlen: 24
+        name: interface_name
+        mtu: 1500
+        is_connected: "true"
+        vnic_type: internal
+        enable_send_redirects: "true"
+        enable_proxy_arp: "true"
+        secondary_ips: 192.168.3.128
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+              esg_name: { get_attribute: [ esg, edge, name ] }
+              portgroup_id: { get_attribute: [ slave_lswith, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: esg
+      - type: cloudify.relationships.depends_on
+        target: slave_lswith

@@ -14,7 +14,7 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import pynsxv.library.nsx_dlr as nsx_router
+import pynsxv.library.nsx_esg as nsx_esg
 from nsx_common import nsx_login
 from cloudify import exceptions as cfy_exc
 
@@ -25,30 +25,44 @@ def create(**kwargs):
     properties = ctx.node.properties
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
-    client_session = nsx_login(nsx_auth)
 
-    interface = properties.get('interface', {})
+    interface = ctx.instance.runtime_properties.get('interface', {})
+    interface.update(properties.get('interface', {}))
     interface.update(kwargs.get('interface', {}))
+    ctx.instance.runtime_properties['interface'] = interface
+
     use_existed = interface.get('use_external_resource', False)
 
     if use_existed:
         ctx.logger.info("Used existed")
         return
 
-    result_raw = nsx_router.dlr_add_interface(client_session,
-        str(interface['dlr_id']),
-        str(interface['interface_ls_id']),
-        str(interface['interface_ip']),
-        str(interface['interface_subnet'])
+    client_session = nsx_login(nsx_auth)
+
+    resource_id = str(interface['ifindex'])
+
+    result_raw = nsx_esg.esg_cfg_interface(client_session,
+        str(interface['esg_name']),
+        str(resource_id),
+        str(interface['ipaddr']),
+        str(interface['netmask']),
+        str(interface['prefixlen']),
+        str(interface['name']),
+        str(interface['mtu']),
+        str(interface['is_connected']),
+        str(interface['portgroup_id']),
+        str(interface['vnic_type']),
+        str(interface['enable_send_redirects']),
+        str(interface['enable_proxy_arp']),
+        str(interface['secondary_ips'])
     )
-    if result_raw['status'] < 200 and result_raw['status'] >= 300:
-        ctx.logger.error("Status %s" % result_raw['status'])
+
+    if not result_raw:
         raise cfy_exc.NonRecoverableError(
             "Can't create interface."
         )
-    resource_id = result_raw['body']['interfaces']['interface']['index']
-    location = result_raw['body']['interfaces']['interface']['name']
-    ctx.instance.runtime_properties['resource_dlr_id'] =  str(interface['dlr_id'])
+
+    location = str(interface['esg_name']) + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
@@ -60,8 +74,11 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    interface = properties.get('interface', {})
+    interface = ctx.instance.runtime_properties.get('interface', {})
+    interface.update(properties.get('interface', {}))
     interface.update(kwargs.get('interface', {}))
+    ctx.instance.runtime_properties['interface'] = interface
+
     use_existed = interface.get('use_external_resource', False)
 
     if use_existed:
@@ -75,13 +92,12 @@ def delete(**kwargs):
 
     client_session = nsx_login(nsx_auth)
 
-    result_raw = nsx_router.dlr_del_interface(
+    result_raw = nsx_esg.esg_clear_interface(
         client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
+        str(interface['esg_name']),
         resource_id
     )
-
-    if result_raw['status'] < 200 and result_raw['status'] >= 300:
+    if not result_raw:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
             "Can't delete interface."
