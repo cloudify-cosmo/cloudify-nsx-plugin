@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.libutils as nsx_utils
-from nsx_common import vcenter_state
+from cfy_nsx_common import vcenter_state
 from cloudify import exceptions as cfy_exc
 
 
@@ -27,27 +27,26 @@ def create(**kwargs):
     vcenter_auth.update(kwargs.get('vcenter_auth', {}))
     vccontent = vcenter_state(vcenter_auth)
 
-    datastore = properties.get('datastore', {})
-    datastore.update(kwargs.get('datastore', {}))
-    use_existed = datastore.get('use_external_resource', False)
+    resource_pool = properties.get('resource_pool', {})
+    resource_pool.update(kwargs.get('resource_pool', {}))
+    use_existed = resource_pool.get('use_external_resource', False)
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
-    ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_datastoremoid(
-        vccontent, str(datastore['name'])
+    ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_edgeresourcepoolmoid(
+        vccontent, str(resource_pool['name'])
     )
-
 
 @operation
 def delete(**kwargs):
     # credentials
     properties = ctx.node.properties
 
-    datastore = properties.get('datastore', {})
-    datastore.update(kwargs.get('datastore', {}))
-    use_existed = datastore.get('use_external_resource', False)
+    resource_pool = properties.get('resource_pool', {})
+    resource_pool.update(kwargs.get('resource_pool', {}))
+    use_existed = resource_pool.get('use_external_resource', False)
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
-            "Not Implemented!"
+            "Not Implemented"
         )

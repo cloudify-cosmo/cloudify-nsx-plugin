@@ -47,9 +47,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.vcenter_resource_pool.create
+          implementation: nsx.cloudify_nsx.cfy_vcenter_resource_pool.create
         delete:
-          implementation: nsx.cloudify_nsx.vcenter_resource_pool.delete
+          implementation: nsx.cloudify_nsx.cfy_vcenter_resource_pool.delete
 
   # vcenter datastore
   cloudify.vcenter.datastore:
@@ -62,9 +62,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.vcenter_datastore.create
+          implementation: nsx.cloudify_nsx.cfy_vcenter_datastore.create
         delete:
-          implementation: nsx.cloudify_nsx.vcenter_datastore.delete
+          implementation: nsx.cloudify_nsx.cfy_vcenter_datastore.delete
 
   # vcenter datacenter
   cloudify.vcenter.datacenter:
@@ -77,9 +77,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.vcenter_datacenter.create
+          implementation: nsx.cloudify_nsx.cfy_vcenter_datacenter.create
         delete:
-          implementation: nsx.cloudify_nsx.vcenter_datacenter.delete
+          implementation: nsx.cloudify_nsx.cfy_vcenter_datacenter.delete
 
   # vcenter datacenter
   cloudify.vcenter.dvportgroup:
@@ -92,9 +92,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.vcenter_dvportgroup.create
+          implementation: nsx.cloudify_nsx.cfy_vcenter_dvportgroup.create
         delete:
-          implementation: nsx.cloudify_nsx.vcenter_dvportgroup.delete
+          implementation: nsx.cloudify_nsx.cfy_vcenter_dvportgroup.delete
 
   # logical switches
   cloudify.nsx.lswitch:
@@ -107,9 +107,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.nsx_lswitch.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_lswitch.create
         delete:
-          implementation: nsx.cloudify_nsx.nsx_lswitch.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_lswitch.delete
 
   # distributed logical routers
   cloudify.nsx.dlr:
@@ -122,9 +122,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.nsx_dlr.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr.create
         delete:
-          implementation: nsx.cloudify_nsx.nsx_dlr.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr.delete
 
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
@@ -137,9 +137,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.nsx_dlr_interface.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_interface.create
         delete:
-          implementation: nsx.cloudify_nsx.nsx_dlr_interface.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_interface.delete
 
   # distributed logical routers gateway
   cloudify.nsx.dlr_dgw:
@@ -152,9 +152,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.nsx_dlr_dgw.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_dgw.create
         delete:
-          implementation: nsx.cloudify_nsx.nsx_dlr_dgw.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_dgw.delete
 
   # edge services gateways
   cloudify.nsx.esg:
@@ -173,10 +173,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.nsx_esg.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.nsx_esg.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg.delete
           inputs: {}
 
   # edge services gateways interfaces
@@ -216,10 +216,38 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.nsx_esg_interface.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_interface.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.nsx_esg_interface.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_interface.delete
+          inputs: {}
+
+  # edge services gateways interfaces
+  cloudify.nsx.esg_gateway:
+    derived_from: cloudify.nodes.Root
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      gateway:
+        default:
+          # The name of the ESG to list interfaces of
+          esg_name: {}
+          # The default gateway ip (next hop)
+          dgw_ip: {}
+          # (Optional) The vnic index of were the default gateway is reachable on
+          vnic: {}
+          # (Optional) The MTU of the defautl gateway (default=1500)
+          mtu: {}
+          # (OIptional) Admin distance of the defautl route (default=1)
+          admin_distance: {}
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_gateway.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_gateway.delete
           inputs: {}
 
   # edge services gateways route
@@ -229,10 +257,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.cfy_stub.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
           inputs: {}
 
   # Edge DHCP
@@ -242,10 +270,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.cfy_stub.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
           inputs: {}
 
   # Edge DHCP pool
@@ -255,10 +283,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.cfy_stub.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
           inputs: {}
 
   # Edge DHCP binding
@@ -268,10 +296,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.cfy_stub.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
           inputs: {}
 
   # distributed firewall
@@ -281,10 +309,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.cfy_stub.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
           inputs: {}
 
   # distributed firewall
@@ -294,8 +322,8 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.cfy_stub.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
           inputs: {}
