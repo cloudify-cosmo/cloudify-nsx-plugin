@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
-from nsx_common import nsx_login
+from cfy_nsx_common import nsx_login
 from cloudify import exceptions as cfy_exc
 
 

@@ -159,3 +159,24 @@ node_templates:
         target: esg
       - type: cloudify.relationships.depends_on
         target: slave_lswith
+
+  esg_gateway:
+    type: cloudify.nsx.esg_gateway
+    properties:
+      nsx_auth: *nsx_auth
+      gateway:
+        dgw_ip: 192.168.3.11
+        vnic: 3
+        mtu: 1500
+        admin_distance: 1
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            gateway:
+              esg_name: { get_attribute: [ esg, edge, name ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: esg
+      - type: cloudify.relationships.depends_on
+        target: esg_interface
