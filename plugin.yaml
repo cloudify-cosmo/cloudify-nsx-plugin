@@ -5,6 +5,35 @@ plugins:
     package_name: cloudify-nsx-plugin
     package_version: '0.1'
 
+data_types:
+
+  vcenter_auth_type:
+    properties:
+      username:
+        default: administrator@vsphere.local
+        required: true
+      password:
+        default: vcenter
+        required: true
+      host:
+        default: vcenter.local
+        required: true
+
+  nsx_auth_type:
+    properties:
+      username:
+        default: administrator@vsphere.local
+        required: true
+      password:
+        default: vcenter
+        required: true
+      host:
+        default: vcenter.local
+        required: true
+      raml:
+        default: https://raw.githubusercontent.com/vmware/pynsxv/master/pynsxv/library/api_spec/nsxvapi.raml
+        required: true
+
 node_types:
 
   # vcenter resource pool
@@ -12,7 +41,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       vcenter_auth:
-        default: {}
+        type: vcenter_auth_type
       resource_pool:
         default: {}
     interfaces:
@@ -27,7 +56,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       vcenter_auth:
-        default: {}
+        type: vcenter_auth_type
       datastore:
         default: {}
     interfaces:
@@ -42,7 +71,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       vcenter_auth:
-        default: {}
+        type: vcenter_auth_type
       datacenter:
         default: {}
     interfaces:
@@ -57,7 +86,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       vcenter_auth:
-        default: {}
+        type: vcenter_auth_type
       dvportgroup:
         default: {}
     interfaces:
@@ -72,7 +101,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
-        default: {}
+        type: nsx_auth_type
       switch:
         default: {}
     interfaces:
@@ -87,7 +116,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
-        default: {}
+        type: nsx_auth_type
       router:
         default: {}
     interfaces:
@@ -102,7 +131,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
-        default: {}
+        type: nsx_auth_type
       interface:
         default: {}
     interfaces:
@@ -117,7 +146,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
-        default: {}
+        type: nsx_auth_type
       gateway:
         default: {}
     interfaces:
@@ -132,7 +161,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
-        default: {}
+        type: nsx_auth_type
       edge:
         default: {}
       firewall:
@@ -153,14 +182,44 @@ node_types:
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:
     derived_from: cloudify.nodes.Root
-
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      interface:
+        default:
+          # The name of the ESG to configure interfaces on
+          esg_name: {}
+          # The vnic index, e.g. vnic3 and the index 3
+          ifindex: {}
+          # (Optional) The primary IP Address to be configured for this interface
+          ipaddr: {}
+          # (Optional) The netmask in the x.x.x.x format
+          netmask: {}
+          # (Optional) The prefix length, this takes precedence over the netmask
+          prefixlen: {}
+          # (Optional) The name assigned to the vnic
+          name: {}
+          # (Optional) The vnic MTU
+          mtu: {}
+          # (Optional) The vnic connection state (true/false)
+          is_connected: ""
+          # (Optional) The portgroup id of logical switch id to connenct this vnic to
+          portgroup_id: ""
+          # (Optional) The vnic type (uplink/internal)
+          vnic_type: ""
+          # (Optional) Whether the interface will send icmp redirects (true/false)
+          enable_send_redirects: ""
+          # (Optional) Whether the interface will do proxy arp (true/false)
+          enable_proxy_arp: ""
+          # (Optional) A list of additional secondary IP addresses in the primary IP's Subnet
+          secondary_ips: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.stub.create
+          implementation: nsx.cloudify_nsx.nsx_esg_interface.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.stub.delete
+          implementation: nsx.cloudify_nsx.nsx_esg_interface.delete
           inputs: {}
 
   # edge services gateways route
