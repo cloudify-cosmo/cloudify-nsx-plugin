@@ -58,6 +58,17 @@ def create(**kwargs):
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
 
+    firewall = properties.get('firewall', {})
+    firewall.update(kwargs.get('firewall', {}))
+    if firewall:
+        nsx_esg.esg_fw_default_set(client_session,
+            str(edge_dict['name']),
+            str(firewall['action']),
+            str(firewall['logging'])
+        )
+        ctx.logger.info("firewall %s | %s" % (
+            str(firewall['action']), str(firewall['logging']))
+        )
 
 @operation
 def delete(**kwargs):
@@ -65,22 +76,26 @@ def delete(**kwargs):
     properties = ctx.node.properties
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
-    client_session = nsx_login(nsx_auth)
 
-    nsx_esg = properties.get('edge', {})
-    nsx_esg.update(kwargs.get('edge', {}))
-    use_existed = nsx_esg.get('use_external_resource', False)
+    nsx_edge = properties.get('edge', {})
+    nsx_edge.update(kwargs.get('edge', {}))
+    use_existed = nsx_edge.get('use_external_resource', False)
 
-    ctx.logger.info("checking %s" % str(nsx_esg["name"]))
-
-    resource_id, _ = nsx_esg.esg_read(client_session, str(nsx_esg["name"]))
     if use_existed:
         ctx.logger.info("Used existed %s" % str(resource_id))
         return
 
-    status, resource_id = nsx_esg.esg_delete(client_session, str(nsx_esg['name']))
-    if not status:
-        raise cfy_exc.NonRecoverableError(
-            "Can't drop router."
-        )
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if not resource_id:
+        ctx.logger.info("We dont have resource_id")
+        return
+
+    client_session = nsx_login(nsx_auth)
+
+    ctx.logger.info("checking %s" % str(resource_id))
+
+    client_session.delete('nsxEdge', uri_parameters={'edgeId': str(resource_id)})
+
     ctx.logger.info("delete %s" % resource_id)
+
+    ctx.instance.runtime_properties['resource_id'] = None

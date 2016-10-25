@@ -135,6 +135,12 @@ node_types:
         default: {}
       edge:
         default: {}
+      firewall:
+        default:
+          # accept or deny
+          action: accept
+          # true or false
+          logging: false
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -146,19 +152,6 @@ node_types:
 
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:
-    derived_from: cloudify.nodes.Root
-
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.stub.create
-          inputs: {}
-        delete:
-          implementation: nsx.cloudify_nsx.stub.delete
-          inputs: {}
-
-  # edge services gateways firewall
-  cloudify.nsx.esg_firewall:
     derived_from: cloudify.nodes.Root
 
     interfaces:

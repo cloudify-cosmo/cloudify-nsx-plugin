@@ -103,6 +103,11 @@ node_templates:
         esg_size: compact
         esg_username: admin
         esg_remote_access: True
+      firewall:
+        # accept or deny
+        action: accept
+        # true or false
+        logging: false
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

@@ -18,12 +18,16 @@ import pynsxv.library.libutils as nsx_utils
 from cloudify import exceptions as cfy_exc
 
 def vcenter_state(vcenter_auth):
+    ctx.logger.info("VCenter login...")
     user = vcenter_auth.get('username')
     password = vcenter_auth.get('password')
     ip = vcenter_auth.get('host')
-    return nsx_utils.connect_to_vc(ip, user, password)
+    state = nsx_utils.connect_to_vc(ip, user, password)
+    ctx.logger.info("VCenter logined")
+    return state
 
 def nsx_login(nsx_auth):
+    ctx.logger.info("NSX login...")
     user = nsx_auth.get('username')
     password = nsx_auth.get('password')
     ip = nsx_auth.get('host')
@@ -43,7 +47,9 @@ def nsx_login(nsx_auth):
             "please set raml file path"
         )
 
-    return NsxClient(raml_file, ip, user, password)
+    client = NsxClient(raml_file, ip, user, password)
+    ctx.logger.info("NSX logined")
+    return client
 
 def get_mo_by_id(content, searchedid, vim_type):
     mo_dict = nsx_utils.get_all_objs(content, vim_type)

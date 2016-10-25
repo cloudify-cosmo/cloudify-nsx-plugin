@@ -70,7 +70,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       switch:
-        username: slave_swith_name
+        name: slave_swith_name
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -79,7 +79,7 @@ node_templates:
     type: cloudify.vcenter.resource_pool
     properties:
       vcenter_auth: &vcenter_auth
-        user: { get_input: vcenter_user }
+        username: { get_input: vcenter_user }
         password: { get_input: vcenter_password }
         host: { get_input: vcenter_ip }
       resource_pool:
