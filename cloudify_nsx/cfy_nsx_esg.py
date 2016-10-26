@@ -28,9 +28,11 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    edge_dict = properties.get('edge', {})
+    edge_dict = ctx.instance.runtime_properties.get('edge', {})
+    edge_dict.update(properties.get('edge', {}))
     edge_dict.update(kwargs.get('edge', {}))
     use_existed = edge_dict.get('use_external_resource', False)
+    ctx.instance.runtime_properties['edge'] = edge_dict
 
     ctx.logger.info("checking %s" % str(edge_dict["name"]))
 
@@ -38,7 +40,6 @@ def create(**kwargs):
     if use_existed:
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.logger.info("Used existed %s" % str(resource_id))
-        return
     elif resource_id:
         raise cfy_exc.NonRecoverableError(
             "We already have such router"
@@ -92,9 +93,11 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    edge_dict = properties.get('edge', {})
+    edge_dict = ctx.instance.runtime_properties.get('edge', {})
+    edge_dict.update(properties.get('edge', {}))
     edge_dict.update(kwargs.get('edge', {}))
     use_existed = edge_dict.get('use_external_resource', False)
+    ctx.instance.runtime_properties['edge'] = edge_dict
 
     if use_existed:
         ctx.logger.info("Used existed %s" % str(edge_dict.get('name')))

@@ -27,17 +27,19 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    interface = properties.get('gateway', {})
-    interface.update(kwargs.get('gateway', {}))
-    use_existed = interface.get('use_external_resource', False)
+    gateway = ctx.instance.runtime_properties.get('gateway', {})
+    gateway = properties.get('gateway', {})
+    gateway.update(kwargs.get('gateway', {}))
+    use_existed = gateway.get('use_external_resource', False)
+    ctx.instance.runtime_properties['gateway'] = gateway
 
     if use_existed:
         ctx.logger.info("Used existed")
         return
 
     result_raw = nsx_router.dlr_set_dgw(client_session,
-        str(interface['dlr_id']),
-        str(interface['address'])
+        str(gateway['dlr_id']),
+        str(gateway['address'])
     )
 
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
@@ -46,9 +48,9 @@ def create(**kwargs):
             "Can't create gateway."
         )
 
-    ctx.instance.runtime_properties['resource_dlr_id'] =  str(interface['dlr_id'])
-    ctx.instance.runtime_properties['resource_id'] = interface['address']
-    ctx.logger.info("created %s" % str(interface['address']))
+    ctx.instance.runtime_properties['resource_dlr_id'] =  str(gateway['dlr_id'])
+    ctx.instance.runtime_properties['resource_id'] = str(gateway['address'])
+    ctx.logger.info("created %s" % str(gateway['address']))
 
 @operation
 def delete(**kwargs):
@@ -58,9 +60,11 @@ def delete(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    interface = properties.get('gateway', {})
-    interface.update(kwargs.get('gateway', {}))
-    use_existed = interface.get('use_external_resource', False)
+    gateway = ctx.instance.runtime_properties.get('gateway', {})
+    gateway = properties.get('gateway', {})
+    gateway.update(kwargs.get('gateway', {}))
+    use_existed = gateway.get('use_external_resource', False)
+    ctx.instance.runtime_properties['gateway'] = gateway
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -81,3 +85,4 @@ def delete(**kwargs):
         )
 
     ctx.logger.info("delete %s" % ctx.instance.runtime_properties['resource_id'])
+    ctx.instance.runtime_properties['resource_id'] = None

@@ -29,9 +29,8 @@ def create(**kwargs):
     interface = ctx.instance.runtime_properties.get('interface', {})
     interface.update(properties.get('interface', {}))
     interface.update(kwargs.get('interface', {}))
-    ctx.instance.runtime_properties['interface'] = interface
-
     use_existed = interface.get('use_external_resource', False)
+    ctx.instance.runtime_properties['interface'] = interface
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -77,9 +76,8 @@ def delete(**kwargs):
     interface = ctx.instance.runtime_properties.get('interface', {})
     interface.update(properties.get('interface', {}))
     interface.update(kwargs.get('interface', {}))
-    ctx.instance.runtime_properties['interface'] = interface
-
     use_existed = interface.get('use_external_resource', False)
+    ctx.instance.runtime_properties['interface'] = interface
 
     if use_existed:
         ctx.logger.info("Used existed")

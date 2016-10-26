@@ -27,9 +27,11 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    router_dict = properties.get('router', {})
+    router_dict = ctx.instance.runtime_properties.get('router', {})
+    router_dict.update(properties.get('router', {}))
     router_dict.update(kwargs.get('router', {}))
     use_existed = router_dict.get('use_external_resource', False)
+    ctx.instance.runtime_properties['router'] = router_dict
 
     ctx.logger.info("checking %s" % str(router_dict["name"]))
 
@@ -67,9 +69,11 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    router_dict = properties.get('router', {})
+    router_dict = ctx.instance.runtime_properties.get('router', {})
+    router_dict.update(properties.get('router', {}))
     router_dict.update(kwargs.get('router', {}))
     use_existed = router_dict.get('use_external_resource', False)
+    ctx.instance.runtime_properties['router'] = router_dict
 
     if use_existed:
         ctx.logger.info("Used pre existed!")

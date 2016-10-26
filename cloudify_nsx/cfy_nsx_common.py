@@ -51,6 +51,18 @@ def nsx_login(nsx_auth):
     ctx.logger.info("NSX logined")
     return client
 
+def get_properties(name, kwargs):
+
+    properties = ctx.node.properties
+
+    properties_dict = ctx.instance.runtime_properties.get(name, {})
+    properties_dict.update(properties.get(name, {}))
+    properties_dict.update(kwargs.get(name, {}))
+    use_existed = properties_dict.get('use_external_resource', False)
+    ctx.instance.runtime_properties[name] = properties_dict
+
+    return use_existed, properties_dict
+
 def get_mo_by_id(content, searchedid, vim_type):
     mo_dict = nsx_utils.get_all_objs(content, vim_type)
     for obj in mo_dict:
