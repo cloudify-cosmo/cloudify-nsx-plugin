@@ -38,7 +38,7 @@ node_types:
 
   # vcenter resource pool
   cloudify.vcenter.resource_pool:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.ObjectStorage
     properties:
       vcenter_auth:
         type: vcenter_auth_type
@@ -53,7 +53,7 @@ node_types:
 
   # vcenter datastore
   cloudify.vcenter.datastore:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.ObjectStorage
     properties:
       vcenter_auth:
         type: vcenter_auth_type
@@ -68,7 +68,7 @@ node_types:
 
   # vcenter datacenter
   cloudify.vcenter.datacenter:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Tier
     properties:
       vcenter_auth:
         type: vcenter_auth_type
@@ -83,7 +83,7 @@ node_types:
 
   # vcenter datacenter
   cloudify.vcenter.dvportgroup:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Subnet
     properties:
       vcenter_auth:
         type: vcenter_auth_type
@@ -98,7 +98,7 @@ node_types:
 
   # logical switches
   cloudify.nsx.lswitch:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Network
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -113,7 +113,7 @@ node_types:
 
   # distributed logical routers
   cloudify.nsx.dlr:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Router
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -128,7 +128,7 @@ node_types:
 
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Port
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -143,7 +143,7 @@ node_types:
 
   # distributed logical routers gateway
   cloudify.nsx.dlr_dgw:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.SecurityGroup
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -158,7 +158,7 @@ node_types:
 
   # edge services gateways
   cloudify.nsx.esg:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Router
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -181,7 +181,7 @@ node_types:
 
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Port
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -200,7 +200,7 @@ node_types:
           # (Optional) The name assigned to the vnic
           name: {}
           # (Optional) The vnic MTU
-          mtu: {}
+          mtu: 1500
           # (Optional) The vnic connection state (true/false)
           is_connected: ""
           # (Optional) The portgroup id of logical switch id to connenct this vnic to
@@ -224,7 +224,7 @@ node_types:
 
   # edge services gateways interfaces
   cloudify.nsx.esg_gateway:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.SecurityGroup
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -237,9 +237,9 @@ node_types:
           # (Optional) The vnic index of were the default gateway is reachable on
           vnic: {}
           # (Optional) The MTU of the defautl gateway (default=1500)
-          mtu: {}
+          mtu: 1500
           # (OIptional) Admin distance of the defautl route (default=1)
-          admin_distance: {}
+          admin_distance: 1
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -252,20 +252,39 @@ node_types:
 
   # edge services gateways route
   cloudify.nsx.esg_route:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      route:
+        default:
+          # The name of the ESG where the route should be added
+          esg_name: {}
+          # The routes network in the x.x.x.x/yy format, e.g. 192.168.1.0/24
+          network: {}
+          # The next hop ip
+          next_hop: {}
+          # (Optional) The vnic index of were this route is reachable on
+          vnic: {}
+          # (Optional) The MTU of the route (default=1500)
+          mtu: 1500
+          # (Optional) Admin distance of the defautl route (default=1)
+          admin_distance: 1
+          # (Optional) A description for this route
+          description: {}
 
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_route.create
           inputs: {}
         delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_route.delete
           inputs: {}
 
   # Edge DHCP
   cloudify.nsx.dhcp:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.ApplicationServer
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -278,7 +297,7 @@ node_types:
 
   # Edge DHCP pool
   cloudify.nsx.dhcp_pool:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.ApplicationModule
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -291,7 +310,7 @@ node_types:
 
   # Edge DHCP binding
   cloudify.nsx.dhcp_binding:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.ApplicationModule
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -304,7 +323,7 @@ node_types:
 
   # distributed firewall
   cloudify.nsx.dfw_section:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.SecurityGroup
 
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -317,7 +336,72 @@ node_types:
 
   # distributed firewall
   cloudify.nsx.dfw_rule:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.SecurityGroup
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          inputs: {}
+
+  # Load Balancer Application profile to an ESG
+  cloudify.nsx.lb_app_profile:
+    derived_from: cloudify.nodes.LoadBalancer
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          inputs: {}
+
+  # Member inside a Server Pool on an ESG
+  cloudify.nsx.lb_member:
+    derived_from: cloudify.nodes.LoadBalancer
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          inputs: {}
+
+  # Load Balancing Monitor on an ESG
+  cloudify.nsx.lb_monitor:
+    derived_from: cloudify.nodes.LoadBalancer
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          inputs: {}
+
+  # a Load Balancing Server Pool on an ESG
+  cloudify.nsx.lb_pool:
+    derived_from: cloudify.nodes.LoadBalancer
+
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+          inputs: {}
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          inputs: {}
+
+  # a Load Balancing Virtual IP / Virtual Server (VIP) on an ESG
+  cloudify.nsx.lb_vip:
+    derived_from: cloudify.nodes.LoadBalancer
 
     interfaces:
       cloudify.interfaces.lifecycle:

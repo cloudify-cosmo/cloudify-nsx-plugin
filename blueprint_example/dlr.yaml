@@ -125,13 +125,13 @@ node_templates:
               uplink_subnet: 255.255.255.0
               uplink_dgw: 192.168.1.1
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: nsx_lswith
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: vresourcepool
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: datastore
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: datacenter
 
   interface:
@@ -148,9 +148,9 @@ node_templates:
               interface_ip: 192.168.2.11
               interface_subnet: 255.255.255.0
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
         target: nsx_dlr
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: slave_lswith
 
   dlr_static_gateway:
@@ -165,7 +165,7 @@ node_templates:
               dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
               address: 192.168.1.12
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
         target: nsx_dlr
 
   dvportgroup:
@@ -181,7 +181,7 @@ node_templates:
             dvportgroup:
               id: { get_attribute: [ slave_lswith, resource_dvportgroup_id ] }
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
         target: slave_lswith
 
 outputs:
