@@ -375,12 +375,43 @@ node_types:
   # Edge DHCP binding
   cloudify.nsx.dhcp_binding:
     derived_from: cloudify.nodes.ApplicationModule
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      bind:
+        default:
+          # The display name of a Edge Service Gateway used for DHCP
+          esg_name: {}
+          # (Optional, case vm_id/vnic_id) The VM managed object Id in vCenter for the VM to be attached to this binding entry
+          vm_id: {}
+          # (Optional, case vm_id/vnic_id) The vnic index for the VM interface attached to this binding entry (e.g. vnic0 has index 0)
+          vnic_id: {}
+          # (Optional, case without vm_id/vnic_id) The MAC Address of the static binding
+          mac: {}
+          # The hostname for this static binding
+          hostname: {}
+          # The IP Address for this static binding
+          ip: {}
+          # The default gateway for the specified binding
+          default_gateway: {}
+          # The subnet mask (e.g. 255.255.255.0) for the specified binding
+          subnet_mask: {}
+          # The DNS domain name (e.g. vmware.com) for the specified binding
+          domain_name: {}
+          # The primary DNS Server
+          dns_server_1: {}
+          # The secondary DNS Server
+          dns_server_2: {}
+          # The lease time in seconds, use 'infinite' to disable expiry of DHCP leases
+          lease_time: infinite
+          # ('true'/'false') If set to true, the DNS servers and domain name set for NSX-Manager will be used
+          auto_dns: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_bind.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_bind.delete
 
   # distributed firewall
   cloudify.nsx.dfw_section:

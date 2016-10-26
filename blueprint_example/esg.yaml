@@ -238,3 +238,28 @@ node_templates:
         target: esg
       - type: cloudify.relationships.depends_on
         target: esg_interface
+
+  esg_pool_bind:
+    type: cloudify.nsx.dhcp_binding
+    properties:
+      nsx_auth: *nsx_auth
+      bind:
+        mac: 11:22:33:44:55:66
+        hostname: secret.server
+        ip: 192.168.5.251
+        default_gateway: 192.168.5.1
+        subnet_mask: 255.255.255.0
+        domain_name: secret.internal.test
+        dns_server_1: 8.8.8.8
+        dns_server_2: 192.168.5.1
+        lease_time: infinite
+        auto_dns: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            bind:
+              esg_name: { get_attribute: [ esg, edge, name ] }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: esg_pool
