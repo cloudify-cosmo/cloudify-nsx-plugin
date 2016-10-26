@@ -16,7 +16,7 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_esg as nsx_esg
 import pynsxv.library.nsx_dhcp as nsx_dhcp
-from cfy_nsx_common import nsx_login
+from cfy_nsx_common import nsx_login, get_properties
 from cloudify import exceptions as cfy_exc
 
 
@@ -28,11 +28,7 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    edge_dict = ctx.instance.runtime_properties.get('edge', {})
-    edge_dict.update(properties.get('edge', {}))
-    edge_dict.update(kwargs.get('edge', {}))
-    use_existed = edge_dict.get('use_external_resource', False)
-    ctx.instance.runtime_properties['edge'] = edge_dict
+    use_existed, edge_dict = get_properties('edge', kwargs)
 
     ctx.logger.info("checking %s" % str(edge_dict["name"]))
 
@@ -61,8 +57,7 @@ def create(**kwargs):
         ctx.instance.runtime_properties['location'] = location
         ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
 
-    firewall = properties.get('firewall', {})
-    firewall.update(kwargs.get('firewall', {}))
+    _, firewall = get_properties('firewall', kwargs)
     if firewall:
         nsx_esg.esg_fw_default_set(client_session,
             str(edge_dict['name']),
@@ -73,8 +68,7 @@ def create(**kwargs):
             str(firewall['action']), str(firewall['logging']))
         )
 
-    dhcp = properties.get('dhcp', {})
-    dhcp.update(kwargs.get('dhcp', {}))
+    _, dhcp = get_properties('dhcp', kwargs)
     if dhcp:
         nsx_dhcp.dhcp_server(client_session,
             str(edge_dict['name']),
@@ -93,11 +87,7 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    edge_dict = ctx.instance.runtime_properties.get('edge', {})
-    edge_dict.update(properties.get('edge', {}))
-    edge_dict.update(kwargs.get('edge', {}))
-    use_existed = edge_dict.get('use_external_resource', False)
-    ctx.instance.runtime_properties['edge'] = edge_dict
+    use_existed, edge_dict = get_properties('edge', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed %s" % str(edge_dict.get('name')))

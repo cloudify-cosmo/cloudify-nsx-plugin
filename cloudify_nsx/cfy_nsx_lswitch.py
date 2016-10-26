@@ -14,7 +14,7 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-from cfy_nsx_common import nsx_login
+from cfy_nsx_common import nsx_login, get_properties
 import pynsxv.library.nsx_logical_switch as nsx_logical_switch
 from cloudify import exceptions as cfy_exc
 
@@ -27,11 +27,7 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    switch_dict = ctx.instance.runtime_properties.get('switch', {})
-    switch_dict.update(properties.get('switch', {}))
-    switch_dict.update(kwargs.get('switch', {}))
-    use_existed = switch_dict.get('use_external_resource', False)
-    ctx.instance.runtime_properties['switch'] = switch_dict
+    use_existed, switch_dict = get_properties('switch', kwargs)
 
     ctx.logger.info("checking %s" % str(switch_dict["name"]))
 
@@ -71,11 +67,7 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    switch_dict = ctx.instance.runtime_properties.get('switch', {})
-    switch_dict.update(properties.get('switch', {}))
-    switch_dict.update(kwargs.get('switch', {}))
-    use_existed = switch_dict.get('use_external_resource', False)
-    ctx.instance.runtime_properties['switch'] = switch_dict
+    use_existed, switch_dict = get_properties('switch', kwargs)
 
     if use_existed:
         ctx.logger.info("Used pre existed!")

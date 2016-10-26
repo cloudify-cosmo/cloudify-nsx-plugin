@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_esg as nsx_esg
-from cfy_nsx_common import nsx_login
+from cfy_nsx_common import nsx_login, get_properties
 from cloudify import exceptions as cfy_exc
 
 
@@ -26,11 +26,7 @@ def create(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    interface = ctx.instance.runtime_properties.get('interface', {})
-    interface.update(properties.get('interface', {}))
-    interface.update(kwargs.get('interface', {}))
-    use_existed = interface.get('use_external_resource', False)
-    ctx.instance.runtime_properties['interface'] = interface
+    use_existed, interface = get_properties('interface', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -73,11 +69,7 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    interface = ctx.instance.runtime_properties.get('interface', {})
-    interface.update(properties.get('interface', {}))
-    interface.update(kwargs.get('interface', {}))
-    use_existed = interface.get('use_external_resource', False)
-    ctx.instance.runtime_properties['interface'] = interface
+    use_existed, interface = get_properties('interface', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
