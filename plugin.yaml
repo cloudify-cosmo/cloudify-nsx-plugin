@@ -103,7 +103,13 @@ node_types:
       nsx_auth:
         type: nsx_auth_type
       switch:
-        default: {}
+        default:
+          # The name of the Scope (Transport Zone)
+          transport_zone: {}
+          # The name that will be assigned to the new logical switch
+          name: {}
+          # (Optional) Control Plane Mode, uses the Transport Zone default if not specified
+          mode: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -118,7 +124,29 @@ node_types:
       nsx_auth:
         type: nsx_auth_type
       router:
-        default: {}
+        default:
+          # The name that will be assigned to the new dlr
+          name: {}
+          # The admin password of new dlr
+          dlr_pwd: {}
+          # The DLR Control VM size
+          dlr_size: {}
+          # The vCenter DataCenter ID where dlr control vm will be deployed
+          datacentermoid: {}
+          # The vCenter datastore ID where dlr control vm will be deployed
+          datastoremoid: {}
+          # The vCenter Cluster where dlr control vm will be deployed
+          resourcepoolid: {}
+          # New dlr ha logical switch id or vds port group
+          ha_ls_id: {}
+          # New dlr uplink logical switch id or vds port group
+          uplink_ls_id: {}
+          # New dlr uplink ip@
+          uplink_ip: {}
+          # New dlr uplink subnet
+          uplink_subnet: {}
+          # New dlr default gateway
+          uplink_dgw: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -133,7 +161,15 @@ node_types:
       nsx_auth:
         type: nsx_auth_type
       interface:
-        default: {}
+        default:
+          # dlr uuid
+          dlr_id: {}
+          # new interface logical switch
+          interface_ls_id: {}
+          # new interface ip address
+          interface_ip: {}
+          # new interface subnet
+          interface_subnet: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -148,7 +184,9 @@ node_types:
       nsx_auth:
         type: nsx_auth_type
       gateway:
-        default: {}
+        default:
+          # default gateway ip address
+          uplink_dgw: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -163,21 +201,48 @@ node_types:
       nsx_auth:
         type: nsx_auth_type
       edge:
-        default: {}
+        default:
+          # The name of the ESG to be created
+          name: {}
+          # The CLI password of the ESG
+          esg_pwd: {}
+          # The size of the ESG, options are compact, large, quadlarge, xlarge
+          esg_size: compact
+          # The managed object id of the vCenter DC Object to deploy the ESG in
+          datacentermoid: {}
+          # The managed object id of the vCenter Datastore Object to deploy the ESG in
+          datastoremoid: {}
+          # The managed object id of the vCenter Cluster or RP Object to deploy the ESG in
+          resourcepoolid: {}
+          # The managed object id of the port group for the first vnic (on creation
+          # the first vnic must be connected to a valid portgroup in NSX)
+          default_pg: {}
+          # The Username for the CLI and SSH access (default: admin)
+          esg_username: admin
+          # Enables / Disables SSH access to the Edge Host (default: False)
+          esg_remote_access: false
       firewall:
         default:
           # accept or deny
           action: accept
           # true or false
           logging: false
+      dhcp:
+        default:
+          # The display name of a Edge Service Gateway used for DHCP
+          esg_name: {}
+          # True/False The desired state of the DHCP Server
+          enabled: true
+          # ('true'/'false') The desired logging state of the DHCP Server
+          syslog_enabled: false
+          # The logging level for DHCP on this Edge (INFO/WARNING/etc.)
+          syslog_level: INFO
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg.delete
-          inputs: {}
 
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:
@@ -217,10 +282,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_interface.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_interface.delete
-          inputs: {}
 
   # edge services gateways interfaces
   cloudify.nsx.esg_gateway:
@@ -245,10 +308,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_gateway.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_gateway.delete
-          inputs: {}
 
   # edge services gateways route
   cloudify.nsx.esg_route:
@@ -277,36 +338,19 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_route.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_route.delete
-          inputs: {}
 
-  # Edge DHCP
-  cloudify.nsx.dhcp:
+  # Edge DHCP pool
+  cloudify.nsx.dhcp_pool:
     derived_from: cloudify.nodes.ApplicationServer
 
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
-
-  # Edge DHCP pool
-  cloudify.nsx.dhcp_pool:
-    derived_from: cloudify.nodes.ApplicationModule
-
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
-        delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # Edge DHCP binding
   cloudify.nsx.dhcp_binding:
@@ -316,10 +360,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # distributed firewall
   cloudify.nsx.dfw_section:
@@ -329,10 +371,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # distributed firewall
   cloudify.nsx.dfw_rule:
@@ -342,10 +382,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # Load Balancer Application profile to an ESG
   cloudify.nsx.lb_app_profile:
@@ -355,10 +393,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # Member inside a Server Pool on an ESG
   cloudify.nsx.lb_member:
@@ -368,10 +404,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # Load Balancing Monitor on an ESG
   cloudify.nsx.lb_monitor:
@@ -381,10 +415,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # a Load Balancing Server Pool on an ESG
   cloudify.nsx.lb_pool:
@@ -394,10 +426,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}
 
   # a Load Balancing Virtual IP / Virtual Server (VIP) on an ESG
   cloudify.nsx.lb_vip:
@@ -407,7 +437,5 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
-          inputs: {}
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
-          inputs: {}

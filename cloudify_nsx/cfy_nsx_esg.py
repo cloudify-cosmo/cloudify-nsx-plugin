@@ -15,6 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_esg as nsx_esg
+import pynsxv.library.nsx_dhcp as nsx_dhcp
 from cfy_nsx_common import nsx_login
 from cloudify import exceptions as cfy_exc
 
@@ -38,25 +39,26 @@ def create(**kwargs):
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.logger.info("Used existed %s" % str(resource_id))
         return
-    if resource_id:
+    elif resource_id:
         raise cfy_exc.NonRecoverableError(
             "We already have such router"
         )
 
-    resource_id, location = nsx_esg.esg_create(client_session,
-        str(edge_dict['name']),
-        str(edge_dict['esg_pwd']),
-        str(edge_dict['esg_size']),
-        str(edge_dict['datacentermoid']),
-        str(edge_dict['datastoremoid']),
-        str(edge_dict['resourcepoolid']),
-        str(edge_dict['default_pg']),
-        str(edge_dict['esg_username']),
-        str(edge_dict['esg_remote_access'])
-    )
-    ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+    if not use_existed:
+        resource_id, location = nsx_esg.esg_create(client_session,
+            str(edge_dict['name']),
+            str(edge_dict['esg_pwd']),
+            str(edge_dict['esg_size']),
+            str(edge_dict['datacentermoid']),
+            str(edge_dict['datastoremoid']),
+            str(edge_dict['resourcepoolid']),
+            str(edge_dict['default_pg']),
+            str(edge_dict['esg_username']),
+            str(edge_dict['esg_remote_access'])
+        )
+        ctx.instance.runtime_properties['resource_id'] = resource_id
+        ctx.instance.runtime_properties['location'] = location
+        ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
 
     firewall = properties.get('firewall', {})
     firewall.update(kwargs.get('firewall', {}))
@@ -68,6 +70,19 @@ def create(**kwargs):
         )
         ctx.logger.info("firewall %s | %s" % (
             str(firewall['action']), str(firewall['logging']))
+        )
+
+    dhcp = properties.get('dhcp', {})
+    dhcp.update(kwargs.get('dhcp', {}))
+    if dhcp:
+        nsx_dhcp.dhcp_server(client_session,
+            str(edge_dict['name']),
+            str(dhcp['enabled']),
+            str(dhcp['syslog_enabled']),
+            str(dhcp['syslog_level'])
+        )
+        ctx.logger.info("dhcp %s | %s" % (
+            str(dhcp['enabled']), str(dhcp['syslog_enabled']))
         )
 
 @operation
