@@ -29,9 +29,8 @@ def create(**kwargs):
     gateway = ctx.instance.runtime_properties.get('gateway', {})
     gateway.update(properties.get('gateway', {}))
     gateway.update(kwargs.get('gateway', {}))
-    ctx.instance.runtime_properties['gateway'] = gateway
-
     use_existed = gateway.get('use_external_resource', False)
+    ctx.instance.runtime_properties['gateway'] = gateway
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -69,9 +68,8 @@ def delete(**kwargs):
     gateway = ctx.instance.runtime_properties.get('gateway', {})
     gateway.update(properties.get('gateway', {}))
     gateway.update(kwargs.get('gateway', {}))
-    ctx.instance.runtime_properties['gateway'] = gateway
-
     use_existed = gateway.get('use_external_resource', False)
+    ctx.instance.runtime_properties['gateway'] = gateway
 
     if use_existed:
         ctx.logger.info("Used existed")

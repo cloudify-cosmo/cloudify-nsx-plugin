@@ -303,7 +303,6 @@ node_types:
           mtu: 1500
           # (OIptional) Admin distance of the defautl route (default=1)
           admin_distance: 1
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -333,7 +332,6 @@ node_types:
           admin_distance: 1
           # (Optional) A description for this route
           description: {}
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -344,18 +342,39 @@ node_types:
   # Edge DHCP pool
   cloudify.nsx.dhcp_pool:
     derived_from: cloudify.nodes.ApplicationServer
-
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      pool:
+        default:
+          # The display name of a Edge Service Gateway used for DHCP
+          esg_name: {}
+          # An IP range, e.g. 192.168.178.10-192.168.178.100 for this IP Pool
+          ip_range: {}
+          # The default gateway for the specified subnet
+          default_gateway: {}
+          # The subnet mask (e.g. 255.255.255.0) for the specified subnet
+          subnet_mask: {}
+          # The DNS domain name (e.g. vmware.com) for the specified subnet
+          domain_name: {}
+          # The primary DNS Server
+          dns_server_1: {}
+          # The secondary DNS Server
+          dns_server_2: {}
+          # The lease time in seconds, use 'infinite' to disable expiry of DHCP leases
+          lease_time: infinite
+          # ('true'/'false') If set to true, the DNS servers and domain name set for NSX-Manager will be used
+          auto_dns: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_pool.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_pool.delete
 
   # Edge DHCP binding
   cloudify.nsx.dhcp_binding:
     derived_from: cloudify.nodes.ApplicationModule
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -366,7 +385,6 @@ node_types:
   # distributed firewall
   cloudify.nsx.dfw_section:
     derived_from: cloudify.nodes.SecurityGroup
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -377,7 +395,6 @@ node_types:
   # distributed firewall
   cloudify.nsx.dfw_rule:
     derived_from: cloudify.nodes.SecurityGroup
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -388,7 +405,6 @@ node_types:
   # Load Balancer Application profile to an ESG
   cloudify.nsx.lb_app_profile:
     derived_from: cloudify.nodes.LoadBalancer
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -399,7 +415,6 @@ node_types:
   # Member inside a Server Pool on an ESG
   cloudify.nsx.lb_member:
     derived_from: cloudify.nodes.LoadBalancer
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -410,7 +425,6 @@ node_types:
   # Load Balancing Monitor on an ESG
   cloudify.nsx.lb_monitor:
     derived_from: cloudify.nodes.LoadBalancer
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -421,7 +435,6 @@ node_types:
   # a Load Balancing Server Pool on an ESG
   cloudify.nsx.lb_pool:
     derived_from: cloudify.nodes.LoadBalancer
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -432,7 +445,6 @@ node_types:
   # a Load Balancing Virtual IP / Virtual Server (VIP) on an ESG
   cloudify.nsx.lb_vip:
     derived_from: cloudify.nodes.LoadBalancer
-
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

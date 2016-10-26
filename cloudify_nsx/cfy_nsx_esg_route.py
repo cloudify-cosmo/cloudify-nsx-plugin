@@ -71,9 +71,8 @@ def delete(**kwargs):
     route = ctx.instance.runtime_properties.get('route', {})
     route.update(properties.get('route', {}))
     route.update(kwargs.get('route', {}))
-    ctx.instance.runtime_properties['route'] = route
-
     use_existed = route.get('use_external_resource', False)
+    ctx.instance.runtime_properties['route'] = route
 
     if use_existed:
         ctx.logger.info("Used existed")

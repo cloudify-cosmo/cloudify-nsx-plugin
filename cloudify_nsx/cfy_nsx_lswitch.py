@@ -27,10 +27,11 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    switch_dict = properties.get('switch', {})
+    switch_dict = ctx.instance.runtime_properties.get('switch', {})
+    switch_dict.update(properties.get('switch', {}))
     switch_dict.update(kwargs.get('switch', {}))
-    switch_mode = switch_dict.get("mode", "UNICAST_MODE")
     use_existed = switch_dict.get('use_external_resource', False)
+    ctx.instance.runtime_properties['switch'] = switch_dict
 
     ctx.logger.info("checking %s" % str(switch_dict["name"]))
 
@@ -38,13 +39,13 @@ def create(**kwargs):
     if use_existed:
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.logger.info("Used existed %s" % str(resource_id))
-
     elif resource_id:
         raise cfy_exc.NonRecoverableError(
             "We already have such switch"
         )
 
     if not use_existed:
+        switch_mode = switch_dict.get("mode", "UNICAST_MODE")
         # nsx does not understand unicode strings
         ctx.logger.info("creating %s" % str(switch_dict["name"]))
         resource_id, location = nsx_logical_switch.logical_switch_create(
@@ -70,9 +71,11 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    switch_dict = properties.get('switch', {})
+    switch_dict = ctx.instance.runtime_properties.get('switch', {})
+    switch_dict.update(properties.get('switch', {}))
     switch_dict.update(kwargs.get('switch', {}))
     use_existed = switch_dict.get('use_external_resource', False)
+    ctx.instance.runtime_properties['switch'] = switch_dict
 
     if use_existed:
         ctx.logger.info("Used pre existed!")

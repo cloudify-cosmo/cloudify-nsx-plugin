@@ -27,9 +27,11 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    interface = properties.get('interface', {})
+    interface = ctx.instance.runtime_properties.get('interface', {})
+    interface.update(properties.get('interface', {}))
     interface.update(kwargs.get('interface', {}))
     use_existed = interface.get('use_external_resource', False)
+    ctx.instance.runtime_properties['interface'] = interface
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -60,9 +62,11 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    interface = properties.get('interface', {})
+    interface = ctx.instance.runtime_properties.get('interface', {})
+    interface.update(properties.get('interface', {}))
     interface.update(kwargs.get('interface', {}))
     use_existed = interface.get('use_external_resource', False)
+    ctx.instance.runtime_properties['interface'] = interface
 
     if use_existed:
         ctx.logger.info("Used existed")

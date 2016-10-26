@@ -124,6 +124,12 @@ node_templates:
     relationships:
       - type: cloudify.relationships.connected_to
         target: nsx_lswith
+      - type: cloudify.relationships.depends_on
+        target: datacenter
+      - type: cloudify.relationships.depends_on
+        target: datastore
+      - type: cloudify.relationships.depends_on
+        target: vresourcepool
 
   slave_lswith:
     type: cloudify.nsx.lswitch
@@ -207,3 +213,28 @@ node_templates:
         target: esg
       - type: cloudify.relationships.depends_on
         target: esg_gateway
+
+  esg_pool:
+    type: cloudify.nsx.dhcp_pool
+    properties:
+      nsx_auth: *nsx_auth
+      pool:
+        ip_range: 192.168.5.128-192.168.5.250
+        default_gateway: 192.168.5.1
+        subnet_mask: 255.255.255.0
+        domain_name: internal.test
+        dns_server_1: 8.8.8.8
+        dns_server_2: 192.168.5.1
+        lease_time: infinite
+        auto_dns: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            pool:
+              esg_name: { get_attribute: [ esg, edge, name ] }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: esg
+      - type: cloudify.relationships.depends_on
+        target: esg_interface
