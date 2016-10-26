@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.libutils as nsx_utils
-from cfy_nsx_common import vcenter_state
+from cfy_nsx_common import vcenter_state, get_properties
 from cloudify import exceptions as cfy_exc
 
 
@@ -27,9 +27,8 @@ def create(**kwargs):
     vcenter_auth.update(kwargs.get('vcenter_auth', {}))
     vccontent = vcenter_state(vcenter_auth)
 
-    datacenter = properties.get('datacenter', {})
-    datacenter.update(kwargs.get('datacenter', {}))
-    use_existed = datacenter.get('use_external_resource', False)
+    use_existed, datacenter = get_properties('datacenter', kwargs)
+
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
@@ -40,12 +39,8 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    # credentials
-    properties = ctx.node.properties
+    use_existed, _ = get_properties('datacenter', kwargs)
 
-    datacenter = properties.get('datacenter', {})
-    datacenter.update(kwargs.get('datacenter', {}))
-    use_existed = datacenter.get('use_external_resource', False)
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"

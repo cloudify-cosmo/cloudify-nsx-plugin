@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
-from cfy_nsx_common import nsx_login
+from cfy_nsx_common import nsx_login, get_properties
 from cloudify import exceptions as cfy_exc
 
 
@@ -27,11 +27,7 @@ def create(**kwargs):
     nsx_auth.update(kwargs.get('nsx_auth', {}))
     client_session = nsx_login(nsx_auth)
 
-    router_dict = ctx.instance.runtime_properties.get('router', {})
-    router_dict.update(properties.get('router', {}))
-    router_dict.update(kwargs.get('router', {}))
-    use_existed = router_dict.get('use_external_resource', False)
-    ctx.instance.runtime_properties['router'] = router_dict
+    use_existed, router_dict = get_properties('router', kwargs)
 
     ctx.logger.info("checking %s" % str(router_dict["name"]))
 
@@ -69,11 +65,7 @@ def delete(**kwargs):
     nsx_auth = properties.get('nsx_auth', {})
     nsx_auth.update(kwargs.get('nsx_auth', {}))
 
-    router_dict = ctx.instance.runtime_properties.get('router', {})
-    router_dict.update(properties.get('router', {}))
-    router_dict.update(kwargs.get('router', {}))
-    use_existed = router_dict.get('use_external_resource', False)
-    ctx.instance.runtime_properties['router'] = router_dict
+    use_existed, router_dict = get_properties('router', kwargs)
 
     if use_existed:
         ctx.logger.info("Used pre existed!")
