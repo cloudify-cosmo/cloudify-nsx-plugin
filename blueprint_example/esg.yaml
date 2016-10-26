@@ -118,7 +118,7 @@ node_templates:
               resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
               default_pg: { get_attribute: [ nsx_lswith, resource_dvportgroup_id ] }
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: nsx_lswith
 
   slave_lswith:
@@ -155,9 +155,9 @@ node_templates:
               esg_name: { get_attribute: [ esg, edge, name ] }
               portgroup_id: { get_attribute: [ slave_lswith, resource_id ] }
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
         target: esg
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: slave_lswith
 
   esg_gateway:
@@ -176,7 +176,30 @@ node_templates:
             gateway:
               esg_name: { get_attribute: [ esg, edge, name ] }
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.contained_in
+        target: esg
+      - type: cloudify.relationships.connected_to
+        target: esg_interface
+
+  esg_route:
+    type: cloudify.nsx.esg_route
+    properties:
+      nsx_auth: *nsx_auth
+      route:
+          network: 192.168.10.0/24
+          next_hop: 192.168.3.10
+          vnic: 3
+          mtu: 1500
+          admin_distance: 1
+          description: Some cool route
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            route:
+              esg_name: { get_attribute: [ esg, edge, name ] }
+    relationships:
+      - type: cloudify.relationships.contained_in
         target: esg
       - type: cloudify.relationships.depends_on
-        target: esg_interface
+        target: esg_gateway
