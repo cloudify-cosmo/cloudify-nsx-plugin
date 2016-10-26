@@ -108,6 +108,10 @@ node_templates:
         action: accept
         # true or false
         logging: false
+      dhcp:
+        enabled: true
+        syslog_enabled: false
+        syslog_level: INFO
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
