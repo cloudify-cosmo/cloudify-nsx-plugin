@@ -33,7 +33,7 @@ def create(**kwargs):
             "Not Implemented"
         )
     ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_edgeresourcepoolmoid(
-        vccontent, str(resource_pool['name'])
+        vccontent, resource_pool['name']
     )
 
 @operation

@@ -35,32 +35,32 @@ def create(**kwargs):
 
     if 'mac' in bind_dict:
         resource_id = nsx_dhcp.add_mac_binding(client_session,
-            str(bind_dict['esg_name']),
-            str(bind_dict['mac']),
-            str(bind_dict['hostname']),
-            str(bind_dict['ip']),
-            str(bind_dict['default_gateway']),
-            str(bind_dict['subnet_mask']),
-            str(bind_dict['domain_name']),
-            str(bind_dict['dns_server_1']),
-            str(bind_dict['dns_server_2']),
-            str(bind_dict['lease_time']),
-            str(bind_dict['auto_dns'])
+            bind_dict['esg_name'],
+            bind_dict['mac'],
+            bind_dict['hostname'],
+            bind_dict['ip'],
+            bind_dict['default_gateway'],
+            bind_dict['subnet_mask'],
+            bind_dict['domain_name'],
+            bind_dict['dns_server_1'],
+            bind_dict['dns_server_2'],
+            bind_dict['lease_time'],
+            bind_dict['auto_dns']
         )
     elif 'mac' in bind_dict and 'mac' in bind_dict:
         resource_id = nsx_dhcp.add_vm_binding(client_session,
-            str(bind_dict['esg_name']),
-            str(bind_dict['vm_id']),
-            str(bind_dict['vnic_id']),
-            str(bind_dict['hostname']),
-            str(bind_dict['ip']),
-            str(bind_dict['default_gateway']),
-            str(bind_dict['subnet_mask']),
-            str(bind_dict['domain_name']),
-            str(bind_dict['dns_server_1']),
-            str(bind_dict['dns_server_2']),
-            str(bind_dict['lease_time']),
-            str(bind_dict['auto_dns'])
+            bind_dict['esg_name'],
+            bind_dict['vm_id'],
+            bind_dict['vnic_id'],
+            bind_dict['hostname'],
+            bind_dict['ip'],
+            bind_dict['default_gateway'],
+            bind_dict['subnet_mask'],
+            bind_dict['domain_name'],
+            bind_dict['dns_server_1'],
+            bind_dict['dns_server_2'],
+            bind_dict['lease_time'],
+            bind_dict['auto_dns']
         )
     else:
         raise cfy_exc.NonRecoverableError(
@@ -69,7 +69,7 @@ def create(**kwargs):
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
 
-    ctx.logger.info("Binded %s | %s" % (str(resource_id), str(bind_dict)))
+    ctx.logger.info("Binded %s | %s" % (resource_id, bind_dict))
 
 @operation
 def delete(**kwargs):
@@ -91,7 +91,7 @@ def delete(**kwargs):
         return
 
     if not nsx_dhcp.delete_dhcp_binding(client_session,
-        str(bind_dict['esg_name']), resource_id
+        bind_dict['esg_name'], resource_id
     ):
         raise cfy_exc.NonRecoverableError(
             "Ca't drop dhcp bind"

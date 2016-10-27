@@ -34,20 +34,20 @@ def create(**kwargs):
         return
 
     resource_id = nsx_dhcp.add_dhcp_pool(client_session,
-        str(pool_dict['esg_name']),
-        str(pool_dict['ip_range']),
-        str(pool_dict['default_gateway']),
-        str(pool_dict['subnet_mask']),
-        str(pool_dict['domain_name']),
-        str(pool_dict['dns_server_1']),
-        str(pool_dict['dns_server_2']),
-        str(pool_dict['lease_time']),
-        str(pool_dict['auto_dns'])
+        pool_dict['esg_name'],
+        pool_dict['ip_range'],
+        pool_dict['default_gateway'],
+        pool_dict['subnet_mask'],
+        pool_dict['domain_name'],
+        pool_dict['dns_server_1'],
+        pool_dict['dns_server_2'],
+        pool_dict['lease_time'],
+        pool_dict['auto_dns']
     )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
 
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(pool_dict['esg_name'])))
+    ctx.logger.info("created %s | %s" % (resource_id, pool_dict['esg_name']))
 
 
 @operation
@@ -70,7 +70,7 @@ def delete(**kwargs):
         return
 
     if not nsx_dhcp.delete_dhcp_pool(client_session,
-        str(pool_dict['esg_name']), resource_id
+        pool_dict['esg_name'], resource_id
     ):
         raise cfy_exc.NonRecoverableError(
             "Ca't drop dhcp pool"

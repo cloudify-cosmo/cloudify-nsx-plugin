@@ -29,12 +29,12 @@ def create(**kwargs):
 
     use_existed, router_dict = get_properties('router', kwargs)
 
-    ctx.logger.info("checking %s" % str(router_dict["name"]))
+    ctx.logger.info("checking %s" % router_dict["name"])
 
-    resource_id, _ = nsx_router.dlr_read(client_session, str(router_dict["name"]))
+    resource_id, _ = nsx_router.dlr_read(client_session, router_dict["name"])
     if use_existed:
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("Used existed %s" % str(resource_id))
+        ctx.logger.info("Used existed %s" % resource_id)
         return
     if resource_id:
         raise cfy_exc.NonRecoverableError(
@@ -42,21 +42,21 @@ def create(**kwargs):
         )
 
     resource_id, location = nsx_router.dlr_create(client_session,
-        str(router_dict['name']),
-        str(router_dict['dlr_pwd']),
-        str(router_dict['dlr_size']),
-        str(router_dict['datacentermoid']),
-        str(router_dict['datastoremoid']),
-        str(router_dict['resourcepoolid']),
-        str(router_dict['ha_ls_id']),
-        str(router_dict['uplink_ls_id']),
-        str(router_dict['uplink_ip']),
-        str(router_dict['uplink_subnet']),
-        str(router_dict['uplink_dgw'])
+        router_dict['name'],
+        router_dict['dlr_pwd'],
+        router_dict['dlr_size'],
+        router_dict['datacentermoid'],
+        router_dict['datastoremoid'],
+        router_dict['resourcepoolid'],
+        router_dict['ha_ls_id'],
+        router_dict['uplink_ls_id'],
+        router_dict['uplink_ip'],
+        router_dict['uplink_subnet'],
+        router_dict['uplink_dgw']
     )
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+    ctx.logger.info("created %s | %s" % (resource_id, location))
 
 @operation
 def delete(**kwargs):
@@ -78,10 +78,10 @@ def delete(**kwargs):
 
     client_session = nsx_login(nsx_auth)
 
-    ctx.logger.info("deleting %s" % str(resource_id))
+    ctx.logger.info("deleting %s" % resource_id)
 
     client_session.delete('nsxEdge', uri_parameters={'edgeId': resource_id})
 
-    ctx.logger.info("deleted %s" % str(resource_id))
+    ctx.logger.info("deleted %s" % resource_id)
 
     ctx.instance.runtime_properties['resource_id'] = None

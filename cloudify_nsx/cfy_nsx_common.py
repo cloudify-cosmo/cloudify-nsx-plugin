@@ -59,6 +59,9 @@ def get_properties(name, kwargs):
     properties_dict.update(properties.get(name, {}))
     properties_dict.update(kwargs.get(name, {}))
     use_existed = properties_dict.get('use_external_resource', False)
+    for key in properties_dict:
+        if isinstance(properties_dict[key], (unicode, int)):
+            properties_dict[key] = str(properties_dict[key])
     ctx.instance.runtime_properties[name] = properties_dict
 
     return use_existed, properties_dict

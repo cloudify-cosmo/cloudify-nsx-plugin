@@ -34,14 +34,14 @@ def create(**kwargs):
             "Not Implemented"
         )
     if 'name' in dvportgroup:
-        ctx.instance.runtime_properties['resource_name'] = str(dvportgroup['name'])
+        ctx.instance.runtime_properties['resource_name'] = dvportgroup['name']
         ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_vdsportgroupid(
-            vccontent, str(dvportgroup['name'])
+            vccontent, dvportgroup['name']
         )
     elif 'id' in dvportgroup:
         ctx.instance.runtime_properties['resource_id'] = dvportgroup['id']
         ctx.instance.runtime_properties['resource_name'] = get_vdsportgroupname(
-            vccontent, str(dvportgroup['id'])
+            vccontent, dvportgroup['id']
         )
     else:
         raise cfy_exc.NonRecoverableError(

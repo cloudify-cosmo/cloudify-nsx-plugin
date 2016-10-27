@@ -34,16 +34,16 @@ def create(**kwargs):
 
     client_session = nsx_login(nsx_auth)
 
-    resource_id = str(route['next_hop'])
+    resource_id = route['next_hop']
 
     result_raw = nsx_esg.esg_route_add(client_session,
-        str(route['esg_name']),
-        str(route['network']),
+        route['esg_name'],
+        route['network'],
         resource_id,
-        str(route['vnic']),
-        str(route['mtu']),
-        str(route['admin_distance']),
-        str(route['description'])
+        route['vnic'],
+        route['mtu'],
+        route['admin_distance'],
+        route['description']
     )
 
     if not result_raw:
@@ -51,10 +51,10 @@ def create(**kwargs):
             "Can't set route."
         )
 
-    location = str(route['esg_name']) + "/" + resource_id
+    location = route['esg_name'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+    ctx.logger.info("created %s | %s" % (resource_id, location))
 
 @operation
 def delete(**kwargs):
@@ -78,8 +78,8 @@ def delete(**kwargs):
 
     result_raw = nsx_esg.esg_route_del(
         client_session,
-        str(route['esg_name']),
-        str(route['network']),
+        route['esg_name'],
+        route['network'],
         resource_id
     )
     if not result_raw:

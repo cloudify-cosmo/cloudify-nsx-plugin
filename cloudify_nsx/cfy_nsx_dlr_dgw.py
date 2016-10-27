@@ -34,8 +34,8 @@ def create(**kwargs):
         return
 
     result_raw = nsx_router.dlr_set_dgw(client_session,
-        str(gateway['dlr_id']),
-        str(gateway['address'])
+        gateway['dlr_id'],
+        gateway['address']
     )
 
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
@@ -44,9 +44,9 @@ def create(**kwargs):
             "Can't create gateway."
         )
 
-    ctx.instance.runtime_properties['resource_dlr_id'] =  str(gateway['dlr_id'])
-    ctx.instance.runtime_properties['resource_id'] = str(gateway['address'])
-    ctx.logger.info("created %s" % str(gateway['address']))
+    ctx.instance.runtime_properties['resource_dlr_id'] =  gateway['dlr_id']
+    ctx.instance.runtime_properties['resource_id'] = gateway['address']
+    ctx.logger.info("created %s" % gateway['address'])
 
 @operation
 def delete(**kwargs):
@@ -67,7 +67,7 @@ def delete(**kwargs):
         return
 
     result_raw = nsx_router.dlr_del_dgw(client_session,
-        str(ctx.instance.runtime_properties['resource_dlr_id'])
+        ctx.instance.runtime_properties['resource_dlr_id']
     )
 
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
