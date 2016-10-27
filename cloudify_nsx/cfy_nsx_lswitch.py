@@ -29,12 +29,12 @@ def create(**kwargs):
 
     use_existed, switch_dict = get_properties('switch', kwargs)
 
-    ctx.logger.info("checking %s" % str(switch_dict["name"]))
+    ctx.logger.info("checking %s" % switch_dict["name"])
 
-    resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, str(switch_dict["name"]))
+    resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, switch_dict["name"])
     if use_existed:
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("Used existed %s" % str(resource_id))
+        ctx.logger.info("Used existed %s" % resource_id)
     elif resource_id:
         raise cfy_exc.NonRecoverableError(
             "We already have such switch"
@@ -43,17 +43,17 @@ def create(**kwargs):
     if not use_existed:
         switch_mode = switch_dict.get("mode", "UNICAST_MODE")
         # nsx does not understand unicode strings
-        ctx.logger.info("creating %s" % str(switch_dict["name"]))
+        ctx.logger.info("creating %s" % switch_dict["name"])
         resource_id, location = nsx_logical_switch.logical_switch_create(
             client_session, switch_dict["transport_zone"],
-            str(switch_dict["name"]), switch_mode
+            switch_dict["name"], switch_mode
         )
         ctx.instance.runtime_properties['location'] = location
-        ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+        ctx.logger.info("created %s | %s" % (resource_id, location))
         switch_params = None
 
     if not switch_params:
-        resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, str(switch_dict["name"]))
+        resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, switch_dict["name"])
 
     resource_dvportgroup_id = switch_params.get('vdsContextWithBacking', {}).get('backingValue')
 
@@ -80,10 +80,10 @@ def delete(**kwargs):
 
     client_session = nsx_login(nsx_auth)
 
-    ctx.logger.info("deleting %s" % str(resource_id))
+    ctx.logger.info("deleting %s" % resource_id)
 
-    client_session.delete('logicalSwitch', uri_parameters={'virtualWireID': str(resource_id)})
+    client_session.delete('logicalSwitch', uri_parameters={'virtualWireID': resource_id})
 
-    ctx.logger.info("deleted %s" % str(resource_id))
+    ctx.logger.info("deleted %s" % resource_id)
 
     ctx.instance.runtime_properties['resource_id'] = None

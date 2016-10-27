@@ -34,22 +34,22 @@ def create(**kwargs):
 
     client_session = nsx_login(nsx_auth)
 
-    resource_id = str(interface['ifindex'])
+    resource_id = interface['ifindex']
 
     result_raw = nsx_esg.esg_cfg_interface(client_session,
-        str(interface['esg_name']),
-        str(resource_id),
-        str(interface['ipaddr']),
-        str(interface['netmask']),
-        str(interface['prefixlen']),
-        str(interface['name']),
-        str(interface['mtu']),
-        str(interface['is_connected']),
-        str(interface['portgroup_id']),
-        str(interface['vnic_type']),
-        str(interface['enable_send_redirects']),
-        str(interface['enable_proxy_arp']),
-        str(interface['secondary_ips'])
+        interface['esg_name'],
+        resource_id,
+        interface['ipaddr'],
+        interface['netmask'],
+        interface['prefixlen'],
+        interface['name'],
+        interface['mtu'],
+        interface['is_connected'],
+        interface['portgroup_id'],
+        interface['vnic_type'],
+        interface['enable_send_redirects'],
+        interface['enable_proxy_arp'],
+        interface['secondary_ips']
     )
 
     if not result_raw:
@@ -57,10 +57,10 @@ def create(**kwargs):
             "Can't create interface."
         )
 
-    location = str(interface['esg_name']) + "/" + resource_id
+    location = interface['esg_name'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+    ctx.logger.info("created %s | %s" % (resource_id, location))
 
 @operation
 def delete(**kwargs):
@@ -84,7 +84,7 @@ def delete(**kwargs):
 
     result_raw = nsx_esg.esg_clear_interface(
         client_session,
-        str(interface['esg_name']),
+        interface['esg_name'],
         resource_id
     )
     if not result_raw:

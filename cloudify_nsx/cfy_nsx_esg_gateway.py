@@ -34,14 +34,14 @@ def create(**kwargs):
 
     client_session = nsx_login(nsx_auth)
 
-    resource_id = str(gateway['dgw_ip'])
+    resource_id = gateway['dgw_ip']
 
     result_raw = nsx_esg.esg_dgw_set(client_session,
-        str(gateway['esg_name']),
-        str(resource_id),
-        str(gateway['vnic']),
-        str(gateway['mtu']),
-        str(gateway['admin_distance'])
+        gateway['esg_name'],
+        resource_id,
+        gateway['vnic'],
+        gateway['mtu'],
+        gateway['admin_distance']
     )
 
     if not result_raw:
@@ -49,10 +49,10 @@ def create(**kwargs):
             "Can't set gateway."
         )
 
-    location = str(gateway['esg_name']) + "/" + resource_id
+    location = gateway['esg_name'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+    ctx.logger.info("created %s | %s" % (resource_id, location))
 
 @operation
 def delete(**kwargs):
@@ -76,7 +76,7 @@ def delete(**kwargs):
 
     result_raw = nsx_esg.esg_dgw_clear(
         client_session,
-        str(gateway['esg_name'])
+        gateway['esg_name']
     )
     if not result_raw:
         ctx.logger.error("Status %s" % result_raw['status'])

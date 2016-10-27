@@ -34,7 +34,7 @@ def create(**kwargs):
             "Not Implemented"
         )
     ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_datacentermoid(
-        vccontent, str(datacenter['name'])
+        vccontent, datacenter['name']
     )
 
 @operation

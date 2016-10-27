@@ -30,12 +30,12 @@ def create(**kwargs):
 
     use_existed, edge_dict = get_properties('edge', kwargs)
 
-    ctx.logger.info("checking %s" % str(edge_dict["name"]))
+    ctx.logger.info("checking %s" % edge_dict["name"])
 
-    resource_id, _ = nsx_esg.esg_read(client_session, str(edge_dict["name"]))
+    resource_id, _ = nsx_esg.esg_read(client_session, edge_dict["name"])
     if use_existed:
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("Used existed %s" % str(resource_id))
+        ctx.logger.info("Used existed %s" % resource_id)
     elif resource_id:
         raise cfy_exc.NonRecoverableError(
             "We already have such router"
@@ -43,41 +43,41 @@ def create(**kwargs):
 
     if not use_existed:
         resource_id, location = nsx_esg.esg_create(client_session,
-            str(edge_dict['name']),
-            str(edge_dict['esg_pwd']),
-            str(edge_dict['esg_size']),
-            str(edge_dict['datacentermoid']),
-            str(edge_dict['datastoremoid']),
-            str(edge_dict['resourcepoolid']),
-            str(edge_dict['default_pg']),
-            str(edge_dict['esg_username']),
-            str(edge_dict['esg_remote_access'])
+            edge_dict['name'],
+            edge_dict['esg_pwd'],
+            edge_dict['esg_size'],
+            edge_dict['datacentermoid'],
+            edge_dict['datastoremoid'],
+            edge_dict['resourcepoolid'],
+            edge_dict['default_pg'],
+            edge_dict['esg_username'],
+            edge_dict['esg_remote_access']
         )
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.instance.runtime_properties['location'] = location
-        ctx.logger.info("created %s | %s" % (str(resource_id), str(location)))
+        ctx.logger.info("created %s | %s" % (resource_id, location))
 
     _, firewall = get_properties('firewall', kwargs)
     if firewall:
         nsx_esg.esg_fw_default_set(client_session,
-            str(edge_dict['name']),
-            str(firewall['action']),
-            str(firewall['logging'])
+            edge_dict['name'],
+            firewall['action'],
+            firewall['logging']
         )
         ctx.logger.info("firewall %s | %s" % (
-            str(firewall['action']), str(firewall['logging']))
+            firewall['action'], firewall['logging'])
         )
 
     _, dhcp = get_properties('dhcp', kwargs)
     if dhcp:
         nsx_dhcp.dhcp_server(client_session,
-            str(edge_dict['name']),
-            str(dhcp['enabled']),
-            str(dhcp['syslog_enabled']),
-            str(dhcp['syslog_level'])
+            edge_dict['name'],
+            dhcp['enabled'],
+            dhcp['syslog_enabled'],
+            dhcp['syslog_level']
         )
         ctx.logger.info("dhcp %s | %s" % (
-            str(dhcp['enabled']), str(dhcp['syslog_enabled']))
+            dhcp['enabled'], dhcp['syslog_enabled'])
         )
 
 @operation
@@ -90,7 +90,7 @@ def delete(**kwargs):
     use_existed, edge_dict = get_properties('edge', kwargs)
 
     if use_existed:
-        ctx.logger.info("Used existed %s" % str(edge_dict.get('name')))
+        ctx.logger.info("Used existed %s" % edge_dict.get('name'))
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
@@ -100,9 +100,9 @@ def delete(**kwargs):
 
     client_session = nsx_login(nsx_auth)
 
-    ctx.logger.info("checking %s" % str(resource_id))
+    ctx.logger.info("checking %s" % resource_id)
 
-    client_session.delete('nsxEdge', uri_parameters={'edgeId': str(resource_id)})
+    client_session.delete('nsxEdge', uri_parameters={'edgeId': resource_id})
 
     ctx.logger.info("delete %s" % resource_id)
 
