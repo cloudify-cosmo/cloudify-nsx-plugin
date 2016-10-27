@@ -22,10 +22,7 @@ from cloudify import exceptions as cfy_exc
 @operation
 def create(**kwargs):
     # credentials
-    properties = ctx.node.properties
-    vcenter_auth = properties.get('vcenter_auth', {})
-    vcenter_auth.update(kwargs.get('vcenter_auth', {}))
-    vccontent = vcenter_state(vcenter_auth)
+    vccontent = vcenter_state(kwargs)
 
     use_existed, datastore = get_properties('datastore', kwargs)
 
@@ -33,6 +30,7 @@ def create(**kwargs):
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
+
     ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_datastoremoid(
         vccontent, datastore['name']
     )

@@ -17,7 +17,18 @@ from nsxramlclient.client import NsxClient
 import pynsxv.library.libutils as nsx_utils
 from cloudify import exceptions as cfy_exc
 
-def vcenter_state(vcenter_auth):
+def __get_properties(name, kwargs):
+    properties_dict = ctx.instance.runtime_properties.get(name, {})
+    properties_dict.update(ctx.node.properties.get(name, {}))
+    properties_dict.update(kwargs.get(name, {}))
+    for key in properties_dict:
+        if isinstance(properties_dict[key], (unicode, int)):
+            properties_dict[key] = str(properties_dict[key])
+    ctx.instance.runtime_properties[name] = properties_dict
+    return properties_dict
+
+def vcenter_state(kwargs):
+    vcenter_auth = __get_properties('vcenter_auth', kwargs)
     ctx.logger.info("VCenter login...")
     user = vcenter_auth.get('username')
     password = vcenter_auth.get('password')
@@ -26,7 +37,8 @@ def vcenter_state(vcenter_auth):
     ctx.logger.info("VCenter logined")
     return state
 
-def nsx_login(nsx_auth):
+def nsx_login(kwargs):
+    nsx_auth = __get_properties('nsx_auth', kwargs)
     ctx.logger.info("NSX login...")
     user = nsx_auth.get('username')
     password = nsx_auth.get('password')
@@ -53,17 +65,8 @@ def nsx_login(nsx_auth):
 
 def get_properties(name, kwargs):
 
-    properties = ctx.node.properties
-
-    properties_dict = ctx.instance.runtime_properties.get(name, {})
-    properties_dict.update(properties.get(name, {}))
-    properties_dict.update(kwargs.get(name, {}))
+    properties_dict = __get_properties(name, kwargs)
     use_existed = properties_dict.get('use_external_resource', False)
-    for key in properties_dict:
-        if isinstance(properties_dict[key], (unicode, int)):
-            properties_dict[key] = str(properties_dict[key])
-    ctx.instance.runtime_properties[name] = properties_dict
-
     return use_existed, properties_dict
 
 def get_mo_by_id(content, searchedid, vim_type):

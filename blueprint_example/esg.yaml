@@ -51,7 +51,7 @@ inputs:
 
 node_templates:
 
-  nsx_lswith:
+  master_lswith:
     type: cloudify.nsx.lswitch
     properties:
       nsx_auth: &nsx_auth
@@ -120,10 +120,10 @@ node_templates:
               datacentermoid: { get_attribute: [ datacenter, resource_id ] }
               datastoremoid: { get_attribute: [ datastore, resource_id ] }
               resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
-              default_pg: { get_attribute: [ nsx_lswith, resource_dvportgroup_id ] }
+              default_pg: { get_attribute: [ master_lswith, resource_dvportgroup_id ] }
     relationships:
       - type: cloudify.relationships.connected_to
-        target: nsx_lswith
+        target: master_lswith
       - type: cloudify.relationships.depends_on
         target: datacenter
       - type: cloudify.relationships.depends_on

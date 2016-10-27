@@ -22,10 +22,7 @@ from cloudify import exceptions as cfy_exc
 @operation
 def create(**kwargs):
     # credentials
-    properties = ctx.node.properties
-    vcenter_auth = properties.get('vcenter_auth', {})
-    vcenter_auth.update(kwargs.get('vcenter_auth', {}))
-    vccontent = vcenter_state(vcenter_auth)
+    vccontent = vcenter_state(kwargs)
 
     use_existed, resource_pool = get_properties('resource_pool', kwargs)
     if not use_existed:

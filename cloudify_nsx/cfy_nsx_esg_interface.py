@@ -21,18 +21,14 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    # credentials
-    properties = ctx.node.properties
-    nsx_auth = properties.get('nsx_auth', {})
-    nsx_auth.update(kwargs.get('nsx_auth', {}))
-
     use_existed, interface = get_properties('interface', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
         return
 
-    client_session = nsx_login(nsx_auth)
+    # credentials
+    client_session = nsx_login(kwargs)
 
     resource_id = interface['ifindex']
 
@@ -64,11 +60,6 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    # credentials
-    properties = ctx.node.properties
-    nsx_auth = properties.get('nsx_auth', {})
-    nsx_auth.update(kwargs.get('nsx_auth', {}))
-
     use_existed, interface = get_properties('interface', kwargs)
 
     if use_existed:
@@ -80,7 +71,8 @@ def delete(**kwargs):
         ctx.logger.info("Not fully created, skip")
         return
 
-    client_session = nsx_login(nsx_auth)
+    # credentials
+    client_session = nsx_login(kwargs)
 
     result_raw = nsx_esg.esg_clear_interface(
         client_session,
