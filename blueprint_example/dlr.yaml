@@ -51,7 +51,7 @@ inputs:
 
 node_templates:
 
-  nsx_lswith:
+  master_lswith:
     type: cloudify.nsx.lswitch
     properties:
       nsx_auth: &nsx_auth
@@ -119,14 +119,14 @@ node_templates:
               datacentermoid: { get_attribute: [ datacenter, resource_id ] }
               datastoremoid: { get_attribute: [ datastore, resource_id ] }
               resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
-              ha_ls_id: { get_attribute: [ nsx_lswith, resource_id ] }
-              uplink_ls_id: { get_attribute: [ nsx_lswith, resource_id ] }
+              ha_ls_id: { get_attribute: [ master_lswith, resource_id ] }
+              uplink_ls_id: { get_attribute: [ master_lswith, resource_id ] }
               uplink_ip: 192.168.1.11
               uplink_subnet: 255.255.255.0
               uplink_dgw: 192.168.1.1
     relationships:
       - type: cloudify.relationships.connected_to
-        target: nsx_lswith
+        target: master_lswith
       - type: cloudify.relationships.connected_to
         target: vresourcepool
       - type: cloudify.relationships.connected_to

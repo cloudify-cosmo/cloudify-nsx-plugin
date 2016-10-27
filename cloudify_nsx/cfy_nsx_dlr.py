@@ -22,10 +22,7 @@ from cloudify import exceptions as cfy_exc
 @operation
 def create(**kwargs):
     # credentials
-    properties = ctx.node.properties
-    nsx_auth = properties.get('nsx_auth', {})
-    nsx_auth.update(kwargs.get('nsx_auth', {}))
-    client_session = nsx_login(nsx_auth)
+    client_session = nsx_login(kwargs)
 
     use_existed, router_dict = get_properties('router', kwargs)
 
@@ -60,11 +57,6 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    # credentials
-    properties = ctx.node.properties
-    nsx_auth = properties.get('nsx_auth', {})
-    nsx_auth.update(kwargs.get('nsx_auth', {}))
-
     use_existed, router_dict = get_properties('router', kwargs)
 
     if use_existed:
@@ -76,7 +68,8 @@ def delete(**kwargs):
         ctx.logger.info("We dont have resource_id")
         return
 
-    client_session = nsx_login(nsx_auth)
+    # credentials
+    client_session = nsx_login(kwargs)
 
     ctx.logger.info("deleting %s" % resource_id)
 

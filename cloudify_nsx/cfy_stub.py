@@ -21,10 +21,7 @@ from cloudify import exceptions as cfy_exc
 @operation
 def create(**kwargs):
     # credentials
-    properties = ctx.node.properties
-    nsx_auth = properties.get('nsx_auth', {})
-    nsx_auth.update(kwargs.get('nsx_auth', {}))
-    client_session = nsx_login(nsx_auth)
+    client_session = nsx_login(kwargs)
 
     ctx.logger.info("create")
     raise cfy_exc.NonRecoverableError(
@@ -34,10 +31,7 @@ def create(**kwargs):
 @operation
 def delete(**kwargs):
     # credentials
-    properties = ctx.node.properties
-    nsx_auth = properties.get('nsx_auth', {})
-    nsx_auth.update(kwargs.get('nsx_auth', {}))
-    client_session = nsx_login(nsx_auth)
+    client_session = nsx_login(kwargs)
 
     ctx.logger.info("delete")
     raise cfy_exc.NonRecoverableError(

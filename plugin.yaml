@@ -416,6 +416,15 @@ node_types:
   # distributed firewall
   cloudify.nsx.dfw_section:
     derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      section:
+        default:
+          # The name of the dfw section to be created
+          name: {}
+          # The type of the section. Allowed values are L2/L3/L3R
+          type: L3R
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
