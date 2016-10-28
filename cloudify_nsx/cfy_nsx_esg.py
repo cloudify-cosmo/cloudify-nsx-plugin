@@ -18,6 +18,7 @@ import pynsxv.library.nsx_esg as nsx_esg
 import pynsxv.library.nsx_dhcp as nsx_dhcp
 from cfy_nsx_common import nsx_login, get_properties
 from cloudify import exceptions as cfy_exc
+import library.nsx_nat as nsx_nat
 
 
 @operation
@@ -56,25 +57,44 @@ def create(**kwargs):
 
     _, firewall = get_properties('firewall', kwargs)
     if firewall:
-        nsx_esg.esg_fw_default_set(client_session,
+        if not nsx_esg.esg_fw_default_set(client_session,
             edge_dict['name'],
             firewall['action'],
             firewall['logging']
-        )
+        ):
+            raise cfy_exc.NonRecoverableError(
+                "Can't change firewall rules"
+            )
         ctx.logger.info("firewall %s | %s" % (
             firewall['action'], firewall['logging'])
         )
 
     _, dhcp = get_properties('dhcp', kwargs)
     if dhcp:
-        nsx_dhcp.dhcp_server(client_session,
+        if not nsx_dhcp.dhcp_server(client_session,
             edge_dict['name'],
             dhcp['enabled'],
             dhcp['syslog_enabled'],
             dhcp['syslog_level']
-        )
+        ):
+            raise cfy_exc.NonRecoverableError(
+                "Can't change dhcp rules"
+            )
         ctx.logger.info("dhcp %s | %s" % (
             dhcp['enabled'], dhcp['syslog_enabled'])
+        )
+
+    _, nat = get_properties('nat', kwargs)
+    if nat:
+        if not nsx_nat.nat_service(client_session,
+            resource_id,
+            nat['enabled']
+        ):
+            raise cfy_exc.NonRecoverableError(
+                "Can't change nat rules"
+            )
+        ctx.logger.info("nat %s" % (
+            nat['enabled'])
         )
 
 @operation

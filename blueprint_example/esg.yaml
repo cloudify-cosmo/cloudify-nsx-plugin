@@ -112,6 +112,8 @@ node_templates:
         enabled: true
         syslog_enabled: false
         syslog_level: INFO
+      nat:
+        enabled: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -169,6 +171,34 @@ node_templates:
         target: esg
       - type: cloudify.relationships.connected_to
         target: slave_lswith
+
+  nat_rule:
+    type: cloudify.nsx.esg_nat
+    properties:
+      nsx_auth: *nsx_auth
+      rule:
+        action: dnat
+        translatedAddress: 192.168.10.1
+        originalAddress: 192.168.1.2
+        vnic: 3
+        ruleTag: 65538
+        loggingEnabled: false
+        enabled: true
+        description: some nat rule
+        protocol: any
+        translatedPort: any
+        originalPort: any
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            rule:
+              esg_id: { get_attribute: [ esg, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: esg
+      - type: cloudify.relationships.connected_to
+        target: esg_interface
 
   esg_gateway:
     type: cloudify.nsx.esg_gateway

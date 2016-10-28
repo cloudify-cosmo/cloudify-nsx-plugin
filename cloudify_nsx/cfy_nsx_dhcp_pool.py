@@ -49,9 +49,6 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    # credentials
-    client_session = nsx_login(kwargs)
-
     use_existed, pool_dict = get_properties('pool', kwargs)
 
     if use_existed:
@@ -62,6 +59,9 @@ def delete(**kwargs):
     if not resource_id:
         ctx.logger.info("We dont have resource_id")
         return
+
+    # credentials
+    client_session = nsx_login(kwargs)
 
     if not nsx_dhcp.delete_dhcp_pool(client_session,
         pool_dict['esg_name'], resource_id

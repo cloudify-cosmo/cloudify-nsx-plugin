@@ -20,7 +20,10 @@ setup(
     author='Denis Pauk',
     author_email='pauk.denis@gmail.com',
     license='LICENSE',
-    packages=['cloudify_nsx'],
+    packages=[
+        'cloudify_nsx',
+        'cloudify_nsx/library'
+    ],
     install_requires=[
         'cloudify-plugins-common>=3.3',
         'pynsxv==0.4.1',
