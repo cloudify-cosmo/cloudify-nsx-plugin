@@ -237,12 +237,55 @@ node_types:
           syslog_enabled: false
           # The logging level for DHCP on this Edge (INFO/WARNING/etc.)
           syslog_level: INFO
+      nat:
+        default:
+          # The display name of a Edge Service Gateway used for NAT
+          enabled: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg.create
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg.delete
+
+  # edge services gateways interfaces
+  cloudify.nsx.esg_nat:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      rule:
+        default:
+          # id of esg
+          esg_id: {}
+          # dnat/snat
+          action: {}
+          originalAddress: {}
+          translatedAddress: {}
+          # Optional. vnic
+          vnic: {}
+          # Optional. Can be used to specify user-controlled ids on VSE.
+          # Valid inputs 65537-131072. If not specified, vShield manager
+          # will generate ruleId
+          ruleTag: {}
+          # Optional. Default is false
+          loggingEnabled: false
+          # Optional. Default is true
+          enabled: true
+          # Optional
+          description: {}
+          # Optional. Default is "any". This tag is not supported for SNAT rule
+          protocol: any
+          # Optional. Default is "any". This tag is not supported for SNAT rule
+          translatedPort: any
+          # Optional. Default is "any". This tag is not supported for SNAT rule
+          originalPort: any
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_nat.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_nat.delete
 
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:

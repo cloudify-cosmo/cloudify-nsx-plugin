@@ -70,9 +70,6 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    # credentials
-    client_session = nsx_login(kwargs)
-
     use_existed, bind_dict = get_properties('bind', kwargs)
 
     if use_existed:
@@ -83,6 +80,9 @@ def delete(**kwargs):
     if not resource_id:
         ctx.logger.info("We dont have resource_id")
         return
+
+    # credentials
+    client_session = nsx_login(kwargs)
 
     if not nsx_dhcp.delete_dhcp_binding(client_session,
         bind_dict['esg_name'], resource_id
