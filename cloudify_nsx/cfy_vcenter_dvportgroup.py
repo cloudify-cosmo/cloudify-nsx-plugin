@@ -15,16 +15,16 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.libutils as nsx_utils
-from cfy_nsx_common import vcenter_state, get_vdsportgroupname, get_properties
+import cfy_nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
     # credentials
-    vccontent = vcenter_state(kwargs)
+    vccontent = common.vcenter_state(kwargs)
 
-    use_existed, dvportgroup = get_properties('dvportgroup', kwargs)
+    use_existed, dvportgroup = common.get_properties('dvportgroup', kwargs)
 
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
@@ -32,13 +32,13 @@ def create(**kwargs):
         )
 
     if 'name' in dvportgroup:
-        ctx.instance.runtime_properties['resource_name'] = dvportgroup['name']
-        ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_vdsportgroupid(
+        resource_name = dvportgroup['name']
+        resource_id = nsx_utils.get_vdsportgroupid(
             vccontent, dvportgroup['name']
         )
     elif 'id' in dvportgroup:
-        ctx.instance.runtime_properties['resource_id'] = dvportgroup['id']
-        ctx.instance.runtime_properties['resource_name'] = get_vdsportgroupname(
+        resource_id = dvportgroup['id']
+        resource_name = common.get_vdsportgroupname(
             vccontent, dvportgroup['id']
         )
     else:
@@ -46,14 +46,22 @@ def create(**kwargs):
             "Validation failed, please provice id or name"
         )
 
-    ctx.logger.info("created %s | %s" % (
-        ctx.instance.runtime_properties['resource_id'],
-        ctx.instance.runtime_properties['resource_name']
-    ))
+    _, update_to = common.get_properties('update_to', kwargs)
+    if update_to:
+        if 'name' in update_to:
+            common.rename_vdsportgroupname(vccontent, resource_id,
+                                           update_to['name'])
+            resource_name = update_to['name']
+
+    ctx.instance.runtime_properties['resource_id'] = resource_id
+    ctx.instance.runtime_properties['resource_name'] = resource_name
+
+    ctx.logger.info("created %s | %s" % (resource_id, resource_name))
+
 
 @operation
 def delete(**kwargs):
-    use_existed, _ = get_properties('dvportgroup', kwargs)
+    use_existed, _ = common.get_properties('dvportgroup', kwargs)
 
     if not use_existed:
         raise cfy_exc.NonRecoverableError(

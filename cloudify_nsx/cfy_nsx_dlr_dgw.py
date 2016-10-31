@@ -31,9 +31,8 @@ def create(**kwargs):
         return
 
     result_raw = nsx_router.dlr_set_dgw(client_session,
-        gateway['dlr_id'],
-        gateway['address']
-    )
+                                        gateway['dlr_id'],
+                                        gateway['address'])
 
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
@@ -41,9 +40,10 @@ def create(**kwargs):
             "Can't create gateway."
         )
 
-    ctx.instance.runtime_properties['resource_dlr_id'] =  gateway['dlr_id']
+    ctx.instance.runtime_properties['resource_dlr_id'] = gateway['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = gateway['address']
     ctx.logger.info("created %s" % gateway['address'])
+
 
 @operation
 def delete(**kwargs):
@@ -60,7 +60,8 @@ def delete(**kwargs):
         ctx.logger.info("Not fully created, skip")
         return
 
-    result_raw = nsx_router.dlr_del_dgw(client_session,
+    result_raw = nsx_router.dlr_del_dgw(
+        client_session,
         ctx.instance.runtime_properties['resource_dlr_id']
     )
 
@@ -70,5 +71,6 @@ def delete(**kwargs):
             "Can't delete gateway."
         )
 
-    ctx.logger.info("delete %s" % ctx.instance.runtime_properties['resource_id'])
+    ctx.logger.info(
+        "delete %s" % ctx.instance.runtime_properties['resource_id'])
     ctx.instance.runtime_properties['resource_id'] = None

@@ -31,9 +31,11 @@ def create(**kwargs):
             "Not Implemented"
         )
 
-    ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_datastoremoid(
+    resource_id = nsx_utils.get_datastoremoid(
         vccontent, datastore['name']
     )
+
+    ctx.instance.runtime_properties['resource_id'] = resource_id
 
 
 @operation

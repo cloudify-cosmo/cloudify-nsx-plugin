@@ -28,7 +28,9 @@ def create(**kwargs):
 
     ctx.logger.info("checking %s" % switch_dict["name"])
 
-    resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, switch_dict["name"])
+    resource_id, switch_params = nsx_logical_switch.logical_switch_read(
+        client_session, switch_dict["name"]
+    )
     if use_existed:
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.logger.info("Used existed %s" % resource_id)
@@ -50,11 +52,15 @@ def create(**kwargs):
         switch_params = None
 
     if not switch_params:
-        resource_id, switch_params = nsx_logical_switch.logical_switch_read(client_session, switch_dict["name"])
+        resource_id, switch_params = nsx_logical_switch.logical_switch_read(
+            client_session, switch_dict["name"]
+        )
 
-    resource_dvportgroup_id = switch_params.get('vdsContextWithBacking', {}).get('backingValue')
+    dvportgroup_id = switch_params.get(
+        'vdsContextWithBacking', {}
+    ).get('backingValue')
 
-    ctx.instance.runtime_properties['resource_dvportgroup_id'] = resource_dvportgroup_id
+    ctx.instance.runtime_properties['resource_dvportgroup_id'] = dvportgroup_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
 
 
@@ -76,7 +82,9 @@ def delete(**kwargs):
 
     ctx.logger.info("deleting %s" % resource_id)
 
-    client_session.delete('logicalSwitch', uri_parameters={'virtualWireID': resource_id})
+    client_session.delete(
+        'logicalSwitch', uri_parameters={'virtualWireID': resource_id}
+    )
 
     ctx.logger.info("deleted %s" % resource_id)
 

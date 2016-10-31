@@ -29,9 +29,12 @@ def create(**kwargs):
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
-    ctx.instance.runtime_properties['resource_id'] = nsx_utils.get_edgeresourcepoolmoid(
+    resource_id = nsx_utils.get_edgeresourcepoolmoid(
         vccontent, resource_pool['name']
     )
+
+    ctx.instance.runtime_properties['resource_id'] = resource_id
+
 
 @operation
 def delete(**kwargs):

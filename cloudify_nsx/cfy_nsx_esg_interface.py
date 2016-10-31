@@ -32,7 +32,8 @@ def create(**kwargs):
 
     resource_id = interface['ifindex']
 
-    result_raw = nsx_esg.esg_cfg_interface(client_session,
+    result_raw = nsx_esg.esg_cfg_interface(
+        client_session,
         interface['esg_name'],
         resource_id,
         interface['ipaddr'],
@@ -57,6 +58,7 @@ def create(**kwargs):
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
+
 
 @operation
 def delete(**kwargs):
