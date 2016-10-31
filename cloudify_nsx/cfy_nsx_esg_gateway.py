@@ -32,13 +32,13 @@ def create(**kwargs):
 
     resource_id = gateway['dgw_ip']
 
-    result_raw = nsx_esg.esg_dgw_set(client_session,
+    result_raw = nsx_esg.esg_dgw_set(
+        client_session,
         gateway['esg_name'],
         resource_id,
         gateway['vnic'],
         gateway['mtu'],
-        gateway['admin_distance']
-    )
+        gateway['admin_distance'])
 
     if not result_raw:
         raise cfy_exc.NonRecoverableError(
@@ -49,6 +49,7 @@ def create(**kwargs):
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
+
 
 @operation
 def delete(**kwargs):

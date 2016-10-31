@@ -14,25 +14,19 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-from cfy_nsx_common import nsx_login
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
-    # credentials
-    client_session = nsx_login(kwargs)
-
     ctx.logger.info("create")
     raise cfy_exc.NonRecoverableError(
         "Not implemented."
     )
 
+
 @operation
 def delete(**kwargs):
-    # credentials
-    client_session = nsx_login(kwargs)
-
     ctx.logger.info("delete")
     raise cfy_exc.NonRecoverableError(
         "Not implemented."

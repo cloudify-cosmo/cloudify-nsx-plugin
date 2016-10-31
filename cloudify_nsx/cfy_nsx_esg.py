@@ -40,7 +40,8 @@ def create(**kwargs):
         )
 
     if not use_existed:
-        resource_id, location = nsx_esg.esg_create(client_session,
+        resource_id, location = nsx_esg.esg_create(
+            client_session,
             edge_dict['name'],
             edge_dict['esg_pwd'],
             edge_dict['esg_size'],
@@ -51,13 +52,15 @@ def create(**kwargs):
             edge_dict['esg_username'],
             edge_dict['esg_remote_access']
         )
+
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.instance.runtime_properties['location'] = location
         ctx.logger.info("created %s | %s" % (resource_id, location))
 
     _, firewall = get_properties('firewall', kwargs)
     if firewall:
-        if not nsx_esg.esg_fw_default_set(client_session,
+        if not nsx_esg.esg_fw_default_set(
+            client_session,
             edge_dict['name'],
             firewall['action'],
             firewall['logging']
@@ -71,7 +74,8 @@ def create(**kwargs):
 
     _, dhcp = get_properties('dhcp', kwargs)
     if dhcp:
-        if not nsx_dhcp.dhcp_server(client_session,
+        if not nsx_dhcp.dhcp_server(
+            client_session,
             edge_dict['name'],
             dhcp['enabled'],
             dhcp['syslog_enabled'],
@@ -86,7 +90,8 @@ def create(**kwargs):
 
     _, nat = get_properties('nat', kwargs)
     if nat:
-        if not nsx_nat.nat_service(client_session,
+        if not nsx_nat.nat_service(
+            client_session,
             resource_id,
             nat['enabled']
         ):
@@ -96,6 +101,7 @@ def create(**kwargs):
         ctx.logger.info("nat %s" % (
             nat['enabled'])
         )
+
 
 @operation
 def delete(**kwargs):

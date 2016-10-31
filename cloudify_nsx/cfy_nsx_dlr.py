@@ -38,7 +38,8 @@ def create(**kwargs):
             "We already have such router"
         )
 
-    resource_id, location = nsx_router.dlr_create(client_session,
+    resource_id, location = nsx_router.dlr_create(
+        client_session,
         router_dict['name'],
         router_dict['dlr_pwd'],
         router_dict['dlr_size'],
@@ -49,11 +50,11 @@ def create(**kwargs):
         router_dict['uplink_ls_id'],
         router_dict['uplink_ip'],
         router_dict['uplink_subnet'],
-        router_dict['uplink_dgw']
-    )
+        router_dict['uplink_dgw'])
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
+
 
 @operation
 def delete(**kwargs):

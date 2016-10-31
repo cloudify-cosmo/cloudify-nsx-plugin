@@ -31,11 +31,10 @@ def create(**kwargs):
         return
 
     result_raw = nsx_router.dlr_add_interface(client_session,
-        interface['dlr_id'],
-        interface['interface_ls_id'],
-        interface['interface_ip'],
-        interface['interface_subnet']
-    )
+                                              interface['dlr_id'],
+                                              interface['interface_ls_id'],
+                                              interface['interface_ip'],
+                                              interface['interface_subnet'])
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
@@ -43,10 +42,11 @@ def create(**kwargs):
         )
     resource_id = result_raw['body']['interfaces']['interface']['index']
     location = result_raw['body']['interfaces']['interface']['name']
-    ctx.instance.runtime_properties['resource_dlr_id'] =  interface['dlr_id']
+    ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
+
 
 @operation
 def delete(**kwargs):

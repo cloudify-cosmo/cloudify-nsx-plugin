@@ -30,7 +30,8 @@ def create(**kwargs):
     # credentials
     client_session = nsx_login(kwargs)
 
-    resource_id, location = nsx_nat.add_nat_rule(client_session,
+    resource_id, location = nsx_nat.add_nat_rule(
+        client_session,
         nat_dict['esg_id'],
         nat_dict['action'],
         nat_dict['originalAddress'],
@@ -42,8 +43,7 @@ def create(**kwargs):
         nat_dict['description'],
         nat_dict['protocol'],
         nat_dict['translatedPort'],
-        nat_dict['originalPort']
-    )
+        nat_dict['originalPort'])
 
     if not resource_id:
         raise cfy_exc.NonRecoverableError(
@@ -54,6 +54,7 @@ def create(**kwargs):
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
+
 
 @operation
 def delete(**kwargs):

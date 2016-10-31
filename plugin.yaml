@@ -89,6 +89,8 @@ node_types:
         type: vcenter_auth_type
       dvportgroup:
         default: {}
+      update_to:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
