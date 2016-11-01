@@ -43,7 +43,11 @@ node_types:
       vcenter_auth:
         type: vcenter_auth_type
       resource_pool:
-        default: {}
+        default:
+          # name of resource pool
+          name: {}
+          # reuse existed resource pool
+          use_external_resource: True
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -58,7 +62,11 @@ node_types:
       vcenter_auth:
         type: vcenter_auth_type
       datastore:
-        default: {}
+        default:
+          # name of datastore
+          name: {}
+          # reuse existed datastore
+          use_external_resource: True
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -73,7 +81,11 @@ node_types:
       vcenter_auth:
         type: vcenter_auth_type
       datacenter:
-        default: {}
+        default:
+          # name of datacenter
+          name: {}
+          # reuse existed datacenter
+          use_external_resource: True
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -81,16 +93,24 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_vcenter_datacenter.delete
 
-  # vcenter datacenter
+  # vcenter distributed port group
   cloudify.vcenter.dvportgroup:
     derived_from: cloudify.nodes.Subnet
     properties:
       vcenter_auth:
         type: vcenter_auth_type
       dvportgroup:
-        default: {}
+        default:
+          # Supported only True - search port group in vcenter by id/name
+          use_external_resource: True
+          # resource_id in vcenter
+          id: {}
+          # name distributed port group
+          name: {}
       update_to:
-        default: {}
+        default:
+          # rename distributed port group
+          name: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -262,7 +282,9 @@ node_types:
           esg_id: {}
           # dnat/snat
           action: {}
+          # originalAddress
           originalAddress: {}
+          # translatedAddress
           translatedAddress: {}
           # Optional. vnic
           vnic: {}
@@ -288,6 +310,51 @@ node_types:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_nat.create
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg_nat.delete
+
+  # edge services gateways firewall
+  cloudify.nsx.esg_firewall:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      rule:
+        default:
+          # id of esg
+          esg_id: {}
+          # Optional. This can be used to specify user controlled ids
+          # on VSE. The inputs here should be 1-65536. If not specified,
+          # VSM will generate ruleId
+          ruleTag: {}
+          # Optional
+          name: {}
+          # Optional. Default behaviour is like "any". ipsetId or
+          # predefined-vnicGroupIds can be used
+          source: {}
+          # Optional. Default behaviour is like "any". ipsetId or
+          # predefined-vnicGroupIds can be used
+          destination: {}
+          # Optional. Default behaviour is like "any". applicationsetId
+          # or applicationgroupId can be used
+          application: {}
+          # Optional. Default behaviour is like "false"
+          matchTranslated: false
+          # Optional. Default behaviour is like "any". Possible values
+          # are in|out
+          direction: any
+          # Mandatory. Possible values are accept|deny|reject
+          action: accept
+          # Optional. Defaults to true
+          enabled: true
+          # Optional. Defaults to false
+          loggingEnabled: true
+          # Optional
+          description: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_firewall.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_esg_firewall.delete
 
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:

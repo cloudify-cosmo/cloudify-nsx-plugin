@@ -200,6 +200,37 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: esg_interface
 
+  firewall_rule:
+    type: cloudify.nsx.esg_firewall
+    properties:
+      nsx_auth: *nsx_auth
+      rule:
+        name: http
+        loggingEnabled: false
+        matchTranslated: false
+        enabled: true
+        source: any
+        action: accept
+        description: Some Firewall Rule
+        direction: in
+        ruleTag: ''
+        application: any
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            rule:
+              esg_id: { get_attribute: [ esg, resource_id ] }
+              destination:
+                groupingObjectId: { get_attribute: [ vresourcepool, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vresourcepool
+      - type: cloudify.relationships.contained_in
+        target: esg
+      - type: cloudify.relationships.connected_to
+        target: esg_interface
+
   esg_gateway:
     type: cloudify.nsx.esg_gateway
     properties:

@@ -19,16 +19,28 @@ from cloudify import exceptions as cfy_exc
 import time
 from pyVmomi import vim
 
+def __cleanup_prioperties(properties_dict):
+    """we need such because nsxclient does not support unicode strings"""
+    result = {}
+
+    for key in properties_dict.iterkeys():
+        value = properties_dict[key]
+        if isinstance(key, (unicode, int)):
+            key = str(key)
+        if isinstance(value, (unicode, int)):
+            value = str(value)
+        # nsxclient does not support unicode values
+        if isinstance(value, dict):
+            value = __cleanup_prioperties(value)
+        result[key] = value
+    return result
 
 def __get_properties(name, kwargs):
     properties_dict = ctx.instance.runtime_properties.get(name, {})
     properties_dict.update(ctx.node.properties.get(name, {}))
     properties_dict.update(kwargs.get(name, {}))
-    for key in properties_dict:
-        if isinstance(properties_dict[key], (unicode, int)):
-            properties_dict[key] = str(properties_dict[key])
     ctx.instance.runtime_properties[name] = properties_dict
-    return properties_dict
+    return __cleanup_prioperties(properties_dict)
 
 
 def vcenter_state(kwargs):

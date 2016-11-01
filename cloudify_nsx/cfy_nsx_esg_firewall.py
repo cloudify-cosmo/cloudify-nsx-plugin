@@ -14,14 +14,15 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-from cfy_nsx_common import nsx_login, get_properties
 from cloudify import exceptions as cfy_exc
-import library.nsx_nat as nsx_nat
+import library.nsx_firewall as nsx_firewall
+from cfy_nsx_common import nsx_login, get_properties
 
 
 @operation
 def create(**kwargs):
-    use_existed, nat_dict = get_properties('rule', kwargs)
+
+    use_existed, firewall_dict = get_properties('rule', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -30,24 +31,25 @@ def create(**kwargs):
     # credentials
     client_session = nsx_login(kwargs)
 
-    resource_id, location = nsx_nat.add_nat_rule(
+    resource_id, location = nsx_firewall.add_firewall_rule(
         client_session,
-        nat_dict['esg_id'],
-        nat_dict['action'],
-        nat_dict['originalAddress'],
-        nat_dict['translatedAddress'],
-        nat_dict['vnic'],
-        nat_dict['ruleTag'],
-        nat_dict['loggingEnabled'],
-        nat_dict['enabled'],
-        nat_dict['description'],
-        nat_dict['protocol'],
-        nat_dict['translatedPort'],
-        nat_dict['originalPort'])
+        firewall_dict['esg_id'],
+        firewall_dict['application'],
+        firewall_dict["direction"],
+        firewall_dict["name"],
+        firewall_dict["loggingEnabled"],
+        firewall_dict["matchTranslated"],
+        firewall_dict["destination"],
+        firewall_dict["enabled"],
+        firewall_dict["source"],
+        firewall_dict["action"],
+        firewall_dict["ruleTag"],
+        firewall_dict["description"]
+    )
 
     if not resource_id:
         raise cfy_exc.NonRecoverableError(
-            "Can't create nat rule."
+            "Can't create firewall rule."
         )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
@@ -71,7 +73,7 @@ def delete(**kwargs):
     # credentials
     client_session = nsx_login(kwargs)
 
-    result_raw = nsx_nat.delete_nat_rule(
+    result_raw = nsx_firewall.delete_firewall_rule(
         client_session,
         nat_dict['esg_id'],
         resource_id
