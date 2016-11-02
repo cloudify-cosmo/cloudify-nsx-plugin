@@ -29,7 +29,7 @@ inputs:
     type: string
     description: >
        raml file path
-    default: https://raw.githubusercontent.com/vmware/pynsxv/master/pynsxv/library/api_spec/nsxvapi.raml
+    default: ""
 
   vcenter_ip:
     type: string
