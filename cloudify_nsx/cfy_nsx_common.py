@@ -13,6 +13,7 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 from cloudify import ctx
+from pkg_resources import resource_filename
 from nsxramlclient.client import NsxClient
 import pynsxv.library.libutils as nsx_utils
 from cloudify import exceptions as cfy_exc
@@ -72,9 +73,9 @@ def nsx_login(kwargs):
 
     raml_file = nsx_auth.get('raml')
     if not raml_file:
-        raise cfy_exc.NonRecoverableError(
-            "please set raml file path"
-        )
+        resource_dir = resource_filename(__name__, 'api_spec')
+        raml_file = '{}/nsxvapi.raml'.format(resource_dir)
+        ctx.logger.info("Will be used internal: %s" % raml_file)
 
     client = NsxClient(raml_file, ip, user, password)
     ctx.logger.info("NSX logined")

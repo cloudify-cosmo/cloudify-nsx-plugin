@@ -31,8 +31,12 @@ data_types:
         default: vcenter.local
         required: true
       raml:
-        default: https://raw.githubusercontent.com/vmware/pynsxv/master/pynsxv/library/api_spec/nsxvapi.raml
-        required: true
+        default: ''
+        description: >
+          you can use updated version of NSX raml or url to
+          https://raw.githubusercontent.com/vmware/pynsxv/master/pynsxv/library/api_spec/nsxvapi.raml
+          Safest way to leave it empty and use NSX 6.2.3 as fully teasted
+        required: false
 
 node_types:
 

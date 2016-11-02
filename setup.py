@@ -24,6 +24,11 @@ setup(
         'cloudify_nsx',
         'cloudify_nsx/library'
     ],
+    package_data={
+        'cloudify_nsx':[
+            'api_spec/nsxvapi.raml', 'api_spec/schemas/*'
+        ]
+    },
     install_requires=[
         'cloudify-plugins-common>=3.3',
         'pynsxv==0.4.1',
