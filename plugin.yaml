@@ -46,12 +46,20 @@ node_types:
     properties:
       vcenter_auth:
         type: vcenter_auth_type
+      validate:
+        default:
+          # we need name in any case of usage except predefined 'id'
+          name:
+            required: true
+            external_use: true
       resource_pool:
         default:
           # name of resource pool
           name: {}
           # reuse existed resource pool
           use_external_resource: True
+          # resource vcenter id
+          id: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -126,6 +134,18 @@ node_types:
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Network
     properties:
+      validate:
+        default:
+          # we need name in any case of usage except predefined 'id'
+          name:
+            required: true
+            external_use: true
+          transport_zone:
+            required: true
+            external_use: false
+          mode:
+            required: false
+            external_use: false
       nsx_auth:
         type: nsx_auth_type
       switch:
@@ -136,6 +156,10 @@ node_types:
           name: {}
           # (Optional) Control Plane Mode, uses the Transport Zone default if not specified
           mode: {}
+          # reuse existed datacenter
+          use_external_resource: false
+          # id in case reuse
+          id: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -226,6 +250,28 @@ node_types:
     properties:
       nsx_auth:
         type: nsx_auth_type
+      validate_edge:
+        default:
+          # we need name in any case of usage except predefined 'id'
+          name:
+            required: true
+            external_use: true
+          esg_pwd:
+            required: true
+          esg_size:
+            default: compact
+          datacentermoid:
+            required: true
+          datastoremoid:
+            required: true
+          resourcepoolid:
+            required: true
+          default_pg:
+            required: true
+          esg_username:
+           default: admin
+          esg_remote_access:
+           default: false
       edge:
         default:
           # The name of the ESG to be created
@@ -247,22 +293,38 @@ node_types:
           esg_username: admin
           # Enables / Disables SSH access to the Edge Host (default: False)
           esg_remote_access: false
+      validate_firewall:
+        default:
+          action:
+            default: accept
+          logging:
+            default: false
       firewall:
         default:
           # accept or deny
           action: accept
           # true or false
           logging: false
+      validate_dhcp:
+        default:
+          enabled:
+            default: true
+          syslog_enabled:
+            default: false
+          syslog_level:
+            default: INFO
       dhcp:
         default:
-          # The display name of a Edge Service Gateway used for DHCP
-          esg_name: {}
           # True/False The desired state of the DHCP Server
           enabled: true
           # ('true'/'false') The desired logging state of the DHCP Server
           syslog_enabled: false
           # The logging level for DHCP on this Edge (INFO/WARNING/etc.)
           syslog_level: INFO
+      validate_nat:
+        default:
+          enabled:
+            default: true
       nat:
         default:
           # The display name of a Edge Service Gateway used for NAT

@@ -14,21 +14,21 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-from cfy_nsx_common import nsx_login, get_properties
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 import library.nsx_nat as nsx_nat
 
 
 @operation
 def create(**kwargs):
-    use_existed, nat_dict = get_properties('rule', kwargs)
+    use_existed, nat_dict = common.get_properties('rule', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     resource_id, location = nsx_nat.add_nat_rule(
         client_session,
@@ -57,7 +57,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, nat_dict = get_properties('rule', kwargs)
+    use_existed, nat_dict = common.get_properties('rule', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -69,7 +69,7 @@ def delete(**kwargs):
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     result_raw = nsx_nat.delete_nat_rule(
         client_session,

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import nsx_common as common
 
 
 def nat_service(client_session, esg_id, enabled):
@@ -52,33 +53,37 @@ def add_nat_rule(client_session, esg_id, action, originalAddress,
         'edgeNatRules', 'create'
     )
 
-    nat_spec['natRules']['natRule']['ruleTag'] = ruleTag
-    nat_spec['natRules']['natRule']['action'] = action
-    nat_spec['natRules']['natRule']['vnic'] = vnic
-    nat_spec['natRules']['natRule']['originalAddress'] = originalAddress
-    nat_spec['natRules']['natRule']['translatedAddress'] = translatedAddress
-    if loggingEnabled:
-        nat_spec['natRules']['natRule']['loggingEnabled'] = 'true'
-    else:
-        nat_spec['natRules']['natRule']['loggingEnabled'] = 'false'
-    if enabled:
-        nat_spec['natRules']['natRule']['enabled'] = 'true'
-    else:
-        nat_spec['natRules']['natRule']['enabled'] = 'false'
-    nat_spec['natRules']['natRule']['description'] = description
-    nat_spec['natRules']['natRule']['protocol'] = protocol
-    nat_spec['natRules']['natRule']['translatedPort'] = originalPort
-    nat_spec['natRules']['natRule']['originalPort'] = translatedPort
+    nat_rule = {
+        'ruleTag': ruleTag,
+        'action': action,
+        'vnic': vnic,
+        'originalAddress': originalAddress,
+        'translatedAddress': translatedAddress,
+        'description': description,
+        'protocol': protocol,
+        'translatedPort': originalPort,
+        'originalPort': translatedPort
+    }
 
-    result = client_session.create(
+    if loggingEnabled:
+        nat_rule['loggingEnabled'] = 'true'
+    else:
+        nat_rule['loggingEnabled'] = 'false'
+    if enabled:
+        nat_rule['enabled'] = 'true'
+    else:
+        nat_rule['enabled'] = 'false'
+
+    nat_spec['natRules']['natRule'] = nat_rule
+
+    result_raw = client_session.create(
         'edgeNatRules', uri_parameters={'edgeId': esg_id},
         request_body_dict=nat_spec
     )
 
-    if result['status'] >= 200 and result['status'] < 300:
-        return result['objectId'], result['location']
-    else:
-        return None, None
+    common.check_raw_result(result_raw)
+
+    return result_raw['objectId'], result_raw['location']
 
 
 def delete_nat_rule(client_session, esg_id, resource_id):

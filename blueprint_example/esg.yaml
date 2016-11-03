@@ -99,10 +99,7 @@ node_templates:
       edge:
         name: real_edge
         esg_pwd: SeCrEt010203!
-        # compact, large, quadlarge, xlarge
-        esg_size: compact
-        esg_username: admin
-        esg_remote_access: True
+        esg_remote_access: true
       firewall:
         # accept or deny
         action: accept

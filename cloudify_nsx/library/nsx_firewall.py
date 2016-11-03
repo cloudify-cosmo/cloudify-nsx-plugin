@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import nsx_common as common
 
 
 def add_firewall_rule(client_session, esg_id, application='any',
@@ -19,52 +20,55 @@ def add_firewall_rule(client_session, esg_id, application='any',
                       enabled=True, source='any', action='accept',
                       ruleTag=None, description=None):
 
-    firewall_spec = {}
-    firewall_spec['firewallRules'] = {}
-    firewall_spec['firewallRules']['firewallRule'] = {}
+    firewallRule = {
+        'name': name,
+        'source': source,
+        'action': action,
+        'direction': direction,
+        'application': application,
+        'destination': destination
+    }
 
-    firewall_spec['firewallRules']['firewallRule']['name'] = name
-    firewall_spec['firewallRules']['firewallRule']['action'] = action
-
-
-    firewall_spec['firewallRules']['firewallRule']['direction'] = direction
-    firewall_spec['firewallRules']['firewallRule']['application'] = application
     if loggingEnabled:
-        firewall_spec['firewallRules']['firewallRule']['loggingEnabled'] = 'true'
+        firewallRule['loggingEnabled'] = 'true'
     else:
-        firewall_spec['firewallRules']['firewallRule']['loggingEnabled'] = 'false'
+        firewallRule['loggingEnabled'] = 'false'
 
     if matchTranslated:
-        firewall_spec['firewallRules']['firewallRule']['matchTranslated'] = 'true'
+        firewallRule['matchTranslated'] = 'true'
     else:
-        firewall_spec['firewallRules']['firewallRule']['matchTranslated'] = 'false'
+        firewallRule['matchTranslated'] = 'false'
 
-    firewall_spec['firewallRules']['firewallRule']['destination'] = destination
     if enabled:
-        firewall_spec['firewallRules']['firewallRule']['enabled'] = 'true'
+        firewallRule['enabled'] = 'true'
     else:
-        firewall_spec['firewallRules']['firewallRule']['enabled'] = 'false'
-    firewall_spec['firewallRules']['firewallRule']['source'] = source
-    if ruleTag:
-        firewall_spec['firewallRules']['firewallRule']['ruleTag'] = ruleTag
-    if description:
-        firewall_spec['firewallRules']['firewallRule']['description'] = description
+        firewallRule['enabled'] = 'false'
 
-    result = client_session.create(
+    if ruleTag:
+        firewallRule['ruleTag'] = ruleTag
+
+    if description:
+        firewallRule['description'] = description
+
+    firewall_spec = {}
+    firewall_spec['firewallRules'] = {}
+    firewall_spec['firewallRules']['firewallRule'] = firewallRule
+
+    result_raw = client_session.create(
         'firewallRules', uri_parameters={'edgeId': esg_id},
         request_body_dict=firewall_spec
     )
 
-    if result['status'] >= 200 and result['status'] < 300:
-        return result['objectId'], result['location']
-    else:
-        return None, None
+    common.check_raw_result(result_raw)
+
+    return result_raw['objectId'], result_raw['location']
 
 
 def delete_firewall_rule(client_session, esg_id, resource_id):
     result = client_session.delete(
-        'firewallRule', uri_parameters={'edgeId': esg_id, 'ruleId': resource_id}
-    )
+        'firewallRule', uri_parameters={
+            'edgeId': esg_id, 'ruleId': resource_id
+        })
 
     if result['status'] == 204:
         return True

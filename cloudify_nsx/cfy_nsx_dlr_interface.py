@@ -15,16 +15,15 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
-from cfy_nsx_common import nsx_login, get_properties
-from cloudify import exceptions as cfy_exc
+import library.nsx_common as common
 
 
 @operation
 def create(**kwargs):
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
-    use_existed, interface = get_properties('interface', kwargs)
+    use_existed, interface = common.get_properties('interface', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -35,11 +34,8 @@ def create(**kwargs):
                                               interface['interface_ls_id'],
                                               interface['interface_ip'],
                                               interface['interface_subnet'])
-    if result_raw['status'] < 200 and result_raw['status'] >= 300:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't create interface."
-        )
+    common.check_raw_result(result_raw)
+
     resource_id = result_raw['body']['interfaces']['interface']['index']
     location = result_raw['body']['interfaces']['interface']['name']
     ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
@@ -50,7 +46,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, interface = get_properties('interface', kwargs)
+    use_existed, interface = common.get_properties('interface', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -62,7 +58,7 @@ def delete(**kwargs):
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     result_raw = nsx_router.dlr_del_interface(
         client_session,
@@ -70,11 +66,7 @@ def delete(**kwargs):
         resource_id
     )
 
-    if result_raw['status'] < 200 and result_raw['status'] >= 300:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete interface."
-        )
+    common.check_raw_result(result_raw)
 
     ctx.logger.info("delete %s" % resource_id)
 

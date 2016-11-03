@@ -14,7 +14,7 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-from cfy_nsx_common import nsx_login, get_properties
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 import pynsxv.library.nsx_dhcp as nsx_dhcp
 
@@ -22,9 +22,9 @@ import pynsxv.library.nsx_dhcp as nsx_dhcp
 @operation
 def create(**kwargs):
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
-    use_existed, bind_dict = get_properties('bind', kwargs)
+    use_existed, bind_dict = common.get_properties('bind', kwargs)
 
     if use_existed:
         ctx.logger.info("Used pre existed!")
@@ -69,7 +69,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, bind_dict = get_properties('bind', kwargs)
+    use_existed, bind_dict = common.get_properties('bind', kwargs)
 
     if use_existed:
         ctx.logger.info("Used pre existed!")
@@ -81,7 +81,7 @@ def delete(**kwargs):
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     if not nsx_dhcp.delete_dhcp_binding(client_session,
                                         bind_dict['esg_name'],

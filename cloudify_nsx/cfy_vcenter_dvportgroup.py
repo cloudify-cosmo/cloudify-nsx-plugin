@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.libutils as nsx_utils
-import cfy_nsx_common as common
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
@@ -24,7 +24,9 @@ def create(**kwargs):
     # credentials
     vccontent = common.vcenter_state(kwargs)
 
-    use_existed, dvportgroup = common.get_properties('dvportgroup', kwargs)
+    use_existed, dvportgroup = common.get_properties(
+        'dvportgroup', kwargs
+    )
 
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
@@ -44,6 +46,11 @@ def create(**kwargs):
     else:
         raise cfy_exc.NonRecoverableError(
             "Validation failed, please provice id or name"
+        )
+
+    if not resource_id:
+        raise cfy_exc.RecoverableError(
+            message="We dont have such network yet", retry_after=10
         )
 
     _, update_to = common.get_properties('update_to', kwargs)

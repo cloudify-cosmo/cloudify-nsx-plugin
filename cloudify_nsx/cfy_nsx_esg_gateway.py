@@ -15,20 +15,20 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_esg as nsx_esg
-from cfy_nsx_common import nsx_login, get_properties
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
-    use_existed, gateway = get_properties('gateway', kwargs)
+    use_existed, gateway = common.get_properties('gateway', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     resource_id = gateway['dgw_ip']
 
@@ -53,7 +53,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, gateway = get_properties('gateway', kwargs)
+    use_existed, gateway = common.get_properties('gateway', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -65,7 +65,7 @@ def delete(**kwargs):
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     result_raw = nsx_esg.esg_dgw_clear(
         client_session,
