@@ -15,16 +15,33 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.libutils as nsx_utils
-from cfy_nsx_common import vcenter_state, get_properties
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
-    # credentials
-    vccontent = vcenter_state(kwargs)
 
-    use_existed, resource_pool = get_properties('resource_pool', kwargs)
+    use_existed, resource_pool = common.get_properties('resource_pool', kwargs)
+    # use existing with id
+    if use_existed and 'id' in resource_pool:
+        ctx.instance.runtime_properties['resource_id'] = resource_pool['id']
+
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
+    # credentials
+    vccontent = common.vcenter_state(kwargs)
+
+    if not resource_id:
+        # no explicit id, validate params
+        ctx.logger.info("checking resource pool: " + str(resource_pool))
+
+        _, validate = common.get_properties('validate', kwargs)
+        resource_pool = common.validate(resource_pool, validate, use_existed)
+
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
@@ -38,7 +55,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, _ = get_properties('resource_pool', kwargs)
+    use_existed, _ = common.get_properties('resource_pool', kwargs)
 
     if not use_existed:
         raise cfy_exc.NonRecoverableError(

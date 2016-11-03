@@ -15,16 +15,16 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.libutils as nsx_utils
-from cfy_nsx_common import vcenter_state, get_properties
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
     # credentials
-    vccontent = vcenter_state(kwargs)
+    vccontent = common.vcenter_state(kwargs)
 
-    use_existed, datacenter = get_properties('datacenter', kwargs)
+    use_existed, datacenter = common.get_properties('datacenter', kwargs)
 
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
@@ -39,7 +39,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, _ = get_properties('datacenter', kwargs)
+    use_existed, _ = common.get_properties('datacenter', kwargs)
 
     if not use_existed:
         raise cfy_exc.NonRecoverableError(

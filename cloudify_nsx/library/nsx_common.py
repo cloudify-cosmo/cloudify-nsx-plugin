@@ -20,6 +20,7 @@ from cloudify import exceptions as cfy_exc
 import time
 from pyVmomi import vim
 
+
 def __cleanup_prioperties(properties_dict):
     """we need such because nsxclient does not support unicode strings"""
     result = {}
@@ -35,6 +36,36 @@ def __cleanup_prioperties(properties_dict):
             value = __cleanup_prioperties(value)
         result[key] = value
     return result
+
+
+def validate(check_dict, validate_rules, use_existed):
+    result = {}
+    for name in validate_rules:
+        validate = validate_rules[name]
+        required_value = validate.get('required', False)
+        external_use_value = validate.get('external_use', False)
+        default_value = validate.get('default', False)
+        # we can have value == false and default == true, so only check
+        # field in list
+        if 'default' in validate and name not in check_dict:
+            value = default_value
+        else:
+            value = check_dict.get(name)
+
+        if use_existed and external_use_value and not value:
+            raise cfy_exc.NonRecoverableError(
+                "don't have external value for %s" % name
+            )
+
+        if required_value and not value:
+            raise cfy_exc.NonRecoverableError(
+                "don't have value for %s " % name
+            )
+
+        result[name] = value
+
+    return result
+
 
 def __get_properties(name, kwargs):
     properties_dict = ctx.instance.runtime_properties.get(name, {})
@@ -104,6 +135,30 @@ def get_vdsportgroupname(content, searchedid):
         return str(portgroup_mo.name)
     else:
         return None
+
+
+def check_raw_result(result_raw):
+    if result_raw['status'] < 200 and result_raw['status'] >= 300:
+        ctx.logger.error("Status %s" % result_raw['status'])
+        raise cfy_exc.NonRecoverableError(
+            "We have error with request."
+        )
+
+
+def get_logical_switch(client_session, logical_switch_id):
+    raw_result = client_session.read('logicalSwitch', uri_parameters={
+        'virtualWireID': logical_switch_id
+    })
+    check_raw_result(raw_result)
+    return raw_result['body']['virtualWire']
+
+
+def get_edgegateway(client_session, edgeId):
+    raw_result = client_session.read('nsxEdge', uri_parameters={
+        'edgeId': edgeId
+    })
+    check_raw_result(raw_result)
+    return raw_result['body']['edge']
 
 
 def _wait_for_task(task):

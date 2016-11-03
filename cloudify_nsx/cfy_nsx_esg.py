@@ -16,7 +16,7 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_esg as nsx_esg
 import pynsxv.library.nsx_dhcp as nsx_dhcp
-from cfy_nsx_common import nsx_login, get_properties
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 import library.nsx_nat as nsx_nat
 
@@ -24,22 +24,36 @@ import library.nsx_nat as nsx_nat
 @operation
 def create(**kwargs):
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
-    use_existed, edge_dict = get_properties('edge', kwargs)
+    use_existed, edge_dict = common.get_properties('edge', kwargs)
 
-    ctx.logger.info("checking %s" % edge_dict["name"])
+    if use_existed and 'id' in edge_dict:
+        ctx.instance.runtime_properties['resource_id'] = edge_dict['id']
+        name = common.get_edgegateway(client_session, edge_dict['id'])['name']
+        edge_dict['name'] = name
+        ctx.instance.runtime_properties['edge']['name'] = name
 
-    resource_id, _ = nsx_esg.esg_read(client_session, edge_dict["name"])
-    if use_existed:
-        ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("Used existed %s" % resource_id)
-    elif resource_id:
-        raise cfy_exc.NonRecoverableError(
-            "We already have such router"
-        )
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
 
-    if not use_existed:
+    if not resource_id:
+        ctx.logger.info("checking " + str(edge_dict))
+
+        _, validate = common.get_properties('validate_edge', kwargs)
+        edge_dict = common.validate(edge_dict, validate, use_existed)
+
+        resource_id, _ = nsx_esg.esg_read(client_session, edge_dict["name"])
+        if use_existed:
+            ctx.instance.runtime_properties['resource_id'] = resource_id
+            ctx.logger.info("Used existed %s" % resource_id)
+        elif resource_id:
+            raise cfy_exc.NonRecoverableError(
+                "We already have such router"
+            )
+
+    if not resource_id:
         resource_id, location = nsx_esg.esg_create(
             client_session,
             edge_dict['name'],
@@ -57,8 +71,13 @@ def create(**kwargs):
         ctx.instance.runtime_properties['location'] = location
         ctx.logger.info("created %s | %s" % (resource_id, location))
 
-    _, firewall = get_properties('firewall', kwargs)
+    _, firewall = common.get_properties('firewall', kwargs)
     if firewall:
+        _, validate = common.get_properties('validate_firewall', kwargs)
+        firewall = common.validate(firewall, validate, False)
+
+        ctx.logger.info("checking firewall:" + str(firewall))
+
         if not nsx_esg.esg_fw_default_set(
             client_session,
             edge_dict['name'],
@@ -68,12 +87,14 @@ def create(**kwargs):
             raise cfy_exc.NonRecoverableError(
                 "Can't change firewall rules"
             )
-        ctx.logger.info("firewall %s | %s" % (
-            firewall['action'], firewall['logging'])
-        )
 
-    _, dhcp = get_properties('dhcp', kwargs)
+    _, dhcp = common.get_properties('dhcp', kwargs)
     if dhcp:
+        _, validate = common.get_properties('validate_dhcp', kwargs)
+        dhcp = common.validate(dhcp, validate, False)
+
+        ctx.logger.info("checking dhcp:" + str(dhcp))
+
         if not nsx_dhcp.dhcp_server(
             client_session,
             edge_dict['name'],
@@ -84,12 +105,14 @@ def create(**kwargs):
             raise cfy_exc.NonRecoverableError(
                 "Can't change dhcp rules"
             )
-        ctx.logger.info("dhcp %s | %s" % (
-            dhcp['enabled'], dhcp['syslog_enabled'])
-        )
 
-    _, nat = get_properties('nat', kwargs)
+    _, nat = common.get_properties('nat', kwargs)
     if nat:
+        _, validate = common.get_properties('validate_nat', kwargs)
+        nat = common.validate(nat, validate, False)
+
+        ctx.logger.info("checking nat:" + str(nat))
+
         if not nsx_nat.nat_service(
             client_session,
             resource_id,
@@ -98,14 +121,11 @@ def create(**kwargs):
             raise cfy_exc.NonRecoverableError(
                 "Can't change nat rules"
             )
-        ctx.logger.info("nat %s" % (
-            nat['enabled'])
-        )
 
 
 @operation
 def delete(**kwargs):
-    use_existed, edge_dict = get_properties('edge', kwargs)
+    use_existed, edge_dict = common.get_properties('edge', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed %s" % edge_dict.get('name'))
@@ -117,7 +137,7 @@ def delete(**kwargs):
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     ctx.logger.info("checking %s" % resource_id)
 

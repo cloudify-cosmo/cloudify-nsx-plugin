@@ -15,16 +15,16 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
-from cfy_nsx_common import nsx_login, get_properties
+import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
-    use_existed, router_dict = get_properties('router', kwargs)
+    use_existed, router_dict = common.get_properties('router', kwargs)
 
     ctx.logger.info("checking %s" % router_dict["name"])
 
@@ -58,7 +58,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, router_dict = get_properties('router', kwargs)
+    use_existed, router_dict = common.get_properties('router', kwargs)
 
     if use_existed:
         ctx.logger.info("Used pre existed!")
@@ -70,7 +70,7 @@ def delete(**kwargs):
         return
 
     # credentials
-    client_session = nsx_login(kwargs)
+    client_session = common.nsx_login(kwargs)
 
     ctx.logger.info("deleting %s" % resource_id)
 
