@@ -147,6 +147,7 @@ node_templates:
               interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
               interface_ip: 192.168.2.11
               interface_subnet: 255.255.255.0
+              name: some_interface_name
     relationships:
       - type: cloudify.relationships.contained_in
         target: nsx_dlr

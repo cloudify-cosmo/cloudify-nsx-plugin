@@ -15,6 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
+import library.nsx_dlr as cfy_dlr
 import library.nsx_common as common
 
 
@@ -29,12 +30,12 @@ def create(**kwargs):
         ctx.logger.info("Used existed")
         return
 
-    result_raw = nsx_router.dlr_add_interface(client_session,
+    result_raw = cfy_dlr.dlr_add_interface(client_session,
                                               interface['dlr_id'],
                                               interface['interface_ls_id'],
                                               interface['interface_ip'],
-                                              interface['interface_subnet'])
-    common.check_raw_result(result_raw)
+                                              interface['interface_subnet'],
+                                              interface.get('name'))
 
     resource_id = result_raw['body']['interfaces']['interface']['index']
     location = result_raw['body']['interfaces']['interface']['name']
