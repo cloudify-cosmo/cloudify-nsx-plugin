@@ -220,6 +220,8 @@ node_types:
           interface_ip: {}
           # new interface subnet
           interface_subnet: {}
+          # name for interface
+          name: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
