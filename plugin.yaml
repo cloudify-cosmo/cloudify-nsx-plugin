@@ -73,6 +73,12 @@ node_types:
     properties:
       vcenter_auth:
         type: vcenter_auth_type
+      validate:
+        default:
+          # we need name in any case of usage except predefined 'id'
+          name:
+            required: true
+            external_use: true
       datastore:
         default:
           # name of datastore
@@ -122,7 +128,7 @@ node_types:
       update_to:
         default:
           # rename distributed port group
-          name: {}
+          name: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

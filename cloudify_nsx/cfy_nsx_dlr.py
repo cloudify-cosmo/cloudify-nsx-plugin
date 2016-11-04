@@ -73,6 +73,7 @@ def create(**kwargs):
                 "Can't change firewall rules"
             )
 
+
 @operation
 def delete(**kwargs):
     use_existed, router_dict = common.get_properties('router', kwargs)

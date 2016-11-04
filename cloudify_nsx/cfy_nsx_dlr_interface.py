@@ -31,11 +31,11 @@ def create(**kwargs):
         return
 
     result_raw = cfy_dlr.dlr_add_interface(client_session,
-                                              interface['dlr_id'],
-                                              interface['interface_ls_id'],
-                                              interface['interface_ip'],
-                                              interface['interface_subnet'],
-                                              interface.get('name'))
+                                           interface['dlr_id'],
+                                           interface['interface_ls_id'],
+                                           interface['interface_ip'],
+                                           interface['interface_subnet'],
+                                           interface.get('name'))
 
     resource_id = result_raw['body']['interfaces']['interface']['index']
     location = result_raw['body']['interfaces']['interface']['name']
