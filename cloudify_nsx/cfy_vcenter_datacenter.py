@@ -21,10 +21,25 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
+    use_existed, datacenter = common.get_properties('datacenter', kwargs)
+    # use existing with id
+    if use_existed and 'id' in datacenter:
+        ctx.instance.runtime_properties['resource_id'] = datacenter['id']
+
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     vccontent = common.vcenter_state(kwargs)
 
-    use_existed, datacenter = common.get_properties('datacenter', kwargs)
+    if not resource_id:
+        # no explicit id, validate params
+        ctx.logger.info("checking datacenter: " + str(datacenter))
+
+        _, validate = common.get_properties('validate', kwargs)
+        datacenter = common.validate(datacenter, validate, use_existed)
 
     if not use_existed:
         raise cfy_exc.NonRecoverableError(

@@ -55,7 +55,7 @@ node_types:
       resource_pool:
         default:
           # name of resource pool
-          name: {}
+          name: ""
           # reuse existed resource pool
           use_external_resource: True
           # resource vcenter id
@@ -82,7 +82,7 @@ node_types:
       datastore:
         default:
           # name of datastore
-          name: {}
+          name: ""
           # reuse existed datastore
           use_external_resource: True
     interfaces:
@@ -98,10 +98,16 @@ node_types:
     properties:
       vcenter_auth:
         type: vcenter_auth_type
+      validate:
+        default:
+          # we need name in any case of usage except predefined 'id'
+          name:
+            required: true
+            external_use: true
       datacenter:
         default:
           # name of datacenter
-          name: {}
+          name: ""
           # reuse existed datacenter
           use_external_resource: True
     interfaces:
@@ -124,7 +130,7 @@ node_types:
           # resource_id in vcenter
           id: {}
           # name distributed port group
-          name: {}
+          name: ""
       update_to:
         default:
           # rename distributed port group
@@ -159,7 +165,7 @@ node_types:
           # The name of the Scope (Transport Zone)
           transport_zone: {}
           # The name that will be assigned to the new logical switch
-          name: {}
+          name: ""
           # (Optional) Control Plane Mode, uses the Transport Zone default if not specified
           mode: {}
           # reuse existed datacenter
@@ -182,7 +188,7 @@ node_types:
       router:
         default:
           # The name that will be assigned to the new dlr
-          name: {}
+          name: ""
           # The admin password of new dlr
           dlr_pwd: {}
           # The DLR Control VM size
@@ -239,7 +245,7 @@ node_types:
           # new interface subnet
           interface_subnet: {}
           # name for interface
-          name: {}
+          name: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -295,7 +301,7 @@ node_types:
       edge:
         default:
           # The name of the ESG to be created
-          name: {}
+          name: ""
           # The CLI password of the ESG
           esg_pwd: {}
           # The size of the ESG, options are compact, large, quadlarge, xlarge
@@ -412,7 +418,7 @@ node_types:
           # VSM will generate ruleId
           ruleTag: {}
           # Optional
-          name: {}
+          name: ""
           # Optional. Default behaviour is like "any". ipsetId or
           # predefined-vnicGroupIds can be used
           source: {}
@@ -451,7 +457,7 @@ node_types:
       interface:
         default:
           # The name of the ESG to configure interfaces on
-          esg_name: {}
+          esg_name: ""
           # The vnic index, e.g. vnic3 and the index 3
           ifindex: {}
           # (Optional) The primary IP Address to be configured for this interface
@@ -461,7 +467,7 @@ node_types:
           # (Optional) The prefix length, this takes precedence over the netmask
           prefixlen: {}
           # (Optional) The name assigned to the vnic
-          name: {}
+          name: ""
           # (Optional) The vnic MTU
           mtu: 1500
           # (Optional) The vnic connection state (true/false)
@@ -492,7 +498,7 @@ node_types:
       gateway:
         default:
           # The name of the ESG to list interfaces of
-          esg_name: {}
+          esg_name: ""
           # The default gateway ip (next hop)
           dgw_ip: {}
           # (Optional) The vnic index of were the default gateway is reachable on
@@ -517,7 +523,7 @@ node_types:
       route:
         default:
           # The name of the ESG where the route should be added
-          esg_name: {}
+          esg_name: ""
           # The routes network in the x.x.x.x/yy format, e.g. 192.168.1.0/24
           network: {}
           # The next hop ip
@@ -546,7 +552,7 @@ node_types:
       pool:
         default:
           # The display name of a Edge Service Gateway used for DHCP
-          esg_name: {}
+          esg_name: ""
           # An IP range, e.g. 192.168.178.10-192.168.178.100 for this IP Pool
           ip_range: {}
           # The default gateway for the specified subnet
@@ -554,7 +560,7 @@ node_types:
           # The subnet mask (e.g. 255.255.255.0) for the specified subnet
           subnet_mask: {}
           # The DNS domain name (e.g. vmware.com) for the specified subnet
-          domain_name: {}
+          domain_name: ""
           # The primary DNS Server
           dns_server_1: {}
           # The secondary DNS Server
@@ -579,7 +585,7 @@ node_types:
       bind:
         default:
           # The display name of a Edge Service Gateway used for DHCP
-          esg_name: {}
+          esg_name: ""
           # (Optional, case vm_id/vnic_id) The VM managed object Id in vCenter for the VM to be attached to this binding entry
           vm_id: {}
           # (Optional, case vm_id/vnic_id) The vnic index for the VM interface attached to this binding entry (e.g. vnic0 has index 0)
@@ -587,7 +593,7 @@ node_types:
           # (Optional, case without vm_id/vnic_id) The MAC Address of the static binding
           mac: {}
           # The hostname for this static binding
-          hostname: {}
+          hostname: ""
           # The IP Address for this static binding
           ip: {}
           # The default gateway for the specified binding
@@ -595,7 +601,7 @@ node_types:
           # The subnet mask (e.g. 255.255.255.0) for the specified binding
           subnet_mask: {}
           # The DNS domain name (e.g. vmware.com) for the specified binding
-          domain_name: {}
+          domain_name: ""
           # The primary DNS Server
           dns_server_1: {}
           # The secondary DNS Server
@@ -620,7 +626,7 @@ node_types:
       section:
         default:
           # The name of the dfw section to be created
-          name: {}
+          name: ""
           # The type of the section. Allowed values are L2/L3/L3R
           type: L3R
     interfaces:
