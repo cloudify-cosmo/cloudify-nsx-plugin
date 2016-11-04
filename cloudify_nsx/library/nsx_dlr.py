@@ -39,3 +39,27 @@ def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip, int
                                           request_body_dict=dlr_interface_dict)
     common.check_raw_result(dlr_interface)
     return dlr_interface
+
+def esg_fw_default_set(client_session, esg_id, def_action, logging_enabled=None):
+    """
+    This function sets the default firewall rule to accept or deny
+    :param client_session: An instance of an NsxClient Session
+    :param esg_id: dlr uuid
+    :param def_action: Default firewall action, values are either accept or deny
+    :param logging_enabled: (Optional) Is logging enabled by default (true/false)
+    :return: True on success, False on failure
+    """
+    if not logging_enabled:
+        logging_enabled = 'false'
+
+    def_policy_body = client_session.extract_resource_body_example('defaultFirewallPolicy', 'update')
+    def_policy_body['firewallDefaultPolicy']['action'] = def_action
+    def_policy_body['firewallDefaultPolicy']['loggingEnabled'] = logging_enabled
+
+    cfg_result = client_session.update('defaultFirewallPolicy', uri_parameters={'edgeId': esg_id},
+                                  request_body_dict=def_policy_body)
+
+    if cfg_result['status'] == 204:
+        return True
+    else:
+        return False

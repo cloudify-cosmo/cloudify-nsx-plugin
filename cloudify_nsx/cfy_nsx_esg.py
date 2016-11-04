@@ -19,6 +19,7 @@ import pynsxv.library.nsx_dhcp as nsx_dhcp
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 import library.nsx_nat as nsx_nat
+import library.nsx_dlr as nsx_dlr
 
 
 @operation
@@ -78,9 +79,9 @@ def create(**kwargs):
 
         ctx.logger.info("checking firewall:" + str(firewall))
 
-        if not nsx_esg.esg_fw_default_set(
+        if not nsx_dlr.esg_fw_default_set(
             client_session,
-            edge_dict['name'],
+            resource_id,
             firewall['action'],
             firewall['logging']
         ):

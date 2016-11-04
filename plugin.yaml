@@ -197,6 +197,18 @@ node_types:
           uplink_subnet: {}
           # New dlr default gateway
           uplink_dgw: {}
+      validate_firewall:
+        default:
+          action:
+            default: accept
+          logging:
+            default: false
+      firewall:
+        default:
+          # accept or deny
+          action: accept
+          # true or false
+          logging: false
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

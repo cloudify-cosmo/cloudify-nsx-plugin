@@ -17,6 +17,7 @@ from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
+import library.nsx_dlr as nsx_dlr
 
 
 @operation
@@ -55,6 +56,22 @@ def create(**kwargs):
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
 
+    _, firewall = common.get_properties('firewall', kwargs)
+    if firewall:
+        _, validate = common.get_properties('validate_firewall', kwargs)
+        firewall = common.validate(firewall, validate, False)
+
+        ctx.logger.info("checking firewall:" + str(firewall))
+
+        if not nsx_dlr.esg_fw_default_set(
+            client_session,
+            resource_id,
+            firewall['action'],
+            firewall['logging']
+        ):
+            raise cfy_exc.NonRecoverableError(
+                "Can't change firewall rules"
+            )
 
 @operation
 def delete(**kwargs):

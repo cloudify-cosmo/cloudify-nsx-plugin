@@ -111,6 +111,11 @@ node_templates:
         dlr_pwd: SeCrEt010203!
         # compact, large, quadlarge, xlarge
         dlr_size: compact
+      firewall:
+        # accept or deny
+        action: accept
+        # true or false
+        logging: false
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
