@@ -55,7 +55,7 @@ def create(**kwargs):
 
     _, update_to = common.get_properties('update_to', kwargs)
     if update_to:
-        if 'name' in update_to:
+        if 'name' in update_to and update_to['name']:
             common.rename_vdsportgroupname(vccontent, resource_id,
                                            update_to['name'])
             resource_name = update_to['name']
