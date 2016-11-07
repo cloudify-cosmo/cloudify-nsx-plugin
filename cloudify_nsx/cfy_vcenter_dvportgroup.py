@@ -28,24 +28,25 @@ def create(**kwargs):
         'dvportgroup', kwargs
     )
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
 
-    if 'name' in dvportgroup:
+    if dvportgroup.get('name'):
         resource_name = dvportgroup['name']
         resource_id = nsx_utils.get_vdsportgroupid(
             vccontent, dvportgroup['name']
         )
-    elif 'id' in dvportgroup:
-        resource_id = dvportgroup['id']
+    elif resource_id:
         resource_name = common.get_vdsportgroupname(
-            vccontent, dvportgroup['id']
+            vccontent, resource_id
         )
     else:
         raise cfy_exc.NonRecoverableError(
-            "Validation failed, please provice id or name"
+            "Validation failed, please provide id or name"
         )
 
     if not resource_id:

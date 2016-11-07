@@ -29,9 +29,10 @@ def create(**kwargs):
 
     use_existed, edge_dict = common.get_properties('edge', kwargs)
 
-    if use_existed and 'id' in edge_dict:
-        ctx.instance.runtime_properties['resource_id'] = edge_dict['id']
-        name = common.get_edgegateway(client_session, edge_dict['id'])['name']
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+
+    if use_existed and resource_id:
+        name = common.get_edgegateway(client_session, resource_id)['name']
         edge_dict['name'] = name
         ctx.instance.runtime_properties['edge']['name'] = name
 

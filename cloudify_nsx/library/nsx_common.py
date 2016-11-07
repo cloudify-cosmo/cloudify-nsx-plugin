@@ -68,10 +68,17 @@ def validate(check_dict, validate_rules, use_existed):
 
 
 def __get_properties(name, kwargs):
-    properties_dict = ctx.instance.runtime_properties.get(name, {})
-    properties_dict.update(ctx.node.properties.get(name, {}))
+    properties_dict = ctx.node.properties.get(name, {})
     properties_dict.update(kwargs.get(name, {}))
+    properties_dict.update(ctx.instance.runtime_properties.get(name, {}))
     ctx.instance.runtime_properties[name] = properties_dict
+
+    if ctx.node.properties.get('resource_id'):
+        ctx.instance.runtime_properties['resource_id'] = ctx.node.properties['resource_id']
+
+    if kwargs.get('resource_id'):
+        ctx.instance.runtime_properties['resource_id'] = kwargs['resource_id']
+
     return __cleanup_prioperties(properties_dict)
 
 
@@ -114,10 +121,22 @@ def nsx_login(kwargs):
 
 
 def get_properties(name, kwargs):
-
     properties_dict = __get_properties(name, kwargs)
-    use_existed = properties_dict.get('use_external_resource', False)
+    use_existed = ctx.node.properties.get(
+        'use_external_resource', False
+    )
     return use_existed, properties_dict
+
+
+def get_properties_and_validate(name, kwargs):
+    use_existed, properties_dict = get_properties(name, kwargs)
+    if use_existed and ctx.instance.runtime_properties.get('resource_id'):
+        return use_existed, properties_dict
+    _, validate_dict = get_properties('validate_' + name, kwargs)
+    ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
+    return use_existed, validate(
+        properties_dict, validate_dict, use_existed
+    )
 
 
 def get_mo_by_id(content, searchedid, vim_type):

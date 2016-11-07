@@ -82,25 +82,25 @@ node_templates:
         username: { get_input: vcenter_user }
         password: { get_input: vcenter_password }
         host: { get_input: vcenter_ip }
+      use_external_resource: true
       resource_pool:
         name: Cluster
-        use_external_resource: True
 
   datastore:
     type: cloudify.vcenter.datastore
     properties:
       vcenter_auth: *vcenter_auth
+      use_external_resource: true
       datastore:
         name: datastore1
-        use_external_resource: True
 
   datacenter:
     type: cloudify.vcenter.datacenter
     properties:
       vcenter_auth: *vcenter_auth
+      use_external_resource: true
       datacenter:
         name: Datacenter
-        use_external_resource: True
 
   nsx_dlr:
     type: cloudify.nsx.dlr
@@ -178,16 +178,14 @@ node_templates:
     type: cloudify.vcenter.dvportgroup
     properties:
       vcenter_auth: *vcenter_auth
-      dvportgroup:
-        use_external_resource: True
+      use_external_resource: true
       update_to:
         name: { get_property: [ slave_lswith, switch, name ] }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            dvportgroup:
-              id: { get_attribute: [ slave_lswith, resource_dvportgroup_id ] }
+            resource_id: { get_attribute: [ slave_lswith, resource_dvportgroup_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: slave_lswith

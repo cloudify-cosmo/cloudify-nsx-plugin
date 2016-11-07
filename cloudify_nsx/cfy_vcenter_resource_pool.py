@@ -21,31 +21,23 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-
-    use_existed, resource_pool = common.get_properties('resource_pool', kwargs)
-    # use existing with id
-    if use_existed and 'id' in resource_pool:
-        ctx.instance.runtime_properties['resource_id'] = resource_pool['id']
+    use_existed, resource_pool = common.get_properties_and_validate(
+        'resource_pool', kwargs
+    )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)
         return
 
-    # credentials
-    vccontent = common.vcenter_state(kwargs)
-
-    if not resource_id:
-        # no explicit id, validate params
-        ctx.logger.info("checking resource pool: " + str(resource_pool))
-
-        _, validate = common.get_properties('validate', kwargs)
-        resource_pool = common.validate(resource_pool, validate, use_existed)
-
     if not use_existed:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
+
+    # credentials
+    vccontent = common.vcenter_state(kwargs)
+
     resource_id = nsx_utils.get_edgeresourcepoolmoid(
         vccontent, resource_pool['name']
     )
