@@ -72,25 +72,25 @@ node_templates:
         username: { get_input: vcenter_user }
         password: { get_input: vcenter_password }
         host: { get_input: vcenter_ip }
+      use_external_resource: true
       resource_pool:
         name: Cluster
-        use_external_resource: True
 
   datastore:
     type: cloudify.vcenter.datastore
     properties:
       vcenter_auth: *vcenter_auth
+      use_external_resource: true
       datastore:
         name: datastore1
-        use_external_resource: True
 
   datacenter:
     type: cloudify.vcenter.datacenter
     properties:
       vcenter_auth: *vcenter_auth
+      use_external_resource: true
       datacenter:
         name: Datacenter
-        use_external_resource: True
 
   esg:
     type: cloudify.nsx.esg

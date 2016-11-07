@@ -23,10 +23,6 @@ from cloudify import exceptions as cfy_exc
 def create(**kwargs):
     use_existed, switch_dict = common.get_properties('switch', kwargs)
 
-    # use existing with id
-    if use_existed and 'id' in switch_dict:
-        ctx.instance.runtime_properties['resource_id'] = switch_dict['id']
-
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)

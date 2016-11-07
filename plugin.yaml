@@ -44,9 +44,15 @@ node_types:
   cloudify.vcenter.resource_pool:
     derived_from: cloudify.nodes.ObjectStorage
     properties:
+      # reuse existed resource pool
+      use_external_resource:
+        default: true
+      # resource vcenter id
+      resource_id:
+        required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate:
+      validate_resource_pool:
         default:
           # we need name in any case of usage except predefined 'id'
           name:
@@ -56,10 +62,6 @@ node_types:
         default:
           # name of resource pool
           name: ""
-          # reuse existed resource pool
-          use_external_resource: True
-          # resource vcenter id
-          id: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -71,9 +73,15 @@ node_types:
   cloudify.vcenter.datastore:
     derived_from: cloudify.nodes.ObjectStorage
     properties:
+      # reuse existed resource pool
+      use_external_resource:
+        default: true
+      # resource vcenter id
+      resource_id:
+        required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate:
+      validate_datastore:
         default:
           # we need name in any case of usage except predefined 'id'
           name:
@@ -83,8 +91,6 @@ node_types:
         default:
           # name of datastore
           name: ""
-          # reuse existed datastore
-          use_external_resource: True
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -96,9 +102,15 @@ node_types:
   cloudify.vcenter.datacenter:
     derived_from: cloudify.nodes.Tier
     properties:
+      # reuse existed resource pool
+      use_external_resource:
+        default: true
+      # resource vcenter id
+      resource_id:
+        required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate:
+      validate_datacenter:
         default:
           # we need name in any case of usage except predefined 'id'
           name:
@@ -108,8 +120,6 @@ node_types:
         default:
           # name of datacenter
           name: ""
-          # reuse existed datacenter
-          use_external_resource: True
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -121,14 +131,16 @@ node_types:
   cloudify.vcenter.dvportgroup:
     derived_from: cloudify.nodes.Subnet
     properties:
+      # Supported only True - search port group in vcenter by id/name
+      use_external_resource:
+        default: true
+      # resource vcenter id
+      resource_id:
+        required: false
       vcenter_auth:
         type: vcenter_auth_type
       dvportgroup:
         default:
-          # Supported only True - search port group in vcenter by id/name
-          use_external_resource: True
-          # resource_id in vcenter
-          id: {}
           # name distributed port group
           name: ""
       update_to:
@@ -146,6 +158,12 @@ node_types:
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Network
     properties:
+      # Supported only True - search port group in vcenter by id/name
+      use_external_resource:
+        default: false
+      # resource nsx id
+      resource_id:
+        required: false
       validate:
         default:
           # we need name in any case of usage except predefined 'id'
@@ -168,10 +186,6 @@ node_types:
           name: ""
           # (Optional) Control Plane Mode, uses the Transport Zone default if not specified
           mode: {}
-          # reuse existed datacenter
-          use_external_resource: false
-          # id in case reuse
-          id: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
