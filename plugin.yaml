@@ -235,6 +235,22 @@ node_types:
           action: accept
           # true or false
           logging: false
+      validate_dhcp:
+        default:
+          enabled:
+            default: true
+          syslog_enabled:
+            default: false
+          syslog_level:
+            default: INFO
+      dhcp:
+        default:
+          # True/False The desired state of the DHCP Server
+          enabled: true
+          # ('true'/'false') The desired logging state of the DHCP Server
+          syslog_enabled: false
+          # The logging level for DHCP on this Edge (INFO/WARNING/etc.)
+          syslog_level: INFO
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -242,12 +258,25 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_dlr.delete
 
+
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
     derived_from: cloudify.nodes.Port
     properties:
       nsx_auth:
         type: nsx_auth_type
+      validate_interface:
+        default:
+          dlr_id:
+            required: true
+          interface_ls_id:
+            required: true
+          interface_ip:
+            required: true
+          interface_subnet:
+            required: true
+          name:
+            default: ""
       interface:
         default:
           # dlr uuid
@@ -266,6 +295,35 @@ node_types:
           implementation: nsx.cloudify_nsx.cfy_nsx_dlr_interface.create
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_dlr_interface.delete
+
+  # distributed router dhcp relay, we need separate type because we can
+  # change it only after set all settings for interfaces
+  cloudify.nsx.dlr_dhcp_relay:
+    derived_from: cloudify.nodes.Port
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      validate_relay:
+        default:
+          dlr_id:
+            required: true
+          relayServer:
+            default: {}
+          relayAgents:
+            default: {}
+      relay:
+        default:
+          # dlr uuid
+          dlr_id: {}
+          # relay settings
+          relayServer: {}
+          relayAgents: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_relay.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_relay.delete
 
   # distributed logical routers gateway
   cloudify.nsx.dlr_dgw:

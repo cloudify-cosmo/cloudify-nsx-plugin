@@ -66,7 +66,7 @@ def delete(**kwargs):
                                      pool_dict['esg_name'],
                                      resource_id):
         raise cfy_exc.NonRecoverableError(
-            "Ca't drop dhcp pool"
+            "Can't drop dhcp pool"
         )
 
     ctx.instance.runtime_properties['resource_id'] = None

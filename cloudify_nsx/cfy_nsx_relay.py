@@ -14,15 +14,14 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import pynsxv.library.nsx_dlr as nsx_router
 import library.nsx_dlr as cfy_dlr
 import library.nsx_common as common
 
 
 @operation
 def create(**kwargs):
-    use_existed, interface = common.get_properties_and_validate(
-        'interface', kwargs
+    use_existed, relay_dict = common.get_properties_and_validate(
+        'relay', kwargs
     )
 
     if use_existed:
@@ -32,24 +31,23 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = cfy_dlr.dlr_add_interface(client_session,
-                                           interface['dlr_id'],
-                                           interface['interface_ls_id'],
-                                           interface['interface_ip'],
-                                           interface['interface_subnet'],
-                                           interface.get('name'))
+    cfy_dlr.update_dhcp_relay(
+        client_session,
+        relay_dict['dlr_id'],
+        relay_dict['relayServer'],
+        relay_dict['relayAgents']
+    )
 
-    resource_id = result_raw['body']['interfaces']['interface']['index']
-    location = result_raw['body']['interfaces']['interface']['name']
-    ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
+    resource_id = relay_dict['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+    ctx.logger.info("created %s" % resource_id)
 
 
 @operation
 def delete(**kwargs):
-    use_existed, interface = common.get_properties('interface', kwargs)
+    use_existed, relay_dict = common.get_properties(
+        'relay', kwargs
+    )
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -63,13 +61,9 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_router.dlr_del_interface(
-        client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
-        resource_id
-    )
+    ctx.logger.info("checking %s" % resource_id)
 
-    common.check_raw_result(result_raw)
+    client_session.delete('dhcpRelay', uri_parameters={'edgeId': resource_id})
 
     ctx.logger.info("delete %s" % resource_id)
 

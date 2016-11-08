@@ -73,6 +73,24 @@ def create(**kwargs):
                 "Can't change firewall rules"
             )
 
+    _, dhcp = common.get_properties('dhcp', kwargs)
+    if dhcp:
+        _, validate = common.get_properties('validate_dhcp', kwargs)
+        dhcp = common.validate(dhcp, validate, False)
+
+        ctx.logger.info("checking dhcp:" + str(dhcp))
+
+        if not nsx_dlr.dhcp_server(
+            client_session,
+            resource_id,
+            dhcp['enabled'],
+            dhcp['syslog_enabled'],
+            dhcp['syslog_level']
+        ):
+            raise cfy_exc.NonRecoverableError(
+                "Can't change dhcp rules"
+            )
+
 
 @operation
 def delete(**kwargs):
