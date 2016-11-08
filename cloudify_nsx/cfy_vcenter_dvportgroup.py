@@ -24,7 +24,7 @@ def create(**kwargs):
     # credentials
     vccontent = common.vcenter_state(kwargs)
 
-    use_existed, dvportgroup = common.get_properties(
+    use_existed, dvportgroup = common.get_properties_and_validate(
         'dvportgroup', kwargs
     )
 

@@ -139,6 +139,11 @@ node_types:
         required: false
       vcenter_auth:
         type: vcenter_auth_type
+      validate_dvportgroup:
+        default:
+          # we need name in any case of usage except predefined 'id'
+          name:
+            required: true
       dvportgroup:
         default:
           # name distributed port group
@@ -164,7 +169,7 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate:
+      validate_switch:
         default:
           # we need name in any case of usage except predefined 'id'
           name:
