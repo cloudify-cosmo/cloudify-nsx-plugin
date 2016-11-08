@@ -21,20 +21,35 @@ import time
 from pyVmomi import vim
 
 
-def __cleanup_prioperties(properties_dict):
+def __cleanup_prioperties(value):
     """we need such because nsxclient does not support unicode strings"""
+    if isinstance(value, (unicode, int)):
+        return str(value)
+    if isinstance(value, dict):
+        return __cleanup_prioperties_dict(value)
+    if isinstance(value, list):
+        return __cleanup_prioperties_list(value)
+    return value
+
+
+def __cleanup_prioperties_dict(properties_dict):
     result = {}
 
     for key in properties_dict.iterkeys():
         value = properties_dict[key]
         if isinstance(key, (unicode, int)):
             key = str(key)
-        if isinstance(value, (unicode, int)):
-            value = str(value)
-        # nsxclient does not support unicode values
-        if isinstance(value, dict):
-            value = __cleanup_prioperties(value)
-        result[key] = value
+        result[key] = __cleanup_prioperties(value)
+
+    return result
+
+
+def __cleanup_prioperties_list(properties_list):
+    result = []
+
+    for value in properties_list:
+        result.append(__cleanup_prioperties(value))
+
     return result
 
 
@@ -73,13 +88,20 @@ def __get_properties(name, kwargs):
     properties_dict.update(ctx.instance.runtime_properties.get(name, {}))
     ctx.instance.runtime_properties[name] = properties_dict
 
-    if ctx.node.properties.get('resource_id'):
-        ctx.instance.runtime_properties['resource_id'] = ctx.node.properties['resource_id']
+    # update resource_id
+    resource_id = None
+    if not ctx.instance.runtime_properties.get('resource_id'):
+        resource_id = None
+        if ctx.node.properties.get('resource_id'):
+            resource_id = ctx.node.properties['resource_id']
 
-    if kwargs.get('resource_id'):
-        ctx.instance.runtime_properties['resource_id'] = kwargs['resource_id']
+        if kwargs.get('resource_id'):
+            resource_id = kwargs['resource_id']
 
-    return __cleanup_prioperties(properties_dict)
+        if resource_id:
+            ctx.instance.runtime_properties['resource_id'] = resource_id
+
+    return __cleanup_prioperties_dict(properties_dict)
 
 
 def vcenter_state(kwargs):
@@ -95,6 +117,7 @@ def vcenter_state(kwargs):
 
 def nsx_login(kwargs):
     nsx_auth = __get_properties('nsx_auth', kwargs)
+
     ctx.logger.info("NSX login...")
     user = nsx_auth.get('username')
     password = nsx_auth.get('password')

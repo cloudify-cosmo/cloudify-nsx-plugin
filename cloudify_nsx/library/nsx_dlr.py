@@ -76,3 +76,86 @@ def esg_fw_default_set(client_session, esg_id, def_action,
         return True
     else:
         return False
+
+
+def dhcp_server(client_session, esg_id, enabled=None, syslog_enabled=None,
+                syslog_level=None):
+    """
+    This function enables/disables the DHCP server on an Edge Gateway
+    and sets the logging status and Level
+
+    :type client_session: nsxramlclient.client.NsxClient
+    :param client_session: A nsxramlclient session Object
+    :type esg_id: str
+    :param esg_id: dlr uuid
+    :type enabled: bool
+    :param enabled: True/False The desired state of the DHCP Server
+    :type syslog_enabled: str
+    :param syslog_enabled: ('true'/'false') The desired logging state of
+      the DHCP Server
+    :type syslog_level: str
+    :param syslog_level: The logging level for DHCP on this Edge
+      (INFO/WARNING/etc.)
+    :param relay: dhcp relay settings for dlr
+    :rtype: bool
+    :return: Return True on success of the operation
+    """
+    change_needed = False
+
+    current_dhcp_config = client_session.read(
+        'dhcp', uri_parameters={'edgeId': esg_id})['body']
+
+    new_dhcp_config = current_dhcp_config
+
+    if enabled:
+        if current_dhcp_config['dhcp']['enabled'] == 'false':
+            new_dhcp_config['dhcp']['enabled'] = 'true'
+            change_needed = True
+    else:
+        if current_dhcp_config['dhcp']['enabled'] == 'true':
+            new_dhcp_config['dhcp']['enabled'] = 'false'
+            change_needed = True
+
+    if syslog_enabled == 'true':
+        if current_dhcp_config['dhcp']['logging']['enable'] == 'false':
+            new_dhcp_config['dhcp']['logging']['enable'] = 'true'
+            change_needed = True
+    elif syslog_enabled == 'false':
+        if current_dhcp_config['dhcp']['logging']['enable'] == 'true':
+            new_dhcp_config['dhcp']['logging']['enable'] = 'false'
+            change_needed = True
+
+    if syslog_level:
+        if current_dhcp_config['dhcp']['logging']['logLevel'] != syslog_level:
+            new_dhcp_config['dhcp']['logging']['logLevel'] = syslog_level
+            change_needed = True
+
+    if not change_needed:
+        return True
+    else:
+        result = client_session.update('dhcp',
+                                       uri_parameters={'edgeId': esg_id},
+                                       request_body_dict=new_dhcp_config)
+        if result['status'] == 204:
+            return True
+        else:
+            return False
+
+
+def update_dhcp_relay(client_session, esg_id, relayServer=None,
+                      relayAgents=None):
+    current_relay_config = client_session.extract_resource_body_example(
+        'dhcpRelay', 'update'
+    )
+
+    if relayServer:
+        current_relay_config['relay']['relayServer'] = relayServer
+    if relayAgents:
+        current_relay_config['relay']['relayAgents'] = relayAgents
+
+    raw_result = client_session.update(
+        'dhcpRelay', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=current_relay_config
+    )
+
+    common.check_raw_result(raw_result)

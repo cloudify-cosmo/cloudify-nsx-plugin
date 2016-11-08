@@ -116,6 +116,10 @@ node_templates:
         action: accept
         # true or false
         logging: false
+      dhcp:
+        enabled: true
+        syslog_enabled: false
+        syslog_level: INFO
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -173,6 +177,28 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: nsx_dlr
+
+  dhcp_relay:
+    type: cloudify.nsx.dlr_dhcp_relay
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            relay:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              relayServer:
+                ipAddress: 8.8.8.8
+              relayAgents:
+                relayAgent:
+                  vnicIndex: { get_attribute: [ interface, resource_id ] }
+                  giAddress: { get_attribute: [ interface, interface, interface_ip ] }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+      - type: cloudify.relationships.connected_to
+        target: interface
 
   dvportgroup:
     type: cloudify.vcenter.dvportgroup

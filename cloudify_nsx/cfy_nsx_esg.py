@@ -15,7 +15,6 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_esg as nsx_esg
-import pynsxv.library.nsx_dhcp as nsx_dhcp
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 import library.nsx_nat as nsx_nat
@@ -97,9 +96,9 @@ def create(**kwargs):
 
         ctx.logger.info("checking dhcp:" + str(dhcp))
 
-        if not nsx_dhcp.dhcp_server(
+        if not nsx_dlr.dhcp_server(
             client_session,
-            edge_dict['name'],
+            resource_id,
             dhcp['enabled'],
             dhcp['syslog_enabled'],
             dhcp['syslog_level']
