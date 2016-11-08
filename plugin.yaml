@@ -355,10 +355,17 @@ node_types:
     properties:
       nsx_auth:
         type: nsx_auth_type
+      validate_gateway:
+        default:
+          dlr_id:
+            required: true
+          address:
+            required: true
       gateway:
         default:
+          dlr_id: ""
           # default gateway ip address
-          uplink_dgw: {}
+          address: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -464,28 +471,54 @@ node_types:
     properties:
       nsx_auth:
         type: nsx_auth_type
+      validate_rule:
+        default:
+          esg_id:
+            required: true
+          action:
+            required: true
+          originalAddress:
+            required: true
+          translatedAddress:
+            required: true
+          vnic:
+            set_none: true
+          ruleTag:
+            set_none: true
+          loggingEnabled:
+            default: false
+          enabled:
+            default: true
+          description:
+            set_none: true
+          protocol:
+            default: any
+          translatedPort:
+            default: any
+          originalPort:
+            default: any
       rule:
         default:
           # id of esg
-          esg_id: {}
+          esg_id: ""
           # dnat/snat
-          action: {}
+          action: ""
           # originalAddress
-          originalAddress: {}
+          originalAddress: ""
           # translatedAddress
-          translatedAddress: {}
+          translatedAddress: ""
           # Optional. vnic
-          vnic: {}
+          vnic: ""
           # Optional. Can be used to specify user-controlled ids on VSE.
           # Valid inputs 65537-131072. If not specified, vShield manager
           # will generate ruleId
-          ruleTag: {}
+          ruleTag: ""
           # Optional. Default is false
           loggingEnabled: false
           # Optional. Default is true
           enabled: true
           # Optional
-          description: {}
+          description: ""
           # Optional. Default is "any". This tag is not supported for SNAT rule
           protocol: any
           # Optional. Default is "any". This tag is not supported for SNAT rule
@@ -508,11 +541,11 @@ node_types:
       rule:
         default:
           # id of esg
-          esg_id: {}
+          esg_id: ""
           # Optional. This can be used to specify user controlled ids
           # on VSE. The inputs here should be 1-65536. If not specified,
           # VSM will generate ruleId
-          ruleTag: {}
+          ruleTag: ""
           # Optional
           name: ""
           # Optional. Default behaviour is like "any". ipsetId or
@@ -536,7 +569,7 @@ node_types:
           # Optional. Defaults to false
           loggingEnabled: true
           # Optional
-          description: {}
+          description: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

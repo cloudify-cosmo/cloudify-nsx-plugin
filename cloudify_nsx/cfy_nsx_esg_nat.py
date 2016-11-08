@@ -21,7 +21,9 @@ import library.nsx_nat as nsx_nat
 
 @operation
 def create(**kwargs):
-    use_existed, nat_dict = common.get_properties('rule', kwargs)
+    use_existed, nat_dict = common.get_properties_and_validate(
+        'rule', kwargs
+    )
 
     if use_existed:
         ctx.logger.info("Used existed")

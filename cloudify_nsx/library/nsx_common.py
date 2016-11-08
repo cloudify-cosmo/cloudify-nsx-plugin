@@ -60,6 +60,7 @@ def validate(check_dict, validate_rules, use_existed):
         required_value = validate.get('required', False)
         external_use_value = validate.get('external_use', False)
         default_value = validate.get('default', False)
+        set_none = validate.get('set_none', False)
         # we can have value == false and default == true, so only check
         # field in list
         if 'default' in validate and name not in check_dict:
@@ -76,6 +77,9 @@ def validate(check_dict, validate_rules, use_existed):
             raise cfy_exc.NonRecoverableError(
                 "don't have value for %s " % name
             )
+
+        if set_none and not value:
+            value = None
 
         result[name] = value
 
