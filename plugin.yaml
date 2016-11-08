@@ -199,30 +199,54 @@ node_types:
     properties:
       nsx_auth:
         type: nsx_auth_type
+      validate_router:
+        default:
+          name:
+            required: true
+          dlr_pwd:
+            required: true
+          dlr_size:
+            required: true
+          datacentermoid:
+            required: true
+          datastoremoid:
+            required: true
+          resourcepoolid:
+            required: true
+          ha_ls_id:
+            required: true
+          uplink_ls_id:
+            required: true
+          uplink_ip:
+            required: true
+          uplink_subnet:
+            required: true
+          uplink_dgw:
+            required: true
       router:
         default:
           # The name that will be assigned to the new dlr
           name: ""
           # The admin password of new dlr
-          dlr_pwd: {}
+          dlr_pwd: ""
           # The DLR Control VM size
-          dlr_size: {}
+          dlr_size: ""
           # The vCenter DataCenter ID where dlr control vm will be deployed
-          datacentermoid: {}
+          datacentermoid: ""
           # The vCenter datastore ID where dlr control vm will be deployed
-          datastoremoid: {}
+          datastoremoid: ""
           # The vCenter Cluster where dlr control vm will be deployed
-          resourcepoolid: {}
+          resourcepoolid: ""
           # New dlr ha logical switch id or vds port group
-          ha_ls_id: {}
+          ha_ls_id: ""
           # New dlr uplink logical switch id or vds port group
-          uplink_ls_id: {}
+          uplink_ls_id: ""
           # New dlr uplink ip@
-          uplink_ip: {}
+          uplink_ip: ""
           # New dlr uplink subnet
-          uplink_subnet: {}
+          uplink_subnet: ""
           # New dlr default gateway
-          uplink_dgw: {}
+          uplink_dgw: ""
       validate_firewall:
         default:
           action:

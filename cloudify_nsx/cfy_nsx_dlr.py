@@ -22,12 +22,14 @@ import library.nsx_dlr as nsx_dlr
 
 @operation
 def create(**kwargs):
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
-    use_existed, router_dict = common.get_properties('router', kwargs)
+    use_existed, router_dict = common.get_properties_and_validate(
+        'router', kwargs
+    )
 
     ctx.logger.info("checking %s" % router_dict["name"])
+
+    # credentials
+    client_session = common.nsx_login(kwargs)
 
     resource_id, _ = nsx_router.dlr_read(client_session, router_dict["name"])
     if use_existed:
