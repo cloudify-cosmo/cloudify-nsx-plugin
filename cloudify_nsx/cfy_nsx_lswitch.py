@@ -21,7 +21,9 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, switch_dict = common.get_properties('switch', kwargs)
+    use_existed, switch_dict = common.get_properties_and_validate(
+        'switch', kwargs
+    )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
@@ -35,9 +37,6 @@ def create(**kwargs):
     if not resource_id:
         # no explicit id, validate params
         ctx.logger.info("checking switch: " + str(switch_dict))
-
-        _, validate = common.get_properties('validate', kwargs)
-        switch_dict = common.validate(switch_dict, validate, use_existed)
 
         resource_id, switch_params = nsx_logical_switch.logical_switch_read(
             client_session, switch_dict["name"]
