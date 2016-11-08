@@ -23,7 +23,9 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    use_existed, gateway = common.get_properties('gateway', kwargs)
+    use_existed, gateway = common.get_properties_and_validate(
+        'gateway', kwargs
+    )
 
     if use_existed:
         ctx.logger.info("Used existed")
