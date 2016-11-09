@@ -280,6 +280,35 @@ node_types:
           syslog_enabled: false
           # The logging level for DHCP on this Edge (INFO/WARNING/etc.)
           syslog_level: INFO
+      validate_routing:
+        default:
+          enabled:
+            default: true
+          routingGlobalConfig:
+            sub:
+              routerId:
+                set_none: true
+              ecmp:
+                default: false
+              logging:
+                sub:
+                 logLevel:
+                   default: info
+                enable:
+                   default: false
+      routing:
+        default:
+          enabled: true
+          routingGlobalConfig:
+            # Required when dynamic routing protocols like OSPF,
+            # or BGP is configured
+            routerId: ''
+            # Optional. When absent, enable=false and logLevel=INFO
+            logging:
+              logLevel: info
+              enable: false
+            # Optional. Defaults to false.
+            ecmp: false
       validate_ospf:
         default:
           enabled:
@@ -290,6 +319,10 @@ node_types:
             default: false
           redistribution:
             default: false
+          protocolAddress:
+            set_none: true
+          forwardingAddress:
+            set_none: true
       ospf:
         default:
           # When not specified, it will be treated as false, When false,
@@ -303,12 +336,48 @@ node_types:
           gracefulRestart: false
           # Optional. Defaults to false.
           redistribution: false
+          # ipAddress on one of the uplink interfaces,
+          # only for enabled and use logical switch as ospf
+          protocolAddress: ""
+          # ipAddress on the same subnet as the forwardingAddress,
+          # only for enabled and use logical switch as ospf
+          forwardingAddress: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_nsx_dlr.create
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_dlr.delete
+
+  # distributed logical routers interface routing ip prefixes
+  # Optional. Required only if user wants to define redistribution
+  # rules in dynamic routing protocols like ospf, bgp
+  cloudify.nsx.dlr_routing_ip_prefix:
+    derived_from: cloudify.nodes.Port
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      validate_area:
+        default:
+          dlr_id:
+            required: true
+          name:
+            required: true
+          ipAddress:
+            required: true
+      prefix:
+        default:
+          dlr_id: ""
+          # All the defined ipPrefix must have unique names
+          name: ""
+          # ip address like 10.112.196.160/24
+          ipAddress: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
 
   # distributed logical routers interface ospf areas
   cloudify.nsx.ospf_areas:
@@ -455,7 +524,7 @@ node_types:
             connected: false
           # Mandatory. Valid values are deny|permit
           action: ""
-     interfaces:
+    interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx.cloudify_nsx.cfy_stub.create
