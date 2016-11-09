@@ -280,6 +280,29 @@ node_types:
           syslog_enabled: false
           # The logging level for DHCP on this Edge (INFO/WARNING/etc.)
           syslog_level: INFO
+      validate_ospf:
+        default:
+          enabled:
+            default: false
+          defaultOriginate:
+            default: false
+          gracefulRestart:
+            default: false
+          redistribution:
+            default: false
+      ospf:
+        default:
+          # When not specified, it will be treated as false, When false,
+          # it will delete the existing config
+          enabled: false
+          # default is false, user can configure edge router to publish
+          # default route by setting it to true.
+          defaultOriginate: false
+          # default is false, user can enable graceful restart by
+          # setting it to true. Its a newly added optional field.
+          gracefulRestart: false
+          # Optional. Defaults to false.
+          redistribution: false
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -287,6 +310,157 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_dlr.delete
 
+  # distributed logical routers interface ospf areas
+  cloudify.nsx.ospf_areas:
+    derived_from: cloudify.nodes.Port
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      validate_area:
+        default:
+          dlr_id:
+            required: true
+          areaId:
+            required: true
+          type:
+            required: true
+            values:
+              - normal
+              - nssa
+          authentication:
+            set_none: true
+            sub:
+              type:
+                required: true
+                values:
+                  - none
+                  - password
+                  - md5
+              value:
+                required: true
+      area:
+        default:
+          # dlr uuid
+          dlr_id: ""
+          # Mandatory and unique. Valid values are 0-4294967295
+          areaId: ""
+          # Optional. Default is normal. Valid inputs are normal, nssa
+          type: normal
+          # Optional. When not specified, its "none" authentication.
+          authentication:
+            # Valid values are none, password, md5
+            type: password
+            # value for authentication
+            value: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
+
+  # distributed logical routers interface ospf interfaces
+  cloudify.nsx.ospf_interfaces:
+    derived_from: cloudify.nodes.Port
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      validate_interface:
+        default:
+          dlr_id:
+            required: true
+          areaId:
+            required: true
+          vnic:
+            required: true
+          helloInterval:
+            default: 10
+          deadInterval:
+            default: 40
+          priority:
+            default: 128
+          cost:
+            set_none: true
+      interface:
+        default:
+          # dlr uuid
+          dlr_id: ""
+          # Mandatory and unique. Valid values are 0-4294967295
+          areaId: ""
+          # NIC id
+          vnic: ""
+          # Optional. Default 10 sec. Valid values are 1-255
+          helloInterval: 10
+          # Optional. Default 40 sec. Valid values are 1-65535
+          deadInterval: 40
+          # Optional. Default 128. Valid values are 0-255
+          priority: 128
+          # Optional. Auto based on interface speed. Valid values are 1-65535
+          cost: 10
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
+
+  # distributed logical routers interface ospf redistribution rule
+  cloudify.nsx.ospf_redistribution_rule:
+    derived_from: cloudify.nodes.Port
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      validate_rule:
+        default:
+          dlr_id:
+            required: true
+          prefixName:
+            set_none: true
+            default: any
+          from:
+            set_none: true
+            sub:
+              isis:
+                default: false
+              ospf:
+                default:  false
+              bgp:
+                default: false
+              static:
+                default: false
+              connected:
+                default: false
+          action:
+            required: true
+            values:
+              - deny
+              - permit
+      rule:
+        default:
+          # dlr uuid
+          dlr_id: ""
+          # Optional. Default is "any". prefixName used here should be
+          # defined in the routingGlobalConfig->ipPrefixes
+          prefixName: any
+          from:
+            # Optional. Defaults to false
+            isis: false
+            # Optional. Defaults to false
+            ospf: false
+            # Optional. Defaults to false
+            bgp: false
+            # Optional. Defaults to false
+            static: false
+            # Optional. Defaults to false
+            connected: false
+          # Mandatory. Valid values are deny|permit
+          action: ""
+     interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
 
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
@@ -472,7 +646,7 @@ node_types:
 
   # edge services gateways interfaces
   cloudify.nsx.esg_nat:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.VirtualIP
     properties:
       nsx_auth:
         type: nsx_auth_type
