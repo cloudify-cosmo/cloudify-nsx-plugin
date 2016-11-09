@@ -538,6 +538,39 @@ node_types:
     properties:
       nsx_auth:
         type: nsx_auth_type
+      validate_rule:
+        default:
+          esg_id:
+            required: true
+          ruleTag:
+            set_none: true
+          name:
+            set_none: true
+          source:
+            set_none: true
+          destination:
+            set_none: true
+          application:
+            set_none: true
+          matchTranslated:
+            default: false
+          direction:
+            values:
+              - in
+              - out
+            set_none: true
+          action:
+            required: true
+            values:
+              - accept
+              - deny
+              - reject
+          enabled:
+            default: true
+          loggingEnabled:
+            default: false
+          description:
+            set_none: true
       rule:
         default:
           # id of esg

@@ -210,7 +210,6 @@ node_templates:
         action: accept
         description: Some Firewall Rule
         direction: in
-        ruleTag: ''
         application: any
     interfaces:
       cloudify.interfaces.lifecycle:
