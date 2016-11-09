@@ -22,7 +22,9 @@ import library.nsx_common as common
 @operation
 def create(**kwargs):
 
-    use_existed, firewall_dict = common.get_properties('rule', kwargs)
+    use_existed, firewall_dict = common.get_properties_and_validate(
+        'rule', kwargs
+    )
 
     if use_existed:
         ctx.logger.info("Used existed")

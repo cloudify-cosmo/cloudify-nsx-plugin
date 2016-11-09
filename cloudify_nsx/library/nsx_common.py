@@ -61,6 +61,7 @@ def validate(check_dict, validate_rules, use_existed):
         external_use_value = validate.get('external_use', False)
         default_value = validate.get('default', False)
         set_none = validate.get('set_none', False)
+        values = validate.get('values', False)
         # we can have value == false and default == true, so only check
         # field in list
         if 'default' in validate and name not in check_dict:
@@ -80,7 +81,15 @@ def validate(check_dict, validate_rules, use_existed):
 
         if set_none and not value:
             value = None
-
+        else:
+            # looks as we have some list of posible values
+            if values:
+                if value not in values:
+                    raise cfy_exc.NonRecoverableError(
+                        "Wrong value %s=%s not in %s" % (
+                            name, str(value), str(values)
+                        )
+                    )
         result[name] = value
 
     return result

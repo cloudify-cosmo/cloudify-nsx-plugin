@@ -36,6 +36,7 @@ def create(**kwargs):
         ctx.instance.runtime_properties['resource_id'] = resource_id
         ctx.logger.info("Used existed %s" % resource_id)
         return
+
     if resource_id:
         raise cfy_exc.NonRecoverableError(
             "We already have such router"
