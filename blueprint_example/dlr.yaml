@@ -120,6 +120,8 @@ node_templates:
         enabled: true
         syslog_enabled: false
         syslog_level: INFO
+      ospf:
+        enabled: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
