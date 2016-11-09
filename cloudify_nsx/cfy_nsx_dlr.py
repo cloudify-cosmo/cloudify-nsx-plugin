@@ -31,68 +31,76 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    resource_id, _ = nsx_router.dlr_read(client_session, router_dict["name"])
-    if use_existed:
-        ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("Used existed %s" % resource_id)
-        return
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
 
-    if resource_id:
+    if not use_existed and not resource_id:
+        resource_id, _ = nsx_router.dlr_read(
+            client_session, router_dict["name"]
+        )
+        if use_existed:
+            ctx.instance.runtime_properties['resource_id'] = resource_id
+            ctx.logger.info("Used existed %s" % resource_id)
+        elif resource_id:
+            raise cfy_exc.NonRecoverableError(
+                "We already have such router"
+            )
+    if not resource_id:
+        resource_id, location = nsx_router.dlr_create(
+            client_session,
+            router_dict['name'],
+            router_dict['dlr_pwd'],
+            router_dict['dlr_size'],
+            router_dict['datacentermoid'],
+            router_dict['datastoremoid'],
+            router_dict['resourcepoolid'],
+            router_dict['ha_ls_id'],
+            router_dict['uplink_ls_id'],
+            router_dict['uplink_ip'],
+            router_dict['uplink_subnet'],
+            router_dict['uplink_dgw'])
+        ctx.instance.runtime_properties['resource_id'] = resource_id
+        ctx.instance.runtime_properties['location'] = location
+        ctx.logger.info("created %s | %s" % (resource_id, location))
+
+    _, firewall = common.get_properties_and_validate('firewall', kwargs)
+    if not nsx_dlr.esg_fw_default_set(
+        client_session,
+        resource_id,
+        firewall['action'],
+        firewall['logging']
+    ):
         raise cfy_exc.NonRecoverableError(
-            "We already have such router"
+            "Can't change firewall rules"
         )
 
-    resource_id, location = nsx_router.dlr_create(
+    _, dhcp = common.get_properties_and_validate('dhcp', kwargs)
+
+    if not nsx_dlr.dhcp_server(
         client_session,
-        router_dict['name'],
-        router_dict['dlr_pwd'],
-        router_dict['dlr_size'],
-        router_dict['datacentermoid'],
-        router_dict['datastoremoid'],
-        router_dict['resourcepoolid'],
-        router_dict['ha_ls_id'],
-        router_dict['uplink_ls_id'],
-        router_dict['uplink_ip'],
-        router_dict['uplink_subnet'],
-        router_dict['uplink_dgw'])
-    ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+        resource_id,
+        dhcp['enabled'],
+        dhcp['syslog_enabled'],
+        dhcp['syslog_level']
+    ):
+        raise cfy_exc.NonRecoverableError(
+            "Can't change dhcp rules"
+        )
 
-    _, firewall = common.get_properties('firewall', kwargs)
-    if firewall:
-        _, validate = common.get_properties('validate_firewall', kwargs)
-        firewall = common.validate(firewall, validate, False)
+    _, routing = common.get_properties_and_validate('routing', kwargs)
+    nsx_dlr.routing_global_config(
+        client_session, resource_id,
+        routing['enabled'], routing['routingGlobalConfig'],
+        routing['staticRouting']
+    )
 
-        ctx.logger.info("checking firewall:" + str(firewall))
+    _, ospf = common.get_properties_and_validate('ospf', kwargs)
 
-        if not nsx_dlr.esg_fw_default_set(
-            client_session,
-            resource_id,
-            firewall['action'],
-            firewall['logging']
-        ):
-            raise cfy_exc.NonRecoverableError(
-                "Can't change firewall rules"
-            )
-
-    _, dhcp = common.get_properties('dhcp', kwargs)
-    if dhcp:
-        _, validate = common.get_properties('validate_dhcp', kwargs)
-        dhcp = common.validate(dhcp, validate, False)
-
-        ctx.logger.info("checking dhcp:" + str(dhcp))
-
-        if not nsx_dlr.dhcp_server(
-            client_session,
-            resource_id,
-            dhcp['enabled'],
-            dhcp['syslog_enabled'],
-            dhcp['syslog_level']
-        ):
-            raise cfy_exc.NonRecoverableError(
-                "Can't change dhcp rules"
-            )
+    nsx_dlr.ospf_create(
+        client_session, resource_id,
+        ospf['enabled'], ospf['defaultOriginate'],
+        ospf['gracefulRestart'], ospf['redistribution'],
+        ospf['protocolAddress'], ospf['forwardingAddress']
+    )
 
 
 @operation

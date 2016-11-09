@@ -284,6 +284,18 @@ node_types:
         default:
           enabled:
             default: true
+          staticRouting:
+            set_none: true
+            sub:
+              defaultRoute:
+                set_none: true
+                sub:
+                  gatewayAddress:
+                    set_none: true
+                  vnic:
+                    default: 0
+                  mtu:
+                    default: 1500
           routingGlobalConfig:
             sub:
               routerId:
@@ -299,6 +311,16 @@ node_types:
       routing:
         default:
           enabled: true
+          staticRouting:
+            # Optional, if no default routes needs to be configured
+            defaultRoute:
+              gatewayAddress: ''
+              # uplink nic
+              vnic: 0
+              # Optional. Valid value:smaller than the MTU set on the
+              # interface. Default will be the MTU of the interface on
+              # which this route is configured
+              mtu: 1500
           routingGlobalConfig:
             # Required when dynamic routing protocols like OSPF,
             # or BGP is configured

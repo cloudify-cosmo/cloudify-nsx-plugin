@@ -159,3 +159,73 @@ def update_dhcp_relay(client_session, esg_id, relayServer=None,
     )
 
     common.check_raw_result(raw_result)
+
+
+def routing_global_config(client_session, esg_id, enabled,
+                          routingGlobalConfig=None, staticRouting=None):
+
+    routing = {
+        'routing': {}
+    }
+
+    if enabled:
+        routing['routing']['enabled'] = "true"
+    else:
+        routing['routing']['enabled'] = "true"
+
+    if routingGlobalConfig:
+        routing['routing']['routingGlobalConfig'] = routingGlobalConfig
+
+    if staticRouting:
+        routing['routing']['staticRouting'] = staticRouting
+
+    raw_result = client_session.update(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=routing
+    )
+
+    common.check_raw_result(raw_result)
+
+
+def ospf_create(client_session, esg_id, enabled, defaultOriginate,
+                gracefulRestart, redistribution, protocolAddress,
+                forwardingAddress):
+    current_ospf = {
+        'ospf': {
+            'redistribution': {
+            }
+        }
+    }
+
+    if enabled:
+        current_ospf['ospf']['enabled'] = 'true'
+    else:
+        current_ospf['ospf']['enabled'] = 'false'
+
+    if defaultOriginate:
+        current_ospf['ospf']['defaultOriginate'] = 'true'
+    else:
+        current_ospf['ospf']['defaultOriginate'] = 'false'
+
+    if gracefulRestart:
+        current_ospf['ospf']['gracefulRestart'] = 'true'
+    else:
+        current_ospf['ospf']['gracefulRestart'] = 'false'
+
+    if redistribution:
+        current_ospf['ospf']['redistribution']['enabled'] = 'true'
+    else:
+        current_ospf['ospf']['redistribution']['enabled'] = 'false'
+
+    if protocolAddress:
+        current_ospf['ospf']['protocolAddress'] = protocolAddress
+
+    if forwardingAddress:
+        current_ospf['ospf']['forwardingAddress'] = forwardingAddress
+
+    raw_result = client_session.update(
+        'routingOSPF', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=current_ospf
+    )
+
+    common.check_raw_result(raw_result)
