@@ -17,7 +17,7 @@ from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
-import library.nsx_dlr as nsx_dlr
+import library.nsx_esg_dlr as nsx_dlr
 
 
 @operation

@@ -14,7 +14,7 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import library.nsx_dlr as cfy_dlr
+import library.nsx_esg_dlr as cfy_dlr
 import library.nsx_common as common
 
 

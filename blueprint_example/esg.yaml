@@ -161,7 +161,7 @@ node_templates:
         create:
           inputs:
             interface:
-              esg_name: { get_attribute: [ esg, edge, name ] }
+              esg_id: { get_attribute: [ esg, resource_id ] }
               portgroup_id: { get_attribute: [ slave_lswith, resource_id ] }
     relationships:
       - type: cloudify.relationships.contained_in

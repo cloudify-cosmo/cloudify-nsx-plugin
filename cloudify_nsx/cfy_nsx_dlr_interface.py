@@ -15,7 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
-import library.nsx_dlr as cfy_dlr
+import library.nsx_esg_dlr as cfy_dlr
 import library.nsx_common as common
 
 
@@ -29,6 +29,11 @@ def create(**kwargs):
         ctx.logger.info("Used existed, no chnages made")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
@@ -37,14 +42,12 @@ def create(**kwargs):
                                            interface['interface_ls_id'],
                                            interface['interface_ip'],
                                            interface['interface_subnet'],
-                                           interface.get('name'))
+                                           interface['name'])
 
     resource_id = result_raw['body']['interfaces']['interface']['index']
-    location = result_raw['body']['interfaces']['interface']['name']
     ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+    ctx.logger.info("created %s" % resource_id)
 
 
 @operation

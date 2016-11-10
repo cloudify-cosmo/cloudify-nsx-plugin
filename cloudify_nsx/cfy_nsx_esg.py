@@ -18,7 +18,7 @@ import pynsxv.library.nsx_esg as nsx_esg
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 import library.nsx_nat as nsx_nat
-import library.nsx_dlr as nsx_dlr
+import library.nsx_esg_dlr as nsx_dlr
 
 
 @operation
