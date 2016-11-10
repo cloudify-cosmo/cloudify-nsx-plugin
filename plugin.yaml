@@ -47,6 +47,7 @@ node_types:
       # reuse existed resource pool
       use_external_resource:
         default: true
+        type: boolean
       # resource vcenter id
       resource_id:
         required: false
@@ -76,6 +77,7 @@ node_types:
       # reuse existed resource pool
       use_external_resource:
         default: true
+        type: boolean
       # resource vcenter id
       resource_id:
         required: false
@@ -105,6 +107,7 @@ node_types:
       # reuse existed resource pool
       use_external_resource:
         default: true
+        type: boolean
       # resource vcenter id
       resource_id:
         required: false
@@ -134,6 +137,7 @@ node_types:
       # Supported only True - search port group in vcenter by id/name
       use_external_resource:
         default: true
+        type: boolean
       # resource vcenter id
       resource_id:
         required: false
@@ -166,6 +170,7 @@ node_types:
       # Supported only True - search port group in vcenter by id/name
       use_external_resource:
         default: false
+        type: boolean
       # resource nsx id
       resource_id:
         required: false
@@ -258,6 +263,7 @@ node_types:
             default: accept
           logging:
             default: false
+            type: boolean
       firewall:
         default:
           # accept or deny
@@ -268,8 +274,10 @@ node_types:
         default:
           enabled:
             default: true
+            type: boolean
           syslog_enabled:
             default: false
+            type: boolean
           syslog_level:
             default: INFO
       dhcp:
@@ -284,6 +292,7 @@ node_types:
         default:
           enabled:
             default: true
+            type: boolean
           staticRouting:
             set_none: true
             sub:
@@ -295,19 +304,21 @@ node_types:
                   vnic:
                     set_none: true
                   mtu:
-                    default: 1500
+                    set_none: true
           routingGlobalConfig:
             sub:
               routerId:
                 set_none: true
               ecmp:
                 default: false
+                type: boolean
               logging:
                 sub:
                  logLevel:
                    default: info
                 enable:
                    default: false
+                   type: boolean
       routing:
         default:
           enabled: true
@@ -316,11 +327,11 @@ node_types:
             defaultRoute:
               gatewayAddress: ''
               # uplink nic
-              vnic: 0
+              vnic: ''
               # Optional. Valid value:smaller than the MTU set on the
               # interface. Default will be the MTU of the interface on
               # which this route is configured
-              mtu: 1500
+              mtu: ''
           routingGlobalConfig:
             # Required when dynamic routing protocols like OSPF,
             # or BGP is configured
@@ -335,12 +346,16 @@ node_types:
         default:
           enabled:
             default: false
+            type: boolean
           defaultOriginate:
             default: false
+            type: boolean
           gracefulRestart:
             default: false
+            type: boolean
           redistribution:
             default: false
+            type: boolean
           protocolAddress:
             set_none: true
           forwardingAddress:
@@ -513,14 +528,19 @@ node_types:
             sub:
               isis:
                 default: false
+                type: boolean
               ospf:
-                default:  false
+                default: false
+                type: boolean
               bgp:
                 default: false
+                type: boolean
               static:
                 default: false
+                type: boolean
               connected:
                 default: false
+                type: boolean
           action:
             required: true
             values:
@@ -671,6 +691,7 @@ node_types:
            default: admin
           esg_remote_access:
            default: false
+           type: boolean
       edge:
         default:
           # The name of the ESG to be created
@@ -698,6 +719,7 @@ node_types:
             default: accept
           logging:
             default: false
+            type: boolean
       firewall:
         default:
           # accept or deny
@@ -708,8 +730,10 @@ node_types:
         default:
           enabled:
             default: true
+            type: boolean
           syslog_enabled:
             default: false
+            type: boolean
           syslog_level:
             default: INFO
       dhcp:
@@ -724,10 +748,102 @@ node_types:
         default:
           enabled:
             default: true
+            type: boolean
       nat:
         default:
           # The display name of a Edge Service Gateway used for NAT
           enabled: true
+      validate_routing:
+        default:
+          enabled:
+            default: true
+            type: boolean
+          staticRouting:
+            set_none: true
+            sub:
+              defaultRoute:
+                set_none: true
+                sub:
+                  gatewayAddress:
+                    set_none: true
+                  vnic:
+                    set_none: true
+                  mtu:
+                    set_none: true
+          routingGlobalConfig:
+            sub:
+              routerId:
+                set_none: true
+              ecmp:
+                default: false
+                type: boolean
+              logging:
+                sub:
+                 logLevel:
+                   default: info
+                enable:
+                   default: false
+                   type: boolean
+      routing:
+        default:
+          enabled: true
+          staticRouting:
+            # Optional, if no default routes needs to be configured
+            defaultRoute:
+              gatewayAddress: ''
+              # uplink nic
+              vnic: ''
+              # Optional. Valid value:smaller than the MTU set on the
+              # interface. Default will be the MTU of the interface on
+              # which this route is configured
+              mtu: ''
+          routingGlobalConfig:
+            # Required when dynamic routing protocols like OSPF,
+            # or BGP is configured
+            routerId: ''
+            # Optional. When absent, enable=false and logLevel=INFO
+            logging:
+              logLevel: info
+              enable: false
+            # Optional. Defaults to false.
+            ecmp: false
+      validate_ospf:
+        default:
+          enabled:
+            default: false
+            type: boolean
+          defaultOriginate:
+            default: false
+            type: boolean
+          gracefulRestart:
+            default: false
+            type: boolean
+          redistribution:
+            default: false
+            type: boolean
+          protocolAddress:
+            set_none: true
+          forwardingAddress:
+            set_none: true
+      ospf:
+        default:
+          # When not specified, it will be treated as false, When false,
+          # it will delete the existing config
+          enabled: false
+          # default is false, user can configure edge router to publish
+          # default route by setting it to true.
+          defaultOriginate: false
+          # default is false, user can enable graceful restart by
+          # setting it to true. Its a newly added optional field.
+          gracefulRestart: false
+          # Optional. Defaults to false.
+          redistribution: false
+          # ipAddress on one of the uplink interfaces,
+          # only for enabled and use logical switch as ospf
+          protocolAddress: ""
+          # ipAddress on the same subnet as the forwardingAddress,
+          # only for enabled and use logical switch as ospf
+          forwardingAddress: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -757,8 +873,10 @@ node_types:
             set_none: true
           loggingEnabled:
             default: false
+            type: boolean
           enabled:
             default: true
+            type: boolean
           description:
             set_none: true
           protocol:
@@ -824,6 +942,7 @@ node_types:
             set_none: true
           matchTranslated:
             default: false
+            type: boolean
           direction:
             values:
               - in
@@ -837,8 +956,10 @@ node_types:
               - reject
           enabled:
             default: true
+            type: boolean
           loggingEnabled:
             default: false
+            type: boolean
           description:
             set_none: true
       rule:
@@ -889,31 +1010,31 @@ node_types:
       interface:
         default:
           # The name of the ESG to configure interfaces on
-          esg_name: ""
+          esg_name: ''
           # The vnic index, e.g. vnic3 and the index 3
-          ifindex: {}
+          ifindex: ''
           # (Optional) The primary IP Address to be configured for this interface
-          ipaddr: {}
+          ipaddr: ''
           # (Optional) The netmask in the x.x.x.x format
-          netmask: {}
+          netmask: ''
           # (Optional) The prefix length, this takes precedence over the netmask
-          prefixlen: {}
+          prefixlen: ''
           # (Optional) The name assigned to the vnic
-          name: ""
+          name: ''
           # (Optional) The vnic MTU
-          mtu: 1500
+          mtu: ''
           # (Optional) The vnic connection state (true/false)
-          is_connected: ""
+          is_connected: ''
           # (Optional) The portgroup id of logical switch id to connenct this vnic to
-          portgroup_id: ""
+          portgroup_id: ''
           # (Optional) The vnic type (uplink/internal)
-          vnic_type: ""
+          vnic_type: ''
           # (Optional) Whether the interface will send icmp redirects (true/false)
-          enable_send_redirects: ""
+          enable_send_redirects: ''
           # (Optional) Whether the interface will do proxy arp (true/false)
-          enable_proxy_arp: ""
+          enable_proxy_arp: ''
           # (Optional) A list of additional secondary IP addresses in the primary IP's Subnet
-          secondary_ips: ""
+          secondary_ips: ''
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -930,14 +1051,14 @@ node_types:
       gateway:
         default:
           # The name of the ESG to list interfaces of
-          esg_name: ""
+          esg_name: ''
           # The default gateway ip (next hop)
-          dgw_ip: {}
+          dgw_ip: ''
           # (Optional) The vnic index of were the default gateway is reachable on
-          vnic: {}
+          vnic: ''
           # (Optional) The MTU of the defautl gateway (default=1500)
-          mtu: 1500
-          # (OIptional) Admin distance of the defautl route (default=1)
+          mtu: ''
+          # (Optional) Admin distance of the defautl route (default=1)
           admin_distance: 1
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -955,19 +1076,19 @@ node_types:
       route:
         default:
           # The name of the ESG where the route should be added
-          esg_name: ""
+          esg_name: ''
           # The routes network in the x.x.x.x/yy format, e.g. 192.168.1.0/24
-          network: {}
+          network: ''
           # The next hop ip
-          next_hop: {}
+          next_hop: ''
           # (Optional) The vnic index of were this route is reachable on
-          vnic: {}
+          vnic: ''
           # (Optional) The MTU of the route (default=1500)
-          mtu: 1500
+          mtu: ''
           # (Optional) Admin distance of the defautl route (default=1)
           admin_distance: 1
           # (Optional) A description for this route
-          description: {}
+          description: ''
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
