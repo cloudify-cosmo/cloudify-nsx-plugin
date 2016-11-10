@@ -23,7 +23,7 @@ from pyVmomi import vim
 
 def __cleanup_prioperties(value):
     """we need such because nsxclient does not support unicode strings"""
-    if isinstance(value, (unicode, int)):
+    if isinstance(value, unicode):
         return str(value)
     if isinstance(value, dict):
         return __cleanup_prioperties_dict(value)
@@ -113,7 +113,8 @@ def validate(check_dict, validate_rules, use_existed):
         # sory some time we have mistake in value for boolean fields
         if value_type == 'boolean' and isinstance(value, str):
             value = value.lower() == 'true'
-
+        elif value_type == 'string' and isinstance(value, int):
+            value = str(value)
         result[name] = value
 
     return result
