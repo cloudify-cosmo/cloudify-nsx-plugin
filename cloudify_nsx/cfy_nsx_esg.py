@@ -26,7 +26,7 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    use_existed, edge_dict = common.get_properties('edge', kwargs)
+    use_existed, edge_dict = common.get_properties_and_validate('edge', kwargs)
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 
@@ -40,11 +40,6 @@ def create(**kwargs):
         ctx.logger.info("Reused %s" % resource_id)
 
     if not resource_id:
-        ctx.logger.info("checking " + str(edge_dict))
-
-        _, validate = common.get_properties('validate_edge', kwargs)
-        edge_dict = common.validate(edge_dict, validate, use_existed)
-
         resource_id, _ = nsx_esg.esg_read(client_session, edge_dict["name"])
         if use_existed:
             ctx.instance.runtime_properties['resource_id'] = resource_id
@@ -72,56 +67,57 @@ def create(**kwargs):
         ctx.instance.runtime_properties['location'] = location
         ctx.logger.info("created %s | %s" % (resource_id, location))
 
-    _, firewall = common.get_properties('firewall', kwargs)
-    if firewall:
-        _, validate = common.get_properties('validate_firewall', kwargs)
-        firewall = common.validate(firewall, validate, False)
+    _, firewall = common.get_properties_and_validate('firewall', kwargs)
 
-        ctx.logger.info("checking firewall:" + str(firewall))
+    if not nsx_dlr.esg_fw_default_set(
+        client_session,
+        resource_id,
+        firewall['action'],
+        firewall['logging']
+    ):
+        raise cfy_exc.NonRecoverableError(
+            "Can't change firewall rules"
+        )
 
-        if not nsx_dlr.esg_fw_default_set(
-            client_session,
-            resource_id,
-            firewall['action'],
-            firewall['logging']
-        ):
-            raise cfy_exc.NonRecoverableError(
-                "Can't change firewall rules"
-            )
+    _, dhcp = common.get_properties_and_validate('dhcp', kwargs)
 
-    _, dhcp = common.get_properties('dhcp', kwargs)
-    if dhcp:
-        _, validate = common.get_properties('validate_dhcp', kwargs)
-        dhcp = common.validate(dhcp, validate, False)
+    if not nsx_dlr.dhcp_server(
+        client_session,
+        resource_id,
+        dhcp['enabled'],
+        dhcp['syslog_enabled'],
+        dhcp['syslog_level']
+    ):
+        raise cfy_exc.NonRecoverableError(
+            "Can't change dhcp rules"
+        )
 
-        ctx.logger.info("checking dhcp:" + str(dhcp))
+    _, routing = common.get_properties_and_validate('routing', kwargs)
+    nsx_dlr.routing_global_config(
+        client_session, resource_id,
+        routing['enabled'], routing['routingGlobalConfig'],
+        routing['staticRouting']
+    )
 
-        if not nsx_dlr.dhcp_server(
-            client_session,
-            resource_id,
-            dhcp['enabled'],
-            dhcp['syslog_enabled'],
-            dhcp['syslog_level']
-        ):
-            raise cfy_exc.NonRecoverableError(
-                "Can't change dhcp rules"
-            )
+    _, ospf = common.get_properties_and_validate('ospf', kwargs)
 
-    _, nat = common.get_properties('nat', kwargs)
-    if nat:
-        _, validate = common.get_properties('validate_nat', kwargs)
-        nat = common.validate(nat, validate, False)
+    nsx_dlr.ospf_create(
+        client_session, resource_id,
+        ospf['enabled'], ospf['defaultOriginate'],
+        ospf['gracefulRestart'], ospf['redistribution'],
+        ospf['protocolAddress'], ospf['forwardingAddress']
+    )
 
-        ctx.logger.info("checking nat:" + str(nat))
+    _, nat = common.get_properties_and_validate('nat', kwargs)
 
-        if not nsx_nat.nat_service(
-            client_session,
-            resource_id,
-            nat['enabled']
-        ):
-            raise cfy_exc.NonRecoverableError(
-                "Can't change nat rules"
-            )
+    if not nsx_nat.nat_service(
+        client_session,
+        resource_id,
+        nat['enabled']
+    ):
+        raise cfy_exc.NonRecoverableError(
+            "Can't change nat rules"
+        )
 
 
 @operation

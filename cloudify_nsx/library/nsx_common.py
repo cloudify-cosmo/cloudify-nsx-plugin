@@ -53,6 +53,17 @@ def __cleanup_prioperties_list(properties_list):
     return result
 
 
+def clenup_if_empty(value):
+    have_not_none = False
+    for key in value:
+        if value[key]:
+            have_not_none = True
+            break
+    if not have_not_none:
+        value = None
+    return value
+
+
 def validate(check_dict, validate_rules, use_existed):
     result = {}
     for name in validate_rules:
@@ -63,6 +74,8 @@ def validate(check_dict, validate_rules, use_existed):
         set_none = rule.get('set_none', False)
         values = rule.get('values', False)
         sub_checks = rule.get('sub', None)
+        value_type = rule.get('type', 'string')
+
         # we can have value == false and default == true, so only check
         # field in list
         if 'default' in rule and name not in check_dict:
@@ -94,6 +107,12 @@ def validate(check_dict, validate_rules, use_existed):
                     )
             if sub_checks:
                 value = validate(value, sub_checks, use_existed)
+                if set_none:
+                    value = clenup_if_empty(value)
+
+        # sory some time we have mistake in value for boolean fields
+        if value_type == 'boolean' and isinstance(value, str):
+            value = value.lower() == 'true'
 
         result[name] = value
 
