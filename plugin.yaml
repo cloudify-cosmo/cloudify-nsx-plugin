@@ -1009,7 +1009,7 @@ node_types:
         type: nsx_auth_type
       validate_interface:
         default:
-          esg_name:
+          esg_id:
             required: true
           ifindex:
             required: true
@@ -1041,8 +1041,8 @@ node_types:
             set_none: true
       interface:
         default:
-          # The name of the ESG to configure interfaces on
-          esg_name: ''
+          # The id of the ESG to configure interfaces on
+          esg_id: ''
           # The vnic index, e.g. vnic3 and the index 3
           ifindex: ''
           # (Optional) The primary IP Address to be configured for this interface

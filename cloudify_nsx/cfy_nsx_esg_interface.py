@@ -14,7 +14,7 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import pynsxv.library.nsx_esg as nsx_esg
+import library.nsx_esg_dlr as nsx_esg
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
@@ -29,6 +29,11 @@ def create(**kwargs):
         ctx.logger.info("Used existed")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
@@ -36,8 +41,8 @@ def create(**kwargs):
 
     result_raw = nsx_esg.esg_cfg_interface(
         client_session,
-        interface['esg_name'],
-        resource_id,
+        interface['esg_id'],
+        interface['ifindex'],
         interface['ipaddr'],
         interface['netmask'],
         interface['prefixlen'],
@@ -56,10 +61,8 @@ def create(**kwargs):
             "Can't create interface."
         )
 
-    location = interface['esg_name'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+    ctx.logger.info("created %s" % resource_id)
 
 
 @operation
@@ -80,7 +83,7 @@ def delete(**kwargs):
 
     result_raw = nsx_esg.esg_clear_interface(
         client_session,
-        interface['esg_name'],
+        interface['esg_id'],
         resource_id
     )
     if not result_raw:

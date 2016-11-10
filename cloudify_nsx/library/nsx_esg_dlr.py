@@ -229,3 +229,107 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
     )
 
     common.check_raw_result(raw_result)
+
+
+def esg_cfg_interface(client_session, esg_id, ifindex, ipaddr=None,
+                      netmask=None, prefixlen=None, name=None, mtu=None,
+                      is_connected=None, portgroup_id=None, vnic_type=None,
+                      enable_send_redirects=None, enable_proxy_arp=None,
+                      secondary_ips=None):
+    """
+    This function configures vnic interfaces on ESGs
+    :param client_session: An instance of an NsxClient Session
+    :param esg_id: esg uuid
+    :param ifindex: The vnic index, e.g. vnic3 and the index 3
+    :param ipaddr: (Optional) The primary IP Address to be configured for
+      this interface
+    :param netmask: (Optional) The netmask in the x.x.x.x format
+    :param prefixlen: (Optional) The prefix length, this takes precedence
+      over the netmask
+    :param name: (Optional) The name assigned to the vnic
+    :param mtu: (Optional) The vnic MTU
+    :param is_connected: (Optional) The vnic connection state (true/false)
+    :param portgroup_id: (Optional) The portgroup id of logical switch
+      id to connenct this vnic to
+    :param vnic_type: (Optional) The vnic type (uplink/internal)
+    :param enable_send_redirects: (Optional) Whether the interface will
+      send icmp redirects (true/false)
+    :param enable_proxy_arp: (Optional) Whether the interface will do
+      proxy arp (true/false)
+    :param secondary_ips: (Optional) A list of additional secondary IP
+      addresses in the primary IP's Subnet
+    :return: Returns True on successful configuration of the Interface
+    """
+    vnic_config = client_session.read(
+        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id}
+    )['body']
+
+    if not mtu:
+        mtu = 1500
+    if not vnic_type:
+        vnic_type = 'internal'
+
+    vnic_config['vnic']['mtu'] = mtu
+    vnic_config['vnic']['type'] = vnic_type
+    if name:
+        vnic_config['vnic']['name'] = name
+    if portgroup_id:
+        vnic_config['vnic']['portgroupId'] = portgroup_id
+    if enable_send_redirects:
+        vnic_config['vnic']['enableSendRedirects'] = enable_send_redirects
+    if enable_proxy_arp:
+        vnic_config['vnic']['enableProxyArp'] = enable_proxy_arp
+    if is_connected:
+        vnic_config['vnic']['isConnected'] = is_connected
+    if ipaddr and (netmask or prefixlen):
+        address_group = {}
+        sec_ips = []
+        if netmask:
+            address_group['subnetMask'] = netmask
+        if prefixlen:
+            address_group['subnetPrefixLength'] = str(prefixlen)
+        if secondary_ips:
+            sec_ips = secondary_ips
+        address_group['primaryAddress'] = ipaddr
+        address_group['secondaryAddresses'] = {'ipAddress': sec_ips}
+        vnic_config['vnic']['addressGroups'] = {'addressGroup': address_group}
+
+    cfg_result = client_session.update(
+        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id},
+        request_body_dict=vnic_config)
+    if cfg_result['status'] == 204:
+        return True
+    else:
+        return False
+
+
+def esg_clear_interface(client_session, esg_id, ifindex):
+    """
+    This function resets the vnic configuration of an ESG to its default
+      state
+    :param client_session: An instance of an NsxClient Session
+    :param esg_id: esg uuid
+    :param ifindex: The vnic index, e.g. vnic3 and the index 3
+    :return: Returns True on successful configuration of the Interface
+    """
+    vnic_config = client_session.read(
+        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id}
+    )['body']
+
+    vnic_config['vnic']['mtu'] = '1500'
+    vnic_config['vnic']['type'] = 'internal'
+    vnic_config['vnic']['name'] = 'vnic{}'.format(ifindex)
+    vnic_config['vnic']['addressGroups'] = None
+    vnic_config['vnic']['portgroupId'] = None
+    vnic_config['vnic']['portgroupName'] = None
+    vnic_config['vnic']['enableProxyArp'] = 'false'
+    vnic_config['vnic']['enableSendRedirects'] = 'false'
+    vnic_config['vnic']['isConnected'] = 'false'
+
+    cfg_result = client_session.update(
+        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id},
+        request_body_dict=vnic_config)
+    if cfg_result['status'] == 204:
+        return True
+    else:
+        return False
