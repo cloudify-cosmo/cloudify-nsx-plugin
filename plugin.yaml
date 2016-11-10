@@ -293,7 +293,7 @@ node_types:
                   gatewayAddress:
                     set_none: true
                   vnic:
-                    default: 0
+                    set_none: true
                   mtu:
                     default: 1500
           routingGlobalConfig:

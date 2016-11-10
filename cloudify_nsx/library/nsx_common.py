@@ -56,15 +56,16 @@ def __cleanup_prioperties_list(properties_list):
 def validate(check_dict, validate_rules, use_existed):
     result = {}
     for name in validate_rules:
-        validate = validate_rules[name]
-        required_value = validate.get('required', False)
-        external_use_value = validate.get('external_use', False)
-        default_value = validate.get('default', False)
-        set_none = validate.get('set_none', False)
-        values = validate.get('values', False)
+        rule = validate_rules[name]
+        required_value = rule.get('required', False)
+        external_use_value = rule.get('external_use', False)
+        default_value = rule.get('default', False)
+        set_none = rule.get('set_none', False)
+        values = rule.get('values', False)
+        sub_checks = rule.get('sub', None)
         # we can have value == false and default == true, so only check
         # field in list
-        if 'default' in validate and name not in check_dict:
+        if 'default' in rule and name not in check_dict:
             value = default_value
         else:
             value = check_dict.get(name)
@@ -80,6 +81,7 @@ def validate(check_dict, validate_rules, use_existed):
             )
 
         if set_none and not value:
+            # empty value
             value = None
         else:
             # looks as we have some list of posible values
@@ -90,6 +92,9 @@ def validate(check_dict, validate_rules, use_existed):
                             name, str(value), str(values)
                         )
                     )
+            if sub_checks:
+                value = validate(value, sub_checks, use_existed)
+
         result[name] = value
 
     return result
