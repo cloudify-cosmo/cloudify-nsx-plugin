@@ -1007,6 +1007,38 @@ node_types:
     properties:
       nsx_auth:
         type: nsx_auth_type
+      validate_interface:
+        default:
+          esg_name:
+            required: true
+          ifindex:
+            required: true
+            type: string
+          ipaddr:
+            set_none: true
+          netmask:
+            set_none: true
+          prefixlen:
+            set_none: true
+          name:
+            set_none: true
+          mtu:
+            set_none: true
+          is_connected:
+            set_none: true
+          portgroup_id:
+            set_none: true
+          vnic_type:
+            set_none: true
+            values:
+              - uplink
+              - internal
+          enable_send_redirects:
+            set_none: true
+          enable_proxy_arp:
+            set_none: true
+          secondary_ips:
+            set_none: true
       interface:
         default:
           # The name of the ESG to configure interfaces on
