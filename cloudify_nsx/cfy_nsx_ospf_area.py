@@ -27,7 +27,8 @@ def create(**kwargs):
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)
-        return
+        if not use_existed:
+            return
 
     # credentials
     client_session = common.nsx_login(kwargs)

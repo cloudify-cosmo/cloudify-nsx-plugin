@@ -196,6 +196,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: nsx_dlr
+      - type: cloudify.relationships.connected_to
+        target: interface
 
   ospf_interface:
     type: cloudify.nsx.ospf_interfaces

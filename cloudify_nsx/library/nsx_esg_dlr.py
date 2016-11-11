@@ -191,12 +191,16 @@ def routing_global_config(client_session, esg_id, enabled,
 def ospf_create(client_session, esg_id, enabled, defaultOriginate,
                 gracefulRestart, redistribution, protocolAddress,
                 forwardingAddress):
-    current_ospf = {
-        'ospf': {
-            'redistribution': {
-            }
-        }
-    }
+
+    raw_result = client_session.read(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    current_ospf = raw_result['body']
+
+    if not current_ospf['ospf'].get('redistribution'):
+        current_ospf['ospf']['redistribution'] = {}
 
     if enabled:
         current_ospf['ospf']['enabled'] = 'true'
@@ -248,8 +252,13 @@ def esg_ospf_add(client_session, esg_id, area_id, use_existed, area_type,
 
     ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
 
+    # case when we have only one element
+    if isinstance(ospf_areas, dict):
+        ospf['ospf']['ospfAreas']['ospfArea'] = [ospf_areas]
+        ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
+
     for area in ospf_areas:
-        if str(area['areaId']) == area_id:
+        if str(area['areaId']) == str(area_id):
             if not use_existed:
                 raise cfy_exc.NonRecoverableError(
                     "You already have such rule"
@@ -257,6 +266,7 @@ def esg_ospf_add(client_session, esg_id, area_id, use_existed, area_type,
             else:
                 ospf_areas['type'] = area_type
                 ospf_areas['authentication'] = auth
+
     if use_existed:
         raise cfy_exc.NonRecoverableError(
             "You don't have such rule"
@@ -271,6 +281,7 @@ def esg_ospf_add(client_session, esg_id, area_id, use_existed, area_type,
         'routingOSPF', uri_parameters={'edgeId':  esg_id},
         request_body_dict=ospf
     )
+
     common.check_raw_result(raw_result)
 
 
