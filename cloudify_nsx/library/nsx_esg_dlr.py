@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import nsx_common as common
+from cloudify import exceptions as cfy_exc
 
 
 def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
@@ -228,6 +229,74 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
         request_body_dict=current_ospf
     )
 
+    common.check_raw_result(raw_result)
+
+
+def esg_ospf_add(client_session, esg_id, area_id, use_existed, area_type,
+                 auth):
+    raw_result = client_session.read(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    ospf = raw_result['body']
+
+    if not ospf['ospf'].get('ospfAreas'):
+        ospf['ospf']['ospfAreas'] = {}
+    if not ospf['ospf']['ospfAreas'].get('ospfArea'):
+        ospf['ospf']['ospfAreas']['ospfArea'] = []
+
+    ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
+
+    for area in ospf_areas:
+        if str(area['areaId']) == area_id:
+            if not use_existed:
+                raise cfy_exc.NonRecoverableError(
+                    "You already have such rule"
+                )
+            else:
+                ospf_areas['type'] = area_type
+                ospf_areas['authentication'] = auth
+    if use_existed:
+        raise cfy_exc.NonRecoverableError(
+            "You don't have such rule"
+        )
+    else:
+        ospf_areas.append({
+            'areaId': area_id,
+            'type': area_type,
+            'authentication': auth})
+
+    raw_result = client_session.update(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        request_body_dict=ospf
+    )
+    common.check_raw_result(raw_result)
+
+
+def esg_ospf_delete(client_session, esg_id, area_id):
+    raw_result = client_session.read(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    ospf = raw_result['body']
+
+    if not ospf['ospf'].get('ospfAreas'):
+        return
+    if not ospf['ospf']['ospfAreas'].get('ospfArea'):
+        return
+
+    ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
+
+    for i in xrange(len(ospf_areas)):
+        if ospf_areas[i]['areaId'] == area_id:
+            ospf_areas.remove(ospf_areas[i])
+
+    raw_result = client_session.update(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        request_body_dict=ospf
+    )
     common.check_raw_result(raw_result)
 
 

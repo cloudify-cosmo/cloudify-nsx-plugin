@@ -179,6 +179,47 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: slave_lswith
 
+  ospf_areas:
+    type: cloudify.nsx.ospf_areas
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            area:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              areaId: 1000
+              type: nssa
+              authentication:
+                type: none
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+
+  ospf_interface:
+    type: cloudify.nsx.ospf_interfaces
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            area:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              vnic: { get_attribute: [ interface, resource_id ] }
+              areaId: { get_attribute: [ ospf_areas, area, areaId ] }
+              helloInterval: 10
+              priority: 128
+              cost: 1
+              deadInterval: 40
+              mtuIgnore: false
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: ospf_areas
+      - type: cloudify.relationships.connected_to
+        target: interface
+
   dlr_static_gateway:
     type: cloudify.nsx.dlr_dgw
     properties:
