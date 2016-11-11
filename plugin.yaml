@@ -394,7 +394,7 @@ node_types:
     properties:
       nsx_auth:
         type: nsx_auth_type
-      validate_area:
+      validate_prefix:
         default:
           dlr_id:
             required: true
@@ -443,7 +443,8 @@ node_types:
                   - password
                   - md5
               value:
-                required: true
+                set_none: true
+                required: false
       area:
         default:
           # dlr uuid
@@ -461,9 +462,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_area.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_area.delete
 
   # distributed logical routers interface ospf interfaces
   cloudify.nsx.ospf_interfaces:

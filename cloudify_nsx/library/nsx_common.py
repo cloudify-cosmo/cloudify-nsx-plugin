@@ -88,7 +88,8 @@ def validate(check_dict, validate_rules, use_existed):
                 "don't have external value for %s" % name
             )
 
-        if required_value and not value:
+        # zero/tru/false is also value
+        if required_value and not value and not isinstance(value, int):
             raise cfy_exc.NonRecoverableError(
                 "don't have value for %s " % name
             )
