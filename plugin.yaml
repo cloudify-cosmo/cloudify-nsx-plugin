@@ -416,7 +416,8 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
 
-  # distributed logical routers interface ospf areas
+  # distributed logical routers interface ospf areas, use only after all
+  # interfaces creation!
   cloudify.nsx.ospf_areas:
     derived_from: cloudify.nodes.Port
     properties:
