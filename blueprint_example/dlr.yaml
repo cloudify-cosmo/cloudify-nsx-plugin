@@ -209,7 +209,7 @@ node_templates:
           inputs:
             interface:
               dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-              vnic: 2
+              vnic: { get_attribute: [ nsx_dlr, router, uplink_vnic ] }
               areaId: { get_attribute: [ ospf_areas, area, areaId ] }
               helloInterval: 10
               priority: 128

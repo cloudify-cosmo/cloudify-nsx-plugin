@@ -83,16 +83,19 @@ def validate(check_dict, validate_rules, use_existed):
         else:
             value = check_dict.get(name)
 
+        # external
         if use_existed and external_use_value and not value:
             raise cfy_exc.NonRecoverableError(
                 "don't have external value for %s" % name
             )
 
-        # zero/tru/false is also value
-        if required_value and not value and not isinstance(value, int):
-            raise cfy_exc.NonRecoverableError(
-                "don't have value for %s " % name
-            )
+        # not external
+        if not use_existed and not external_use_value:
+            # zero/true/false is also value
+            if required_value and not value and not isinstance(value, int):
+                raise cfy_exc.NonRecoverableError(
+                    "don't have value for %s " % name
+                )
 
         if set_none and not value:
             # empty value
@@ -192,8 +195,6 @@ def get_properties(name, kwargs):
 
 def get_properties_and_validate(name, kwargs):
     use_existed, properties_dict = get_properties(name, kwargs)
-    if use_existed and ctx.instance.runtime_properties.get('resource_id'):
-        return use_existed, properties_dict
     _, validate_dict = get_properties('validate_' + name, kwargs)
     ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
     return use_existed, validate(

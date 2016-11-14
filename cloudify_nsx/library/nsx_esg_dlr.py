@@ -79,6 +79,34 @@ def esg_fw_default_set(client_session, esg_id, def_action,
         return False
 
 
+def get_uplink_vnic(client_session, esg_id, uplink_ls_id):
+    """Search uplink vnic"""
+    raw_result = client_session.read(
+        'interfaces', uri_parameters={'edgeId': esg_id}
+    )
+    interfaces_struct = raw_result['body']
+    common.check_raw_result(raw_result)
+    interfaces = interfaces_struct.get('interfaces', {}).get('interface')
+    if not interfaces:
+        raise cfy_exc.RecoverableError(
+            "No interfaces"
+        )
+    if isinstance(interfaces, dict):
+        interfaces = [interfaces]
+
+    for interface in interfaces:
+        if interface.get('type') != 'uplink':
+            continue
+        if interface.get('connectedToId') != uplink_ls_id:
+            continue
+
+        return interface.get('index')
+
+    raise cfy_exc.RecoverableError(
+        "No uplink interfaces"
+    )
+
+
 def dhcp_server(client_session, esg_id, enabled=None, syslog_enabled=None,
                 syslog_level=None):
     """
@@ -189,8 +217,8 @@ def routing_global_config(client_session, esg_id, enabled,
 
 
 def ospf_create(client_session, esg_id, enabled, defaultOriginate,
-                gracefulRestart, redistribution, protocolAddress,
-                forwardingAddress):
+                gracefulRestart, redistribution, protocolAddress=None,
+                forwardingAddress=None):
 
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId':  esg_id})
@@ -237,7 +265,7 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
 
 
 def esg_ospf_area_add(client_session, esg_id, area_id, use_existed, area_type,
-                 auth):
+                      auth):
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId':  esg_id})
 
@@ -308,16 +336,21 @@ def esg_ospf_interface_add(client_session, esg_id, area_id, vnic, use_existed,
         ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
 
     for interface in ospf_interfaces:
-        if str(interface['areaId']) == str(area_id) and str(interface['vnic']) == str(vnic):
-            if not use_existed:
-                raise cfy_exc.NonRecoverableError(
-                    "You already have such rule"
-                )
-            else:
-                ospf_interfaces['helloInterval'] = hello_interval
-                ospf_interfaces['deadInterval'] = dead_interval
-                ospf_interfaces['priority'] = priority
-                ospf_interfaces['cost'] = cost
+        if str(interface['areaId']) != str(area_id):
+            continue
+
+        if str(interface['vnic']) != str(vnic):
+            continue
+
+        if not use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You already have such rule"
+            )
+        else:
+            ospf_interfaces['helloInterval'] = hello_interval
+            ospf_interfaces['deadInterval'] = dead_interval
+            ospf_interfaces['priority'] = priority
+            ospf_interfaces['cost'] = cost
 
     if use_existed:
         raise cfy_exc.NonRecoverableError(
@@ -392,8 +425,13 @@ def esg_ospf_interface_delete(client_session, esg_id, area_id, vnic):
         ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
 
     for i in xrange(len(ospf_interfaces)):
-        if str(ospf_interfaces[i]['areaId']) == str(area_id) and str(ospf_interfaces[i]['vnic']) == str(vnic):
-            ospf_interfaces.remove(ospf_interfaces[i])
+        if str(ospf_interfaces[i]['areaId']) != str(area_id):
+            continue
+
+        if str(ospf_interfaces[i]['vnic']) != str(vnic):
+            continue
+
+        ospf_interfaces.remove(ospf_interfaces[i])
 
     raw_result = client_session.update(
         'routingOSPF', uri_parameters={'edgeId':  esg_id},
