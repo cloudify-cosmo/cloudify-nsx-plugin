@@ -207,9 +207,9 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            area:
+            interface:
               dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-              vnic: { get_attribute: [ interface, resource_id ] }
+              vnic: 2
               areaId: { get_attribute: [ ospf_areas, area, areaId ] }
               helloInterval: 10
               priority: 128

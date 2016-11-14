@@ -479,14 +479,18 @@ node_types:
             required: true
           areaId:
             required: true
+          # must be vnic with uplink
           vnic:
             required: true
           helloInterval:
             default: 10
+            type: string
           deadInterval:
             default: 40
+            type: string
           priority:
             default: 128
+            type: string
           cost:
             set_none: true
       interface:
@@ -508,9 +512,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_interface.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_interface.delete
 
   # distributed logical routers interface ospf redistribution rule
   cloudify.nsx.ospf_redistribution_rule:

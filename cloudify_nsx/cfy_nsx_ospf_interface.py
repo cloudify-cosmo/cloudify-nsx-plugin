@@ -20,8 +20,8 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, area = common.get_properties_and_validate(
-        'area', kwargs
+    use_existed, interface = common.get_properties_and_validate(
+        'interface', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
@@ -33,22 +33,25 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.esg_ospf_area_add(client_session,
-                         area['dlr_id'],
-                         area['areaId'],
-                         use_existed,
-                         area['type'],
-                         area['authentication'])
+    cfy_dlr.esg_ospf_interface_add(client_session,
+                                   interface['dlr_id'],
+                                   interface['areaId'],
+                                   interface['vnic'],
+                                   use_existed,
+                                   interface['helloInterval'],
+                                   interface['deadInterval'],
+                                   interface['priority'],
+                                   interface['cost'])
 
-    resource_id = area['areaId']
-    ctx.instance.runtime_properties['resource_dlr_id'] = area['dlr_id']
+    resource_id = str(interface['areaId']) + "|" + str(interface['vnic'])
+    ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
 
 
 @operation
 def delete(**kwargs):
-    use_existed, area = common.get_properties('area', kwargs)
+    use_existed, interface = common.get_properties('interface', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -62,10 +65,12 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.esg_ospf_area_delete(
+    ids = resource_id.split("|")
+    cfy_dlr.esg_ospf_interface_delete(
         client_session,
         ctx.instance.runtime_properties['resource_dlr_id'],
-        resource_id
+        ids[0],
+        ids[1]
     )
 
     ctx.logger.info("deleted %s" % resource_id)

@@ -236,7 +236,7 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
     common.check_raw_result(raw_result)
 
 
-def esg_ospf_add(client_session, esg_id, area_id, use_existed, area_type,
+def esg_ospf_area_add(client_session, esg_id, area_id, use_existed, area_type,
                  auth):
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId':  esg_id})
@@ -285,7 +285,62 @@ def esg_ospf_add(client_session, esg_id, area_id, use_existed, area_type,
     common.check_raw_result(raw_result)
 
 
-def esg_ospf_delete(client_session, esg_id, area_id):
+def esg_ospf_interface_add(client_session, esg_id, area_id, vnic, use_existed,
+                           hello_interval, dead_interval, priority, cost):
+
+    raw_result = client_session.read(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    ospf = raw_result['body']
+
+    if not ospf['ospf'].get('ospfInterfaces'):
+        ospf['ospf']['ospfInterfaces'] = {}
+    if not ospf['ospf']['ospfInterfaces'].get('ospfInterface'):
+        ospf['ospf']['ospfInterfaces']['ospfInterface'] = []
+
+    ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
+
+    # case when we have only one element
+    if isinstance(ospf_interfaces, dict):
+        ospf['ospf']['ospfInterfaces']['ospfInterface'] = [ospf_interfaces]
+        ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
+
+    for interface in ospf_interfaces:
+        if str(interface['areaId']) == str(area_id) and str(interface['vnic']) == str(vnic):
+            if not use_existed:
+                raise cfy_exc.NonRecoverableError(
+                    "You already have such rule"
+                )
+            else:
+                ospf_interfaces['helloInterval'] = hello_interval
+                ospf_interfaces['deadInterval'] = dead_interval
+                ospf_interfaces['priority'] = priority
+                ospf_interfaces['cost'] = cost
+
+    if use_existed:
+        raise cfy_exc.NonRecoverableError(
+            "You don't have such rule"
+        )
+    else:
+        ospf_interfaces.append({
+            'vnic': vnic,
+            'areaId': area_id,
+            'helloInterval': hello_interval,
+            'deadInterval': dead_interval,
+            'priority': priority,
+            'cost': cost})
+
+    raw_result = client_session.update(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        request_body_dict=ospf
+    )
+
+    common.check_raw_result(raw_result)
+
+
+def esg_ospf_area_delete(client_session, esg_id, area_id):
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId':  esg_id})
 
@@ -300,9 +355,45 @@ def esg_ospf_delete(client_session, esg_id, area_id):
 
     ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
 
+    # case when we have only one element
+    if isinstance(ospf_areas, dict):
+        ospf['ospf']['ospfAreas']['ospfArea'] = [ospf_areas]
+        ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
+
     for i in xrange(len(ospf_areas)):
-        if ospf_areas[i]['areaId'] == area_id:
+        if str(ospf_areas[i]['areaId']) == str(area_id):
             ospf_areas.remove(ospf_areas[i])
+
+    raw_result = client_session.update(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        request_body_dict=ospf
+    )
+    common.check_raw_result(raw_result)
+
+
+def esg_ospf_interface_delete(client_session, esg_id, area_id, vnic):
+    raw_result = client_session.read(
+        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    ospf = raw_result['body']
+
+    if not ospf['ospf'].get('ospfInterfaces'):
+        return
+    if not ospf['ospf']['ospfInterfaces'].get('ospfInterface'):
+        return
+
+    ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
+
+    # case when we have only one element
+    if isinstance(ospf_interfaces, dict):
+        ospf['ospf']['ospfInterfaces']['ospfInterface'] = [ospf_interfaces]
+        ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
+
+    for i in xrange(len(ospf_interfaces)):
+        if str(ospf_interfaces[i]['areaId']) == str(area_id) and str(ospf_interfaces[i]['vnic']) == str(vnic):
+            ospf_interfaces.remove(ospf_interfaces[i])
 
     raw_result = client_session.update(
         'routingOSPF', uri_parameters={'edgeId':  esg_id},
