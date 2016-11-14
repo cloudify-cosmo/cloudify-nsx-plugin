@@ -167,7 +167,7 @@ node_types:
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Network
     properties:
-      # Supported only True - search port group in vcenter by id/name
+      # reuse id/name
       use_external_resource:
         default: false
         type: boolean
@@ -207,6 +207,13 @@ node_types:
   cloudify.nsx.dlr:
     derived_from: cloudify.nodes.Router
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_router:
@@ -392,6 +399,13 @@ node_types:
   cloudify.nsx.dlr_routing_ip_prefix:
     derived_from: cloudify.nodes.Port
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_prefix:
@@ -421,6 +435,13 @@ node_types:
   cloudify.nsx.ospf_areas:
     derived_from: cloudify.nodes.Port
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_area:
@@ -471,6 +492,13 @@ node_types:
   cloudify.nsx.ospf_interfaces:
     derived_from: cloudify.nodes.Port
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_interface:
@@ -520,6 +548,13 @@ node_types:
   cloudify.nsx.ospf_redistribution_rule:
     derived_from: cloudify.nodes.Port
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_rule:
@@ -583,6 +618,13 @@ node_types:
   cloudify.nsx.dlr_interface:
     derived_from: cloudify.nodes.Port
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_interface:
@@ -621,6 +663,13 @@ node_types:
   cloudify.nsx.dlr_dhcp_relay:
     derived_from: cloudify.nodes.Port
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_relay:
@@ -649,6 +698,13 @@ node_types:
   cloudify.nsx.dlr_dgw:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_gateway:
@@ -673,6 +729,13 @@ node_types:
   cloudify.nsx.esg:
     derived_from: cloudify.nodes.Router
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_edge:
@@ -680,19 +743,24 @@ node_types:
           # we need name in any case of usage except predefined 'id'
           name:
             required: true
-            external_use: true
+            external_use: false
           esg_pwd:
             required: true
+            external_use: false
           esg_size:
             default: compact
           datacentermoid:
             required: true
+            external_use: false
           datastoremoid:
             required: true
+            external_use: false
           resourcepoolid:
             required: true
+            external_use: false
           default_pg:
             required: true
+            external_use: false
           esg_username:
            default: admin
           esg_remote_access:
@@ -827,10 +895,6 @@ node_types:
           redistribution:
             default: false
             type: boolean
-          protocolAddress:
-            set_none: true
-          forwardingAddress:
-            set_none: true
       ospf:
         default:
           # When not specified, it will be treated as false, When false,
@@ -844,12 +908,7 @@ node_types:
           gracefulRestart: false
           # Optional. Defaults to false.
           redistribution: false
-          # ipAddress on one of the uplink interfaces,
-          # only for enabled and use logical switch as ospf
-          protocolAddress: ""
-          # ipAddress on the same subnet as the forwardingAddress,
-          # only for enabled and use logical switch as ospf
-          forwardingAddress: ""
+          # ForwardingAddress and protocolAddress are not usable for edge
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -861,6 +920,13 @@ node_types:
   cloudify.nsx.esg_nat:
     derived_from: cloudify.nodes.VirtualIP
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_rule:
@@ -930,6 +996,13 @@ node_types:
   cloudify.nsx.esg_firewall:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_rule:
@@ -1011,6 +1084,13 @@ node_types:
   cloudify.nsx.esg_interface:
     derived_from: cloudify.nodes.Port
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       validate_interface:
@@ -1084,6 +1164,13 @@ node_types:
   cloudify.nsx.esg_gateway:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       gateway:
@@ -1109,6 +1196,13 @@ node_types:
   cloudify.nsx.esg_route:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       route:
@@ -1138,6 +1232,13 @@ node_types:
   cloudify.nsx.dhcp_pool:
     derived_from: cloudify.nodes.ApplicationServer
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       pool:
@@ -1171,6 +1272,13 @@ node_types:
   cloudify.nsx.dhcp_binding:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       bind:
@@ -1212,6 +1320,13 @@ node_types:
   cloudify.nsx.dfw_section:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
       nsx_auth:
         type: nsx_auth_type
       section:

@@ -34,11 +34,11 @@ def create(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     cfy_dlr.esg_ospf_area_add(client_session,
-                         area['dlr_id'],
-                         area['areaId'],
-                         use_existed,
-                         area['type'],
-                         area['authentication'])
+                              area['dlr_id'],
+                              area['areaId'],
+                              use_existed,
+                              area['type'],
+                              area['authentication'])
 
     resource_id = area['areaId']
     ctx.instance.runtime_properties['resource_dlr_id'] = area['dlr_id']

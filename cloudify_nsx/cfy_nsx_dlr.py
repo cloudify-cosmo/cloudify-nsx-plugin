@@ -62,6 +62,11 @@ def create(**kwargs):
         ctx.instance.runtime_properties['location'] = location
         ctx.logger.info("created %s | %s" % (resource_id, location))
 
+    uplink_vnic = nsx_dlr.get_uplink_vnic(
+        client_session, resource_id, router_dict['uplink_ls_id'])
+
+    ctx.instance.runtime_properties['router']['uplink_vnic'] = uplink_vnic
+
     _, firewall = common.get_properties_and_validate('firewall', kwargs)
     if not nsx_dlr.esg_fw_default_set(
         client_session,
