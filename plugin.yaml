@@ -367,6 +367,8 @@ node_types:
             set_none: true
           forwardingAddress:
             set_none: true
+      # Only one of (OSPF/BGP) can be configured as the dynamic routing
+      # protocol for Logical Router.
       ospf:
         default:
           # When not specified, it will be treated as false, When false,
@@ -386,6 +388,41 @@ node_types:
           # ipAddress on the same subnet as the forwardingAddress,
           # only for enabled and use logical switch as ospf
           forwardingAddress: ""
+      validate_bgp:
+        default:
+          enabled:
+            default: false
+            type: boolean
+          defaultOriginate:
+            default: false
+            type: boolean
+          gracefulRestart:
+            default: false
+            type: boolean
+          redistribution:
+            default: false
+            type: boolean
+          localAS:
+            type: string
+            set_none: true
+      # Only one of (OSPF/BGP) can be configured as the dynamic routing
+      # protocol for Logical Router.
+      bgp:
+        default:
+          # When not specified, it will be treated as false, When false,
+          # it will delete the existing config
+          enabled: false
+          # default is false, user can configure edge router to publish
+          # default route by setting it to true.
+          defaultOriginate: false
+          # default is false, user can enable graceful restart by
+          # setting it to true. Its a newly added optional field.
+          gracefulRestart: false
+          # Optional. Defaults to false.
+          redistribution: false
+          # Valid values are : 1-65534
+          # For disabled it must be also some number
+          localAS: 1
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -909,6 +946,41 @@ node_types:
           # Optional. Defaults to false.
           redistribution: false
           # ForwardingAddress and protocolAddress are not usable for edge
+      validate_bgp:
+        default:
+          enabled:
+            default: false
+            type: boolean
+          defaultOriginate:
+            default: false
+            type: boolean
+          gracefulRestart:
+            default: false
+            type: boolean
+          redistribution:
+            default: false
+            type: boolean
+          localAS:
+            type: string
+            set_none: true
+      # Only one of (OSPF/BGP) can be configured as the dynamic routing
+      # protocol for Logical Router.
+      bgp:
+        default:
+          # When not specified, it will be treated as false, When false,
+          # it will delete the existing config
+          enabled: false
+          # default is false, user can configure edge router to publish
+          # default route by setting it to true.
+          defaultOriginate: false
+          # default is false, user can enable graceful restart by
+          # setting it to true. Its a newly added optional field.
+          gracefulRestart: false
+          # Optional. Defaults to false.
+          redistribution: false
+          # Valid values are : 1-65534
+          # For disabled it must be also some number
+          localAS: 1
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

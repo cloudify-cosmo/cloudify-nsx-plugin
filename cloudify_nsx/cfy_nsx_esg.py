@@ -17,62 +17,7 @@ from cloudify.decorators import operation
 import pynsxv.library.nsx_esg as nsx_esg
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
-import library.nsx_nat as nsx_nat
 import library.nsx_esg_dlr as nsx_dlr
-
-
-def update_edge(client_session, resource_id, kwargs):
-
-    _, firewall = common.get_properties_and_validate('firewall', kwargs)
-
-    if not nsx_dlr.esg_fw_default_set(
-        client_session,
-        resource_id,
-        firewall['action'],
-        firewall['logging']
-    ):
-        raise cfy_exc.NonRecoverableError(
-            "Can't change firewall rules"
-        )
-
-    _, dhcp = common.get_properties_and_validate('dhcp', kwargs)
-
-    if not nsx_dlr.dhcp_server(
-        client_session,
-        resource_id,
-        dhcp['enabled'],
-        dhcp['syslog_enabled'],
-        dhcp['syslog_level']
-    ):
-        raise cfy_exc.NonRecoverableError(
-            "Can't change dhcp rules"
-        )
-
-    _, routing = common.get_properties_and_validate('routing', kwargs)
-    nsx_dlr.routing_global_config(
-        client_session, resource_id,
-        routing['enabled'], routing['routingGlobalConfig'],
-        routing['staticRouting']
-    )
-
-    _, ospf = common.get_properties_and_validate('ospf', kwargs)
-
-    nsx_dlr.ospf_create(
-        client_session, resource_id,
-        ospf['enabled'], ospf['defaultOriginate'],
-        ospf['gracefulRestart'], ospf['redistribution']
-    )
-
-    _, nat = common.get_properties_and_validate('nat', kwargs)
-
-    if not nsx_nat.nat_service(
-        client_session,
-        resource_id,
-        nat['enabled']
-    ):
-        raise cfy_exc.NonRecoverableError(
-            "Can't change nat rules"
-        )
 
 
 @operation
@@ -122,7 +67,7 @@ def create(**kwargs):
         ctx.instance.runtime_properties['location'] = location
         ctx.logger.info("created %s | %s" % (resource_id, location))
 
-    update_edge(client_session, resource_id, kwargs)
+    nsx_dlr.update_common_edges(client_session, resource_id, kwargs, True)
 
 
 @operation
@@ -139,7 +84,7 @@ def delete(**kwargs):
 
     if use_existed:
         ctx.logger.info("Used existed %s" % edge_dict.get('name'))
-        update_edge(client_session, resource_id, kwargs)
+        nsx_dlr.update_common_edges(client_session, resource_id, kwargs, True)
         return
 
     ctx.logger.info("checking %s" % resource_id)
