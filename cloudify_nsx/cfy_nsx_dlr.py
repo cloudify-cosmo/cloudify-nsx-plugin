@@ -67,45 +67,7 @@ def create(**kwargs):
 
     ctx.instance.runtime_properties['router']['uplink_vnic'] = uplink_vnic
 
-    _, firewall = common.get_properties_and_validate('firewall', kwargs)
-    if not nsx_dlr.esg_fw_default_set(
-        client_session,
-        resource_id,
-        firewall['action'],
-        firewall['logging']
-    ):
-        raise cfy_exc.NonRecoverableError(
-            "Can't change firewall rules"
-        )
-
-    _, dhcp = common.get_properties_and_validate('dhcp', kwargs)
-
-    if not nsx_dlr.dhcp_server(
-        client_session,
-        resource_id,
-        dhcp['enabled'],
-        dhcp['syslog_enabled'],
-        dhcp['syslog_level']
-    ):
-        raise cfy_exc.NonRecoverableError(
-            "Can't change dhcp rules"
-        )
-
-    _, routing = common.get_properties_and_validate('routing', kwargs)
-    nsx_dlr.routing_global_config(
-        client_session, resource_id,
-        routing['enabled'], routing['routingGlobalConfig'],
-        routing['staticRouting']
-    )
-
-    _, ospf = common.get_properties_and_validate('ospf', kwargs)
-
-    nsx_dlr.ospf_create(
-        client_session, resource_id,
-        ospf['enabled'], ospf['defaultOriginate'],
-        ospf['gracefulRestart'], ospf['redistribution'],
-        ospf['protocolAddress'], ospf['forwardingAddress']
-    )
+    nsx_dlr.update_common_edges(client_session, resource_id, kwargs, False)
 
 
 @operation

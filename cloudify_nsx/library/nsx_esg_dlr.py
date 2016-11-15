@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import nsx_common as common
+import nsx_nat as nsx_nat
 from cloudify import exceptions as cfy_exc
 
 
@@ -216,6 +217,56 @@ def routing_global_config(client_session, esg_id, enabled,
     common.check_raw_result(raw_result)
 
 
+def bgp_create(client_session, esg_id, enabled, defaultOriginate,
+               gracefulRestart, redistribution, localAS):
+
+    raw_result = client_session.read(
+        'routingBGP', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    current_bgp = raw_result['body']
+
+    if not current_bgp:
+        # for fully "disabled" case
+        current_bgp = {
+            'bgp': {}
+        }
+
+    if not current_bgp['bgp'].get('redistribution'):
+        current_bgp['bgp']['redistribution'] = {}
+
+    if enabled:
+        current_bgp['bgp']['enabled'] = 'true'
+    else:
+        current_bgp['bgp']['enabled'] = 'false'
+
+    if defaultOriginate:
+        current_bgp['bgp']['defaultOriginate'] = 'true'
+    else:
+        current_bgp['bgp']['defaultOriginate'] = 'false'
+
+    if gracefulRestart:
+        current_bgp['bgp']['gracefulRestart'] = 'true'
+    else:
+        current_bgp['bgp']['gracefulRestart'] = 'false'
+
+    if redistribution:
+        current_bgp['bgp']['redistribution']['enabled'] = 'true'
+    else:
+        current_bgp['bgp']['redistribution']['enabled'] = 'false'
+
+    if localAS:
+        current_bgp['bgp']['localAS'] = localAS
+
+    raw_result = client_session.update(
+        'routingBGP', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=current_bgp
+    )
+
+    common.check_raw_result(raw_result)
+
+
 def ospf_create(client_session, esg_id, enabled, defaultOriginate,
                 gracefulRestart, redistribution, protocolAddress=None,
                 forwardingAddress=None):
@@ -226,6 +277,12 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
     common.check_raw_result(raw_result)
 
     current_ospf = raw_result['body']
+
+    if not current_ospf:
+        # for fully "disabled" case
+        current_ospf = {
+            'ospf': {}
+        }
 
     if not current_ospf['ospf'].get('redistribution'):
         current_ospf['ospf']['redistribution'] = {}
@@ -542,3 +599,85 @@ def esg_clear_interface(client_session, esg_id, ifindex):
         return True
     else:
         return False
+
+
+def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
+
+    _, firewall = common.get_properties_and_validate('firewall', kwargs)
+
+    if not esg_fw_default_set(
+        client_session,
+        resource_id,
+        firewall['action'],
+        firewall['logging']
+    ):
+        raise cfy_exc.NonRecoverableError(
+            "Can't change firewall rules"
+        )
+
+    _, dhcp = common.get_properties_and_validate('dhcp', kwargs)
+
+    if not dhcp_server(
+        client_session,
+        resource_id,
+        dhcp['enabled'],
+        dhcp['syslog_enabled'],
+        dhcp['syslog_level']
+    ):
+        raise cfy_exc.NonRecoverableError(
+            "Can't change dhcp rules"
+        )
+
+    _, routing = common.get_properties_and_validate('routing', kwargs)
+    routing_global_config(
+        client_session, resource_id,
+        routing['enabled'], routing['routingGlobalConfig'],
+        routing['staticRouting']
+    )
+
+    _, ospf = common.get_properties_and_validate('ospf', kwargs)
+    _, bgp = common.get_properties_and_validate('bgp', kwargs)
+
+    # disable bgp before change ospf (if need)
+    if not bgp['enabled']:
+        bgp_create(
+            client_session, resource_id,
+            bgp['enabled'], bgp['defaultOriginate'],
+            bgp['gracefulRestart'], bgp['redistribution'],
+            bgp['localAS']
+        )
+
+    if esg_restriction:
+        ospf_create(
+            client_session, resource_id,
+            ospf['enabled'], ospf['defaultOriginate'],
+            ospf['gracefulRestart'], ospf['redistribution']
+        )
+    else:
+        ospf_create(
+            client_session, resource_id,
+            ospf['enabled'], ospf['defaultOriginate'],
+            ospf['gracefulRestart'], ospf['redistribution'],
+            ospf['protocolAddress'], ospf['forwardingAddress']
+        )
+
+    # enable bgp after change ospf (if need)
+    if bgp['enabled']:
+        bgp_create(
+            client_session, resource_id,
+            bgp['enabled'], bgp['defaultOriginate'],
+            bgp['gracefulRestart'], bgp['redistribution'],
+            bgp['localAS']
+        )
+
+    if esg_restriction:
+        _, nat = common.get_properties_and_validate('nat', kwargs)
+
+        if not nsx_nat.nat_service(
+            client_session,
+            resource_id,
+            nat['enabled']
+        ):
+            raise cfy_exc.NonRecoverableError(
+                "Can't change nat rules"
+            )

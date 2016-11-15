@@ -1,0 +1,149 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+#  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-nsx-plugin/master/plugin.yaml
+  - ../plugin.yaml
+
+inputs:
+
+  nsx_ip:
+    type: string
+    description: >
+       nsx server ip
+    default: 127.0.0.1
+
+  nsx_user:
+    type: string
+    description: >
+       nsx server user
+    default: nsx
+
+  nsx_password:
+    type: string
+    description: >
+       nsx server user password
+    default: nsx
+
+  nsx_raml:
+    type: string
+    description: >
+       raml file path
+    default: ""
+
+  vcenter_ip:
+    type: string
+    description: >
+       vcenter server ip
+    default: 127.0.0.1
+
+  vcenter_user:
+    type: string
+    description: >
+       vcenter server user
+    default: nsx
+
+  vcenter_password:
+    type: string
+    description: >
+       vcenter server user password
+    default: nsx
+
+node_templates:
+
+  master_lswith:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: &nsx_auth
+        username: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        host: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+      switch:
+        name: master_swith_name
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
+  vresourcepool:
+    type: cloudify.vcenter.resource_pool
+    properties:
+      vcenter_auth: &vcenter_auth
+        username: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        host: { get_input: vcenter_ip }
+      use_external_resource: true
+      resource_pool:
+        name: Cluster
+
+  datastore:
+    type: cloudify.vcenter.datastore
+    properties:
+      vcenter_auth: *vcenter_auth
+      use_external_resource: true
+      datastore:
+        name: datastore1
+
+  datacenter:
+    type: cloudify.vcenter.datacenter
+    properties:
+      vcenter_auth: *vcenter_auth
+      use_external_resource: true
+      datacenter:
+        name: Datacenter
+
+  nsx_dlr:
+    type: cloudify.nsx.dlr
+    properties:
+      nsx_auth: *nsx_auth
+      router:
+        name: some_router_name
+        dlr_pwd: SeCrEt010203!
+        # compact, large, quadlarge, xlarge
+        dlr_size: compact
+      firewall:
+        # accept or deny
+        action: accept
+        # true or false
+        logging: false
+      dhcp:
+        enabled: true
+        syslog_enabled: false
+        syslog_level: INFO
+      routing:
+        enabled: true
+        routingGlobalConfig:
+          routerId: 192.168.1.11
+          logging:
+            logLevel: info
+            enable: false
+          ecmp: false
+        staticRouting:
+          defaultRoute:
+            # some address, will be replaced by default gateway
+            gatewayAddress: 192.168.1.43
+      bgp:
+        enabled: true
+        localAS: 12345
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            router:
+              datacentermoid: { get_attribute: [ datacenter, resource_id ] }
+              datastoremoid: { get_attribute: [ datastore, resource_id ] }
+              resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
+              ha_ls_id: { get_attribute: [ master_lswith, resource_id ] }
+              uplink_ls_id: { get_attribute: [ master_lswith, resource_id ] }
+              uplink_ip: 192.168.1.11
+              uplink_subnet: 255.255.255.0
+              uplink_dgw: 192.168.1.1
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: master_lswith
+      - type: cloudify.relationships.connected_to
+        target: vresourcepool
+      - type: cloudify.relationships.connected_to
+        target: datastore
+      - type: cloudify.relationships.connected_to
+        target: datacenter
