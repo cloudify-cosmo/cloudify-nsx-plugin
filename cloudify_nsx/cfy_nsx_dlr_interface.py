@@ -26,7 +26,7 @@ def create(**kwargs):
     )
 
     if use_existed:
-        ctx.logger.info("Used existed, no chnages made")
+        ctx.logger.info("Used existed, no changes made")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

@@ -124,7 +124,7 @@ node_templates:
             gatewayAddress: 192.168.1.43
       bgp:
         enabled: true
-        localAS: 12345
+        localAS: 64520
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -147,3 +147,40 @@ node_templates:
         target: datastore
       - type: cloudify.relationships.connected_to
         target: datacenter
+
+  bgp_neighbour:
+    type: cloudify.nsx.dlrBGPNeighbour
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            neighbour:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              ipAddress: 192.168.2.1
+              remoteAS: 64521
+              protocolAddress: 192.168.1.20
+              forwardingAddress: 192.168.1.11
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+
+  bgp_neighbour_filter:
+    type: cloudify.nsx.esgBGPNeighbourFilter
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            filter:
+              neighbour_id: { get_attribute: [ bgp_neighbour, resource_id ] }
+              action: deny
+              ipPrefixGe: 30
+              ipPrefixLe': 32
+              direction: in
+              network: 192.169.1.0/24
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: bgp_neighbour
