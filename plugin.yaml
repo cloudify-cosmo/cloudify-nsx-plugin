@@ -430,43 +430,6 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_dlr.delete
 
-  # distributed logical routers interface routing ip prefixes
-  # Optional. Required only if user wants to define redistribution
-  # rules in dynamic routing protocols like ospf, bgp
-  cloudify.nsx.dlr_routing_ip_prefix:
-    derived_from: cloudify.nodes.Port
-    properties:
-      # reuse id/name
-      use_external_resource:
-        default: false
-        type: boolean
-      # resource nsx id
-      resource_id:
-        required: false
-      nsx_auth:
-        type: nsx_auth_type
-      validate_prefix:
-        default:
-          dlr_id:
-            required: true
-          name:
-            required: true
-          ipAddress:
-            required: true
-      prefix:
-        default:
-          dlr_id: ""
-          # All the defined ipPrefix must have unique names
-          name: ""
-          # ip address like 10.112.196.160/24
-          ipAddress: ""
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
-        delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
-
   # distributed logical routers interface ospf areas, use only after all
   # interfaces creation!
   cloudify.nsx.ospf_areas:
@@ -580,6 +543,167 @@ node_types:
           implementation: nsx.cloudify_nsx.cfy_nsx_ospf_interface.create
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_ospf_interface.delete
+
+  # BGP Neighbour
+  cloudify.nsx.dlrBGPNeighbour:
+    derived_from: cloudify.nodes.Port
+    properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      nsx_auth:
+        type: nsx_auth_type
+      validate_neighbour:
+        default:
+          dlr_id:
+            required: true
+          ipAddress:
+            required: true
+          remoteAS:
+            required: true
+          forwardingAddress:
+            required: true
+          protocolAddress:
+            required: true
+          weight:
+            type: string
+            default: 60
+          holdDownTimer:
+            type: string
+            default: 180
+          keepAliveTimer:
+            type: string
+            default: 60
+          password:
+            set_none: true
+      neighbour:
+        default:
+          # dlr uuid
+          dlr_id: ""
+          # IPv4 only. IPv6 support not supported
+          ipAddress: ""
+          # Valid values are 0-65535
+          remoteAS: ""
+          # Optional. Default is 60. Valid values are 0-65535
+          weight: 60
+          # Optional. Default is 180 seconds. Valid values are : 2-65535.
+          holdDownTimer: 180
+          # Optional. Default is 60 seconds. Valid values are : 1-65534.
+          keepAliveTimer: 60
+          # Optional
+          password: ""
+          # ipAddress on one of the uplink interfaces,
+          # only for enabled and use logical switch as ospf
+          protocolAddress: ""
+          # ipAddress on the same subnet as the forwardingAddress,
+          # only for enabled and use logical switch as ospf
+          forwardingAddress: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.delete
+
+  # BGP Neighbour Filter
+  cloudify.nsx.esgBGPNeighbourFilter:
+    derived_from: cloudify.nodes.Port
+    properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      nsx_auth:
+        type: nsx_auth_type
+      validate_filter:
+        default:
+          neighbour_id:
+            required: true
+          action:
+            required: true
+            values:
+              - permit
+              - deny
+          ipPrefixGe:
+            type: string
+            set_none: true
+          ipPrefixLe:
+            type: string
+            set_none: true
+          direction:
+            required: true
+            values:
+              - in
+              - out
+          network:
+            required: true
+      filter:
+        default:
+          # neighbour rule
+          neighbour_id: ""
+          # Valid values are permit/deny
+          action: ""
+          # Optional. "Greater than or equal to" & used for filtering
+          # based on prefix length. Valid IPv4 prefixes
+          ipPrefixGe: ""
+          # Optional. "Less than or equal to" & used for filtering
+          # based on prefix length. Valid IPv4 prefixes
+          ipPrefixLe: ""
+          # Valid values are in/out
+          direction: ""
+          # Valid values are CIDR networks. IPv4 only.
+          # IPv6 support not supported
+          network: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_bgp_neighbour_filter.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_bgp_neighbour_filter.delete
+
+  # distributed logical routers interface routing ip prefixes
+  # Optional. Required only if user wants to define redistribution
+  # rules in dynamic routing protocols like ospf, bgp
+  cloudify.nsx.dlr_routing_ip_prefix:
+    derived_from: cloudify.nodes.Port
+    properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      nsx_auth:
+        type: nsx_auth_type
+      validate_prefix:
+        default:
+          dlr_id:
+            required: true
+          name:
+            required: true
+          ipAddress:
+            required: true
+      prefix:
+        default:
+          dlr_id: ""
+          # All the defined ipPrefix must have unique names
+          name: ""
+          # ip address like 10.112.196.160/24
+          ipAddress: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_stub.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_stub.delete
 
   # distributed logical routers interface ospf redistribution rule
   cloudify.nsx.ospf_redistribution_rule:
@@ -987,6 +1111,61 @@ node_types:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg.create
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_esg.delete
+
+  # BGP Neighbour
+  cloudify.nsx.esgBGPNeighbour:
+    derived_from: cloudify.nodes.Port
+    properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      nsx_auth:
+        type: nsx_auth_type
+      validate_neighbour:
+        default:
+          dlr_id:
+            required: true
+          ipAddress:
+            required: true
+          remoteAS:
+            required: true
+          weight:
+            type: string
+            default: 60
+          holdDownTimer:
+            type: string
+            default: 180
+          keepAliveTimer:
+            type: string
+            default: 60
+          password:
+            set_none: true
+      neighbour:
+        default:
+          # dlr uuid
+          dlr_id: ""
+          # IPv4 only. IPv6 support not supported
+          ipAddress: ""
+          # Valid values are 0-65535
+          remoteAS: ""
+          # Optional. Default is 60. Valid values are 0-65535
+          weight: 60
+          # Optional. Default is 180 seconds. Valid values are : 2-65535.
+          holdDownTimer: 180
+          # Optional. Default is 60 seconds. Valid values are : 1-65534.
+          keepAliveTimer: 60
+          # Optional
+          password: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.delete
 
   # edge services gateways interfaces
   cloudify.nsx.esg_nat:

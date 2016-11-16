@@ -20,38 +20,40 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, interface = common.get_properties_and_validate(
-        'interface', kwargs
+    use_existed, neighbour_filter = common.get_properties_and_validate(
+        'filter', kwargs
     )
+
+    if use_existed:
+        ctx.logger.info("Used existed, no changes made")
+        return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)
-        if not use_existed:
-            return
+        return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.esg_ospf_interface_add(client_session,
-                                   interface['dlr_id'],
-                                   interface['areaId'],
-                                   interface['vnic'],
-                                   use_existed,
-                                   interface['helloInterval'],
-                                   interface['deadInterval'],
-                                   interface['priority'],
-                                   interface['cost'])
+    resource_id = cfy_dlr.add_bgp_neighbour_filter(
+        client_session,
+        use_existed,
+        neighbour_filter['neighbour_id'],
+        neighbour_filter['action'],
+        neighbour_filter['ipPrefixGe'],
+        neighbour_filter['ipPrefixLe'],
+        neighbour_filter['direction'],
+        neighbour_filter['network']
+    )
 
-    resource_id = "%s|%s" % (str(interface['areaId']), str(interface['vnic']))
-    ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
 
 
 @operation
 def delete(**kwargs):
-    use_existed, interface = common.get_properties('interface', kwargs)
+    use_existed, neighbour = common.get_properties('neighbour', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -65,14 +67,11 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    ids = resource_id.split("|")
-    cfy_dlr.esg_ospf_interface_delete(
+    cfy_dlr.del_bgp_neighbour_filter(
         client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
-        ids[0],
-        ids[1]
+        resource_id
     )
 
-    ctx.logger.info("deleted %s" % resource_id)
+    ctx.logger.info("delete %s" % resource_id)
 
     ctx.instance.runtime_properties['resource_id'] = None

@@ -267,6 +267,339 @@ def bgp_create(client_session, esg_id, enabled, defaultOriginate,
     common.check_raw_result(raw_result)
 
 
+def add_bgp_neighbour(client_session, esg_id, use_existed, ipAddress,
+                      remoteAS, weight, holdDownTimer, keepAliveTimer,
+                      password, protocolAddress, forwardingAddress):
+    raw_result = client_session.read(
+        'routingBGP', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    current_bgp = raw_result['body']
+
+    if not current_bgp:
+        # for fully "disabled" case
+        current_bgp = {
+            'bgp': {}
+        }
+
+    if not current_bgp['bgp'].get('bgpNeighbours'):
+        current_bgp['bgp']['bgpNeighbours'] = {}
+    if not current_bgp['bgp']['bgpNeighbours'].get('bgpNeighbour'):
+        current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = []
+
+    bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    # case when we have only one element
+    if isinstance(bgp_neighbours, dict):
+        current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
+        bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    for bgp_neighbour in bgp_neighbours:
+        if bgp_neighbour['ipAddress'] != ipAddress:
+            continue
+
+        if str(bgp_neighbour['remoteAS']) != str(remoteAS):
+            continue
+
+        if forwardingAddress:
+            if bgp_neighbour['forwardingAddress'] != forwardingAddress:
+                continue
+
+        if protocolAddress:
+            if bgp_neighbour['protocolAddress'] != protocolAddress:
+                continue
+
+        if not use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You already have such rule"
+            )
+        else:
+            bgp_neighbour['weight'] = weight
+            bgp_neighbour['holdDownTimer'] = holdDownTimer
+            bgp_neighbour['keepAliveTimer'] = keepAliveTimer
+            bgp_neighbour['password'] = password
+            if protocolAddress:
+                bgp_neighbour['protocolAddress'] = protocolAddress
+            if forwardingAddress:
+                bgp_neighbour['forwardingAddress'] = forwardingAddress
+            use_existed = False
+            break
+
+    if use_existed:
+        raise cfy_exc.NonRecoverableError(
+            "You don't have such rule"
+        )
+    else:
+        bgp_neighbour = {
+            'ipAddress': ipAddress,
+            'remoteAS': remoteAS,
+            'weight': weight,
+            'holdDownTimer': holdDownTimer,
+            'keepAliveTimer': keepAliveTimer,
+            'password': password
+        }
+        if protocolAddress:
+            bgp_neighbour['protocolAddress'] = protocolAddress
+        if forwardingAddress:
+            bgp_neighbour['forwardingAddress'] = forwardingAddress
+        bgp_neighbours.append(bgp_neighbour)
+
+    raw_result = client_session.update(
+        'routingBGP', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=current_bgp
+    )
+
+    common.check_raw_result(raw_result)
+
+    return "%s|%s|%s|%s|%s" % (
+        esg_id, ipAddress, remoteAS,
+        protocolAddress if protocolAddress else "",
+        forwardingAddress if forwardingAddress else ""
+    )
+
+
+def del_bgp_neighbour(client_session, neighbour_id):
+
+    ids = neighbour_id.split("|")
+
+    esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+
+    raw_result = client_session.read(
+        'routingBGP', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    current_bgp = raw_result['body']
+
+    if not current_bgp:
+        raise cfy_exc.NonRecoverableError(
+            "You don't have such rule"
+        )
+
+    if not current_bgp['bgp'].get('bgpNeighbours'):
+        return
+    if not current_bgp['bgp']['bgpNeighbours'].get('bgpNeighbour'):
+        return
+
+    bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    # case when we have only one element
+    if isinstance(bgp_neighbours, dict):
+        current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
+        bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    for i in xrange(len(bgp_neighbours)):
+        bgp_neighbour = bgp_neighbours[i]
+        if bgp_neighbour['ipAddress'] != ipAddress:
+            continue
+
+        if str(bgp_neighbour['remoteAS']) != str(remoteAS):
+            continue
+
+        if forwardingAddress:
+            if bgp_neighbour['forwardingAddress'] != forwardingAddress:
+                continue
+
+        if protocolAddress:
+            if bgp_neighbour['protocolAddress'] != protocolAddress:
+                continue
+
+        bgp_neighbours.remove(bgp_neighbour)
+        break
+
+    raw_result = client_session.update(
+        'routingBGP', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=current_bgp
+    )
+
+    common.check_raw_result(raw_result)
+
+
+def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
+                             action, ipPrefixGe, ipPrefixLe, direction,
+                             network):
+    ids = neighbour_id.split("|")
+
+    esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+
+    raw_result = client_session.read(
+        'routingBGP', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    current_bgp = raw_result['body']
+
+    if not current_bgp:
+        # for fully "disabled" case
+        current_bgp = {
+            'bgp': {}
+        }
+
+    if not current_bgp['bgp'].get('bgpNeighbours'):
+        current_bgp['bgp']['bgpNeighbours'] = {}
+    if not current_bgp['bgp']['bgpNeighbours'].get('bgpNeighbour'):
+        current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = []
+
+    bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    # case when we have only one element
+    if isinstance(bgp_neighbours, dict):
+        current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
+        bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    bgp_neighbour_rule = False
+
+    for bgp_neighbour in bgp_neighbours:
+        if bgp_neighbour['ipAddress'] != ipAddress:
+            continue
+
+        if str(bgp_neighbour['remoteAS']) != str(remoteAS):
+            continue
+
+        if forwardingAddress:
+            if bgp_neighbour['forwardingAddress'] != forwardingAddress:
+                continue
+
+        if protocolAddress:
+            if bgp_neighbour['protocolAddress'] != protocolAddress:
+                continue
+
+        bgp_neighbour_rule = bgp_neighbour
+
+    if not bgp_neighbour_rule:
+        raise cfy_exc.NonRecoverableError(
+            "You don't have such rule"
+        )
+
+    if not bgp_neighbour_rule.get('bgp_neighbour_rule'):
+        bgp_neighbour_rule['bgpFilters'] = {}
+    if not bgp_neighbour_rule['bgpFilters'].get('bgpFilter'):
+        bgp_neighbour_rule['bgpFilters']['bgpFilter'] = []
+
+    bgp_filters = bgp_neighbour_rule['bgpFilters']['bgpFilter']
+    if isinstance(bgp_filters, dict):
+        bgp_neighbour_rule['bgpFilters']['bgpFilter'] = [bgp_filters]
+        bgp_filters = bgp_neighbour_rule['bgpFilters']['bgpFilter']
+
+    for bgp_filter in bgp_filters:
+        if str(bgp_filter['network']) != network:
+            continue
+        if not use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You already have such filter(same network)"
+            )
+        else:
+            bgp_filter['action'] = action
+            bgp_filter['ipPrefixGe'] = ipPrefixGe
+            bgp_filter['ipPrefixLe'] = ipPrefixLe
+            bgp_filter['direction'] = direction
+            use_existed = False
+            break
+
+    if use_existed:
+        raise cfy_exc.NonRecoverableError(
+            "You don't have such rule"
+        )
+    else:
+        bgp_filter = {
+            'network': network,
+            'action': action,
+            'ipPrefixGe': ipPrefixGe,
+            'ipPrefixLe':  ipPrefixLe,
+            'direction':  direction
+        }
+        bgp_filters.append(bgp_filter)
+
+    raw_result = client_session.update(
+        'routingBGP', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=current_bgp
+    )
+
+    common.check_raw_result(raw_result)
+
+    return str(network) + "|" + neighbour_id
+
+
+def del_bgp_neighbour_filter(client_session, resource_id):
+    ids = resource_id.split("|")
+
+    network = ids[0]
+    esg_id = ids[1]
+    ipAddress = ids[2]
+    remoteAS = ids[3]
+    protocolAddress = ids[4]
+    forwardingAddress = ids[5]
+
+    raw_result = client_session.read(
+        'routingBGP', uri_parameters={'edgeId':  esg_id})
+
+    common.check_raw_result(raw_result)
+
+    current_bgp = raw_result['body']
+
+    if not current_bgp:
+        return
+
+    if not current_bgp['bgp'].get('bgpNeighbours'):
+        return
+    if not current_bgp['bgp']['bgpNeighbours'].get('bgpNeighbour'):
+        return
+
+    bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    # case when we have only one element
+    if isinstance(bgp_neighbours, dict):
+        current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
+        bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
+
+    bgp_neighbour_rule = False
+
+    for bgp_neighbour in bgp_neighbours:
+        if bgp_neighbour['ipAddress'] != ipAddress:
+            continue
+
+        if str(bgp_neighbour['remoteAS']) != str(remoteAS):
+            continue
+
+        if forwardingAddress:
+            if bgp_neighbour['forwardingAddress'] != forwardingAddress:
+                continue
+
+        if protocolAddress:
+            if bgp_neighbour['protocolAddress'] != protocolAddress:
+                continue
+
+        bgp_neighbour_rule = bgp_neighbour
+
+    if not bgp_neighbour_rule:
+        return
+
+    if not bgp_neighbour_rule.get('bgp_neighbour_rule'):
+        return
+    if not bgp_neighbour_rule['bgpFilters'].get('bgpFilter'):
+        return
+
+    bgp_filters = bgp_neighbour_rule['bgpFilters']['bgpFilter']
+    if isinstance(bgp_filters, dict):
+        bgp_neighbour_rule['bgpFilters']['bgpFilter'] = [bgp_filters]
+        bgp_filters = bgp_neighbour_rule['bgpFilters']['bgpFilter']
+
+    for i in xrange(bgp_filters):
+        bgp_filter = bgp_filters[i]
+        if str(bgp_filter['network']) != network:
+            continue
+        bgp_filters.remove(bgp_filter)
+        break
+
+    raw_result = client_session.update(
+        'routingBGP', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=current_bgp
+    )
+
+    common.check_raw_result(raw_result)
+
+
 def ospf_create(client_session, esg_id, enabled, defaultOriginate,
                 gracefulRestart, redistribution, protocolAddress=None,
                 forwardingAddress=None):
@@ -343,14 +676,17 @@ def esg_ospf_area_add(client_session, esg_id, area_id, use_existed, area_type,
         ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
 
     for area in ospf_areas:
-        if str(area['areaId']) == str(area_id):
-            if not use_existed:
-                raise cfy_exc.NonRecoverableError(
-                    "You already have such rule"
-                )
-            else:
-                ospf_areas['type'] = area_type
-                ospf_areas['authentication'] = auth
+        if str(area['areaId']) != str(area_id):
+            continue
+        if not use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You already have such rule"
+            )
+        else:
+            area['type'] = area_type
+            area['authentication'] = auth
+            use_existed = False
+            break
 
     if use_existed:
         raise cfy_exc.NonRecoverableError(
@@ -404,10 +740,12 @@ def esg_ospf_interface_add(client_session, esg_id, area_id, vnic, use_existed,
                 "You already have such rule"
             )
         else:
-            ospf_interfaces['helloInterval'] = hello_interval
-            ospf_interfaces['deadInterval'] = dead_interval
-            ospf_interfaces['priority'] = priority
-            ospf_interfaces['cost'] = cost
+            interface['helloInterval'] = hello_interval
+            interface['deadInterval'] = dead_interval
+            interface['priority'] = priority
+            interface['cost'] = cost
+            use_existed = False
+            break
 
     if use_existed:
         raise cfy_exc.NonRecoverableError(
