@@ -163,6 +163,46 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_vcenter_dvportgroup.delete
 
+  # SecuriteGroup
+  cloudify.nsx.security_group:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      nsx_auth:
+        type: nsx_auth_type
+      validate_group:
+        default:
+          scopeId:
+            default: globalroot-0
+            required: true
+          name:
+            required: true
+          member:
+            set_none: true
+          excludeMember:
+            set_none: true
+          dynamicMemberDefinition:
+            set_none: true
+      group:
+        default:
+          scopeId: globalroot-0
+          name: ""
+          member: {}
+          excludeMember: {}
+          dynamicMemberDefinition: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_group.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_group.delete
+
   # logical switches
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Network
