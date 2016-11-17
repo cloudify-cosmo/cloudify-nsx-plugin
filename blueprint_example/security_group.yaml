@@ -62,3 +62,15 @@ node_templates:
       group:
         scopeId: globalroot-0
         name: MasterSecureGroup
+
+  master_security_policy:
+    type: cloudify.nsx.security_policy
+    properties:
+      nsx_auth: *nsx_auth
+      policy:
+        name: MasterPolicy
+        description: MasterPolicy
+        precedence: 100
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: master_security_group

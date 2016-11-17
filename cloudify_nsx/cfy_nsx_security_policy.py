@@ -21,8 +21,8 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, group = common.get_properties_and_validate(
-        'group', kwargs
+    use_existed, policy = common.get_properties_and_validate(
+        'policy', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
@@ -34,9 +34,8 @@ def create(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if not resource_id:
-        resource_id = nsx_security_group.get_group(client_session,
-                                             group['scopeId'],
-                                             group['name'])
+        resource_id = nsx_security_group.get_policy(client_session,
+                                                    policy['name'])
 
         if use_existed and resource_id:
             ctx.instance.runtime_properties['resource_id'] = resource_id
@@ -47,13 +46,14 @@ def create(**kwargs):
             )
 
     if not resource_id:
-        resource_id = nsx_security_group.add_group(
+        resource_id = nsx_security_group.add_policy(
             client_session,
-            group['scopeId'],
-            group['name'],
-            group['member'],
-            group['excludeMember'],
-            group['dynamicMemberDefinition']
+            policy['name'],
+            policy['description'],
+            policy['precedence'],
+            policy['parent'],
+            policy['securityGroupBinding'],
+            policy['actionsByCategory']
         )
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
@@ -76,7 +76,7 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    nsx_security_group.del_group(
+    nsx_security_group.del_policy(
         client_session,
         resource_id
     )

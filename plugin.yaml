@@ -203,6 +203,49 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_security_group.delete
 
+  # SecuriteGroup
+  cloudify.nsx.security_policy:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      nsx_auth:
+        type: nsx_auth_type
+      validate_policy:
+        default:
+          name:
+            required: true
+          description:
+            set_none: true
+          precedence:
+            type: string
+            required: true
+          parent:
+            set_none: true
+          securityGroupBinding:
+            set_none: true
+          actionsByCategory:
+            set_none: true
+      policy:
+        default:
+          name: ""
+          description: ""
+          precedence: ""
+          parent: ""
+          securityGroupBinding: ""
+          actionsByCategory: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy.delete
+
   # logical switches
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Network
@@ -763,7 +806,6 @@ node_types:
           dlr_id:
             required: true
           prefixName:
-            set_none: true
             default: any
           from:
             set_none: true

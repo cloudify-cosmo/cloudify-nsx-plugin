@@ -14,7 +14,27 @@
 import nsx_common as common
 
 
-def get(client_session, scopeId, name):
+def get_policy(client_session, name):
+    raw_result = client_session.read('securityPolicyID', uri_parameters={'ID': "all"})
+
+    common.check_raw_result(raw_result)
+
+    if not 'securityPolicies' in raw_result['body']:
+        return None
+
+    policies = raw_result['body']['securityPolicies'].get('securityPolicy')
+
+    if isinstance(policies, dict):
+        groups = [policies]
+
+    for policy in policies:
+        if policy.get('name') == name:
+            return policy.get('objectId')
+
+    return None
+
+
+def get_group(client_session, scopeId, name):
     raw_result = client_session.read('secGroupScope',
                                      uri_parameters={'scopeId': scopeId})
 
@@ -57,8 +77,38 @@ def add_group(client_session, scopeId, name, member, excludeMember,
     return raw_result['objectId']
 
 
+def add_policy(client_session, name, description, precedence, parent,
+               securityGroupBinding, actionsByCategory):
+
+    security_policy = {
+        'securityPolicy': {
+            "name": name,
+            "description": description,
+            "precedence": precedence,
+            "parent": parent,
+            "securityGroupBinding": securityGroupBinding,
+            "actionsByCategory": actionsByCategory
+        }
+    }
+
+    raw_result = client_session.create(
+        'securityPolicy', request_body_dict=security_policy
+    )
+
+    common.check_raw_result(raw_result)
+
+    return raw_result['objectId']
+
+
 def del_group(client_session, resource_id):
 
     client_session.delete('secGroupObject',
                           uri_parameters={'objectId': resource_id},
+                          query_parameters_dict={'force': 'true'})
+
+
+def del_policy(client_session, resource_id):
+
+    client_session.delete('securityPolicyID',
+                          uri_parameters={'ID': resource_id},
                           query_parameters_dict={'force': 'true'})
