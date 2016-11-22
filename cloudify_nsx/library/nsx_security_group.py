@@ -15,7 +15,8 @@ import nsx_common as common
 
 
 def get_policy(client_session, name):
-    raw_result = client_session.read('securityPolicyID', uri_parameters={'ID': "all"})
+    raw_result = client_session.read('securityPolicyID',
+                                     uri_parameters={'ID': "all"})
 
     common.check_raw_result(raw_result)
 
@@ -25,7 +26,7 @@ def get_policy(client_session, name):
     policies = raw_result['body']['securityPolicies'].get('securityPolicy')
 
     if isinstance(policies, dict):
-        groups = [policies]
+        policies = [policies]
 
     for policy in policies:
         if policy.get('name') == name:

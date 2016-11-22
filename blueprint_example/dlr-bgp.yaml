@@ -125,6 +125,7 @@ node_templates:
       bgp:
         enabled: true
         localAS: 64520
+        redistribution: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -183,4 +184,44 @@ node_templates:
               network: 192.169.1.0/24
     relationships:
       - type: cloudify.relationships.contained_in
+        target: bgp_neighbour
+
+  dlr_ip_prefix:
+    type: cloudify.nsx.dlr_routing_ip_prefix
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            prefix:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              name: Some_secret_name
+              ipAddress: 10.112.196.160/24
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+
+  dlr_bgp_redistribute:
+    type: cloudify.nsx.routing_redistribution_rule
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            rule:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              prefixName: { get_attribute: [ dlr_ip_prefix, prefix, name ] }
+              type: bgp
+              from:
+                ospf: true
+                static: true
+              action: deny
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+      - type: cloudify.relationships.depends_on
+        target: dlr_ip_prefix
+      - type: cloudify.relationships.depends_on
         target: bgp_neighbour

@@ -784,12 +784,12 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_routing_ip_prefix.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_routing_ip_prefix.delete
 
   # distributed logical routers interface ospf redistribution rule
-  cloudify.nsx.ospf_redistribution_rule:
+  cloudify.nsx.routing_redistribution_rule:
     derived_from: cloudify.nodes.Port
     properties:
       # reuse id/name
@@ -805,6 +805,11 @@ node_types:
         default:
           dlr_id:
             required: true
+          type:
+            required: true
+            values:
+              - bgp
+              - ospf
           prefixName:
             default: any
           from:
@@ -834,6 +839,8 @@ node_types:
         default:
           # dlr uuid
           dlr_id: ""
+          # resdistribute section ospf/bgp
+          type: ""
           # Optional. Default is "any". prefixName used here should be
           # defined in the routingGlobalConfig->ipPrefixes
           prefixName: any
@@ -853,9 +860,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_stub.create
+          implementation: nsx.cloudify_nsx.cfy_nsx_routing_redistribution.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_stub.delete
+          implementation: nsx.cloudify_nsx.cfy_nsx_routing_redistribution.delete
 
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
