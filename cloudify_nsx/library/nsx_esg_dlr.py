@@ -85,8 +85,10 @@ def get_uplink_vnic(client_session, esg_id, uplink_ls_id):
     raw_result = client_session.read(
         'interfaces', uri_parameters={'edgeId': esg_id}
     )
-    interfaces_struct = raw_result['body']
     common.check_raw_result(raw_result)
+
+    interfaces_struct = raw_result['body']
+
     interfaces = interfaces_struct.get('interfaces', {}).get('interface')
     if not interfaces:
         raise cfy_exc.RecoverableError(
@@ -132,8 +134,12 @@ def dhcp_server(client_session, esg_id, enabled=None, syslog_enabled=None,
     """
     change_needed = False
 
-    current_dhcp_config = client_session.read(
-        'dhcp', uri_parameters={'edgeId': esg_id})['body']
+    raw_result = client_session.read(
+        'dhcp', uri_parameters={'edgeId': esg_id})
+
+    common.check_raw_result(raw_result)
+
+    current_dhcp_config = raw_result['body']
 
     new_dhcp_config = current_dhcp_config
 
@@ -295,6 +301,8 @@ def add_bgp_neighbour(client_session, esg_id, use_existed, ipAddress,
         current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
         bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
 
+    need_add = True
+
     for bgp_neighbour in bgp_neighbours:
         if bgp_neighbour['ipAddress'] != ipAddress:
             continue
@@ -323,27 +331,28 @@ def add_bgp_neighbour(client_session, esg_id, use_existed, ipAddress,
                 bgp_neighbour['protocolAddress'] = protocolAddress
             if forwardingAddress:
                 bgp_neighbour['forwardingAddress'] = forwardingAddress
-            use_existed = False
+            need_add = False
             break
 
-    if use_existed:
-        raise cfy_exc.NonRecoverableError(
-            "You don't have such rule"
-        )
-    else:
-        bgp_neighbour = {
-            'ipAddress': ipAddress,
-            'remoteAS': remoteAS,
-            'weight': weight,
-            'holdDownTimer': holdDownTimer,
-            'keepAliveTimer': keepAliveTimer,
-            'password': password
-        }
-        if protocolAddress:
-            bgp_neighbour['protocolAddress'] = protocolAddress
-        if forwardingAddress:
-            bgp_neighbour['forwardingAddress'] = forwardingAddress
-        bgp_neighbours.append(bgp_neighbour)
+    if need_add:
+        if use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You don't have such rule"
+            )
+        else:
+            bgp_neighbour = {
+                'ipAddress': ipAddress,
+                'remoteAS': remoteAS,
+                'weight': weight,
+                'holdDownTimer': holdDownTimer,
+                'keepAliveTimer': keepAliveTimer,
+                'password': password
+            }
+            if protocolAddress:
+                bgp_neighbour['protocolAddress'] = protocolAddress
+            if forwardingAddress:
+                bgp_neighbour['forwardingAddress'] = forwardingAddress
+            bgp_neighbours.append(bgp_neighbour)
 
     raw_result = client_session.update(
         'routingBGP', uri_parameters={'edgeId': str(esg_id)},
@@ -389,8 +398,7 @@ def del_bgp_neighbour(client_session, neighbour_id):
         current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
         bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
 
-    for i in xrange(len(bgp_neighbours)):
-        bgp_neighbour = bgp_neighbours[i]
+    for bgp_neighbour in bgp_neighbours:
         if bgp_neighbour['ipAddress'] != ipAddress:
             continue
 
@@ -482,6 +490,8 @@ def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
         bgp_neighbour_rule['bgpFilters']['bgpFilter'] = [bgp_filters]
         bgp_filters = bgp_neighbour_rule['bgpFilters']['bgpFilter']
 
+    need_add = True
+
     for bgp_filter in bgp_filters:
         if str(bgp_filter['network']) != network:
             continue
@@ -494,22 +504,23 @@ def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
             bgp_filter['ipPrefixGe'] = ipPrefixGe
             bgp_filter['ipPrefixLe'] = ipPrefixLe
             bgp_filter['direction'] = direction
-            use_existed = False
+            need_add = False
             break
 
-    if use_existed:
-        raise cfy_exc.NonRecoverableError(
-            "You don't have such rule"
-        )
-    else:
-        bgp_filter = {
-            'network': network,
-            'action': action,
-            'ipPrefixGe': ipPrefixGe,
-            'ipPrefixLe':  ipPrefixLe,
-            'direction':  direction
-        }
-        bgp_filters.append(bgp_filter)
+    if need_add:
+        if use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You don't have such rule"
+            )
+        else:
+            bgp_filter = {
+                'network': network,
+                'action': action,
+                'ipPrefixGe': ipPrefixGe,
+                'ipPrefixLe':  ipPrefixLe,
+                'direction':  direction
+            }
+            bgp_filters.append(bgp_filter)
 
     raw_result = client_session.update(
         'routingBGP', uri_parameters={'edgeId': str(esg_id)},
@@ -585,8 +596,7 @@ def del_bgp_neighbour_filter(client_session, resource_id):
         bgp_neighbour_rule['bgpFilters']['bgpFilter'] = [bgp_filters]
         bgp_filters = bgp_neighbour_rule['bgpFilters']['bgpFilter']
 
-    for i in xrange(bgp_filters):
-        bgp_filter = bgp_filters[i]
+    for bgp_filter in bgp_filters:
         if str(bgp_filter['network']) != network:
             continue
         bgp_filters.remove(bgp_filter)
@@ -675,6 +685,8 @@ def esg_ospf_area_add(client_session, esg_id, area_id, use_existed, area_type,
         ospf['ospf']['ospfAreas']['ospfArea'] = [ospf_areas]
         ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
 
+    need_add = True
+
     for area in ospf_areas:
         if str(area['areaId']) != str(area_id):
             continue
@@ -685,18 +697,19 @@ def esg_ospf_area_add(client_session, esg_id, area_id, use_existed, area_type,
         else:
             area['type'] = area_type
             area['authentication'] = auth
-            use_existed = False
+            need_add = False
             break
 
-    if use_existed:
-        raise cfy_exc.NonRecoverableError(
-            "You don't have such rule"
-        )
-    else:
-        ospf_areas.append({
-            'areaId': area_id,
-            'type': area_type,
-            'authentication': auth})
+    if need_add:
+        if use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You don't have such rule"
+            )
+        else:
+            ospf_areas.append({
+                'areaId': area_id,
+                'type': area_type,
+                'authentication': auth})
 
     raw_result = client_session.update(
         'routingOSPF', uri_parameters={'edgeId':  esg_id},
@@ -728,6 +741,8 @@ def esg_ospf_interface_add(client_session, esg_id, area_id, vnic, use_existed,
         ospf['ospf']['ospfInterfaces']['ospfInterface'] = [ospf_interfaces]
         ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
 
+    need_add = True
+
     for interface in ospf_interfaces:
         if str(interface['areaId']) != str(area_id):
             continue
@@ -744,21 +759,22 @@ def esg_ospf_interface_add(client_session, esg_id, area_id, vnic, use_existed,
             interface['deadInterval'] = dead_interval
             interface['priority'] = priority
             interface['cost'] = cost
-            use_existed = False
+            need_add = False
             break
 
-    if use_existed:
-        raise cfy_exc.NonRecoverableError(
-            "You don't have such rule"
-        )
-    else:
-        ospf_interfaces.append({
-            'vnic': vnic,
-            'areaId': area_id,
-            'helloInterval': hello_interval,
-            'deadInterval': dead_interval,
-            'priority': priority,
-            'cost': cost})
+    if need_add:
+        if use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You don't have such rule"
+            )
+        else:
+            ospf_interfaces.append({
+                'vnic': vnic,
+                'areaId': area_id,
+                'helloInterval': hello_interval,
+                'deadInterval': dead_interval,
+                'priority': priority,
+                'cost': cost})
 
     raw_result = client_session.update(
         'routingOSPF', uri_parameters={'edgeId':  esg_id},
@@ -788,9 +804,10 @@ def esg_ospf_area_delete(client_session, esg_id, area_id):
         ospf['ospf']['ospfAreas']['ospfArea'] = [ospf_areas]
         ospf_areas = ospf['ospf']['ospfAreas']['ospfArea']
 
-    for i in xrange(len(ospf_areas)):
-        if str(ospf_areas[i]['areaId']) == str(area_id):
-            ospf_areas.remove(ospf_areas[i])
+    for ospf_area in ospf_areas:
+        if str(ospf_area['areaId']) == str(area_id):
+            ospf_areas.remove(ospf_area)
+            break
 
     raw_result = client_session.update(
         'routingOSPF', uri_parameters={'edgeId':  esg_id},
@@ -819,14 +836,15 @@ def esg_ospf_interface_delete(client_session, esg_id, area_id, vnic):
         ospf['ospf']['ospfInterfaces']['ospfInterface'] = [ospf_interfaces]
         ospf_interfaces = ospf['ospf']['ospfInterfaces']['ospfInterface']
 
-    for i in xrange(len(ospf_interfaces)):
-        if str(ospf_interfaces[i]['areaId']) != str(area_id):
+    for ospf_interface in ospf_interfaces:
+        if str(ospf_interface['areaId']) != str(area_id):
             continue
 
-        if str(ospf_interfaces[i]['vnic']) != str(vnic):
+        if str(ospf_interface['vnic']) != str(vnic):
             continue
 
-        ospf_interfaces.remove(ospf_interfaces[i])
+        ospf_interfaces.remove(ospf_interface)
+        break
 
     raw_result = client_session.update(
         'routingOSPF', uri_parameters={'edgeId':  esg_id},
@@ -1019,3 +1037,271 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
             raise cfy_exc.NonRecoverableError(
                 "Can't change nat rules"
             )
+
+
+def add_routing_prefix(client_session, use_existed, esg_id, name, ipAddress):
+
+    raw_result = client_session.read(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)})
+
+    common.check_raw_result(raw_result)
+
+    routing = raw_result['body']
+
+    if not routing:
+        routing = {
+            'routing': {}
+        }
+
+    if not routing['routing'].get('routingGlobalConfig'):
+        routing['routing']['routingGlobalConfig'] = {}
+
+    if not routing['routing']['routingGlobalConfig'].get('ipPrefixes'):
+        routing['routing']['routingGlobalConfig']['ipPrefixes'] = {}
+
+    prefixes_parent = routing['routing']['routingGlobalConfig']['ipPrefixes']
+
+    if not prefixes_parent.get('ipPrefix'):
+        prefixes_parent['ipPrefix'] = []
+
+    prefixes = prefixes_parent['ipPrefix']
+
+    if isinstance(prefixes, dict):
+        prefixes_parent['ipPrefix'] = [prefixes]
+        prefixes = prefixes_parent['ipPrefix']
+
+    need_add = True
+    for prefix in prefixes:
+        if prefix['name'] != name:
+            continue
+
+        if not use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You already have such prefix"
+            )
+        else:
+            prefix['ipAddress'] = ipAddress
+            need_add = False
+            break
+
+    if need_add:
+        if use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You don't have such prefix"
+            )
+        else:
+            prefix = {
+                'name': name,
+                'ipAddress': ipAddress
+            }
+            prefixes.append(prefix)
+
+    raw_result = client_session.update(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=routing
+    )
+
+    common.check_raw_result(raw_result)
+
+    return "%s|%s" % (esg_id, name)
+
+
+def del_routing_prefix(client_session, resource_id):
+
+    esg_id, name = resource_id.split("|")
+
+    raw_result = client_session.read(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)})
+
+    common.check_raw_result(raw_result)
+
+    routing = raw_result['body']
+
+    if not routing:
+        return
+
+    if not routing['routing'].get('routingGlobalConfig'):
+        return
+
+    if not routing['routing']['routingGlobalConfig'].get('ipPrefixes'):
+        return
+
+    prefixes_parent = routing['routing']['routingGlobalConfig']['ipPrefixes']
+
+    if not prefixes_parent.get('ipPrefix'):
+        return
+
+    prefixes = prefixes_parent['ipPrefix']
+
+    if isinstance(prefixes, dict):
+        prefixes_parent['ipPrefix'] = [prefixes]
+        prefixes = prefixes_parent['ipPrefix']
+
+    for prefix in prefixes:
+        if prefix['name'] != name:
+            continue
+
+        prefixes.remove(prefix)
+        break
+
+    raw_result = client_session.update(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=routing
+    )
+
+    common.check_raw_result(raw_result)
+
+
+def add_routing_rule(client_session, use_existed, esg_id, routing_type,
+                     prefixName, routing_from, action):
+
+    # convert boolean to 'correct' string values for routing
+    for key in routing_from:
+        if routing_from[key]:
+            routing_from[key] = "true"
+        else:
+            routing_from[key] = "false"
+
+    raw_result = client_session.read(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)})
+
+    common.check_raw_result(raw_result)
+
+    routing = raw_result['body']
+
+    if not routing:
+        routing = {
+            'routing': {}
+        }
+
+    # search routing type
+    if routing_type in routing['routing']:
+        routing_sub_dict = routing['routing'][routing_type]
+
+    if not isinstance(routing_sub_dict, dict):
+        routing['routing'][routing_type] = routing_sub_dict = {}
+
+    # seach redistribution
+    if 'redistribution' in routing_sub_dict:
+        redistribution = routing_sub_dict['redistribution']
+
+    if not isinstance(redistribution, dict):
+        redistribution = routing_sub_dict['redistribution'] = {}
+
+    # parent rules
+    if 'rules' in redistribution:
+        redistribution_rules = redistribution['rules']
+
+    if not isinstance(redistribution_rules, dict):
+        redistribution['rules'] = redistribution_rules = {}
+
+    # rules dict
+    if 'rule' not in redistribution_rules:
+        redistribution_rules['rule'] = []
+
+    rules = redistribution_rules['rule']
+    if isinstance(rules, dict):
+        redistribution_rules['rule'] = [rules]
+        rules = redistribution_rules['rule']
+
+    need_add = True
+
+    for rule in rules:
+        if rule['prefixName'] != prefixName:
+            continue
+
+        if not use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You already have such rule"
+            )
+        else:
+            rule['from'] = routing_from
+            rule['action'] = action
+            need_add = False
+            break
+
+    if need_add:
+        if use_existed:
+            raise cfy_exc.NonRecoverableError(
+                "You don't have such rule"
+            )
+        else:
+            rule = {
+                'prefixName': prefixName,
+                'from': routing_from,
+                'action': action
+            }
+            rules.append(rule)
+
+    raw_result = client_session.update(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=routing
+    )
+
+    common.check_raw_result(raw_result)
+
+    return "%s|%s|%s" % (esg_id, routing_type, prefixName)
+
+
+def del_routing_rule(client_session, resource_id):
+
+    esg_id, routing_type, prefixName = resource_id.split("|")
+
+    raw_result = client_session.read(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)})
+
+    common.check_raw_result(raw_result)
+
+    routing = raw_result['body']
+
+    if not routing:
+        return
+
+    # search routing type
+    if routing_type in routing['routing']:
+        routing_sub_dict = routing['routing'][routing_type]
+
+    if not isinstance(routing_sub_dict, dict):
+        routing['routing'][routing_type] = routing_sub_dict = {}
+
+    # seach redistribution
+    if 'redistribution' in routing_sub_dict:
+        redistribution = routing_sub_dict['redistribution']
+
+    if not isinstance(redistribution, dict):
+        redistribution = routing_sub_dict['redistribution'] = {}
+
+    # parent rules
+    if 'rules' in redistribution:
+        redistribution_rules = redistribution['rules']
+
+    if not isinstance(redistribution_rules, dict):
+        redistribution['rules'] = redistribution_rules = {}
+
+    # rules dict
+    if 'rule' not in redistribution_rules:
+        redistribution_rules['rule'] = []
+
+    rules = redistribution_rules['rule']
+    if isinstance(rules, dict):
+        redistribution_rules['rule'] = [rules]
+        rules = redistribution_rules['rule']
+
+    need_save = False
+    for rule in rules:
+        if rule['prefixName'] != prefixName:
+            continue
+
+        rules.remove(rule)
+        need_save = True
+        break
+
+    if not need_save:
+        return
+
+    raw_result = client_session.update(
+        'routingConfig', uri_parameters={'edgeId': str(esg_id)},
+        request_body_dict=routing
+    )
+
+    common.check_raw_result(raw_result)

@@ -67,10 +67,25 @@ node_templates:
     type: cloudify.nsx.security_policy
     properties:
       nsx_auth: *nsx_auth
-      policy:
-        name: MasterPolicy
-        description: MasterPolicy
-        precedence: 100
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy:
+              name: MasterPolicy
+              description: MasterPolicy
+              precedence: 100
+              actionsByCategory:
+                category: firewall
+                action:
+                  '@class': firewallSecurityAction
+                  name: name
+                  description: description
+                  category: firewall
+                  secondarySecurityGroup:
+                    objectId: { get_attribute: [ master_security_group, resource_id ] }
+                  action: allow
+                  direction: inbound
     relationships:
       - type: cloudify.relationships.connected_to
         target: master_security_group
