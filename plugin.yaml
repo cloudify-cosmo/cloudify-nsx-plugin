@@ -167,6 +167,8 @@ node_types:
   cloudify.nsx.security_group:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -174,8 +176,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_group:
         default:
           scopeId:
@@ -203,10 +203,12 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_security_group.delete
 
-  # SecuriteGroup
+  # Security Group Policy
   cloudify.nsx.security_policy:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -214,8 +216,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_policy:
         default:
           name:
@@ -250,6 +250,8 @@ node_types:
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Network
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -269,8 +271,11 @@ node_types:
           mode:
             required: false
             external_use: false
-      nsx_auth:
-        type: nsx_auth_type
+            set_none: true
+            values:
+              - UNICAST_MODE
+              - MULTYCAST_MODE
+              - HYBRID_MODE
       switch:
         default:
           # The name of the Scope (Transport Zone)
@@ -290,6 +295,8 @@ node_types:
   cloudify.nsx.dlr:
     derived_from: cloudify.nodes.Router
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -297,8 +304,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_router:
         default:
           name:
@@ -370,6 +375,16 @@ node_types:
             type: boolean
           syslog_level:
             default: INFO
+            caseinsensitive: true
+            values:
+              - EMERGENCY
+              - ALERT
+              - CRITICAL
+              - ERROR
+              - WARNING
+              - NOTICE
+              - INFO
+              - DEBUG
       dhcp:
         default:
           # True/False The desired state of the DHCP Server
@@ -404,8 +419,18 @@ node_types:
                 type: boolean
               logging:
                 sub:
-                 logLevel:
-                   default: info
+                  logLevel:
+                    default: INFO
+                    caseinsensitive: true
+                    values:
+                      - EMERGENCY
+                      - ALERT
+                      - CRITICAL
+                      - ERROR
+                      - WARNING
+                      - NOTICE
+                      - INFO
+                      - DEBUG
                 enable:
                    default: false
                    type: boolean
@@ -428,7 +453,7 @@ node_types:
             routerId: ''
             # Optional. When absent, enable=false and logLevel=INFO
             logging:
-              logLevel: info
+              logLevel: INFO
               enable: false
             # Optional. Defaults to false.
             ecmp: false
@@ -518,6 +543,8 @@ node_types:
   cloudify.nsx.ospf_areas:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -525,8 +552,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_area:
         default:
           dlr_id:
@@ -575,6 +600,8 @@ node_types:
   cloudify.nsx.ospf_interfaces:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -582,8 +609,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_interface:
         default:
           dlr_id:
@@ -631,6 +656,8 @@ node_types:
   cloudify.nsx.dlrBGPNeighbour:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -638,8 +665,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_neighbour:
         default:
           dlr_id:
@@ -696,6 +721,8 @@ node_types:
   cloudify.nsx.esgBGPNeighbourFilter:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -703,8 +730,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_filter:
         default:
           neighbour_id:
@@ -757,6 +782,8 @@ node_types:
   cloudify.nsx.dlr_routing_ip_prefix:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -764,8 +791,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_prefix:
         default:
           dlr_id:
@@ -792,6 +817,8 @@ node_types:
   cloudify.nsx.routing_redistribution_rule:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -799,8 +826,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_rule:
         default:
           dlr_id:
@@ -868,6 +893,8 @@ node_types:
   cloudify.nsx.dlr_interface:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -875,8 +902,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_interface:
         default:
           dlr_id:
@@ -889,6 +914,9 @@ node_types:
             required: true
           name:
             default: ""
+          vnic:
+            type: string
+            set_none: true
       interface:
         default:
           # dlr uuid
@@ -901,6 +929,8 @@ node_types:
           interface_subnet: {}
           # name for interface
           name: ""
+          # vnic for interface
+          vnic: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -913,6 +943,8 @@ node_types:
   cloudify.nsx.dlr_dhcp_relay:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -920,8 +952,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_relay:
         default:
           dlr_id:
@@ -948,6 +978,8 @@ node_types:
   cloudify.nsx.dlr_dgw:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -955,8 +987,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_gateway:
         default:
           dlr_id:
@@ -979,6 +1009,8 @@ node_types:
   cloudify.nsx.esg:
     derived_from: cloudify.nodes.Router
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -986,8 +1018,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_edge:
         default:
           # we need name in any case of usage except predefined 'id'
@@ -999,6 +1029,11 @@ node_types:
             external_use: false
           esg_size:
             default: compact
+            values:
+              - compact
+              - large
+              - quadlarge
+              - xlarge
           datacentermoid:
             required: true
             external_use: false
@@ -1060,6 +1095,15 @@ node_types:
             type: boolean
           syslog_level:
             default: INFO
+            values:
+              - EMERGENCY
+              - ALERT
+              - CRITICAL
+              - ERROR
+              - WARNING
+              - NOTICE
+              - INFO
+              - DEBUG
       dhcp:
         default:
           # True/False The desired state of the DHCP Server
@@ -1104,7 +1148,17 @@ node_types:
               logging:
                 sub:
                  logLevel:
-                   default: info
+                    default: INFO
+                    caseinsensitive: true
+                    values:
+                      - EMERGENCY
+                      - ALERT
+                      - CRITICAL
+                      - ERROR
+                      - WARNING
+                      - NOTICE
+                      - INFO
+                      - DEBUG
                 enable:
                    default: false
                    type: boolean
@@ -1127,7 +1181,7 @@ node_types:
             routerId: ''
             # Optional. When absent, enable=false and logLevel=INFO
             logging:
-              logLevel: info
+              logLevel: INFO
               enable: false
             # Optional. Defaults to false.
             ecmp: false
@@ -1205,6 +1259,8 @@ node_types:
   cloudify.nsx.esgBGPNeighbour:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1212,8 +1268,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_neighbour:
         default:
           dlr_id:
@@ -1260,6 +1314,8 @@ node_types:
   cloudify.nsx.esg_nat:
     derived_from: cloudify.nodes.VirtualIP
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1267,8 +1323,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_rule:
         default:
           esg_id:
@@ -1336,6 +1390,8 @@ node_types:
   cloudify.nsx.esg_firewall:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1343,8 +1399,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_rule:
         default:
           esg_id:
@@ -1424,6 +1478,8 @@ node_types:
   cloudify.nsx.esg_interface:
     derived_from: cloudify.nodes.Port
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1431,8 +1487,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       validate_interface:
         default:
           esg_id:
@@ -1504,6 +1558,8 @@ node_types:
   cloudify.nsx.esg_gateway:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1511,12 +1567,25 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
+      validate_gateway:
+        default:
+          esg_id:
+            required: true
+          dgw_ip:
+            required: true
+          vnic:
+            set_none: true
+            type: string
+          mtu:
+            set_none: true
+            type: string
+          admin_distance:
+            set_none: true
+            type: string
       gateway:
         default:
-          # The name of the ESG to list interfaces of
-          esg_name: ''
+          # The id of the ESG to configure interfaces on
+          esg_id: ''
           # The default gateway ip (next hop)
           dgw_ip: ''
           # (Optional) The vnic index of were the default gateway is reachable on
@@ -1536,6 +1605,8 @@ node_types:
   cloudify.nsx.esg_route:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1543,12 +1614,29 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
+      validate_route:
+        default:
+          esg_id:
+            required: true
+          network:
+            required: true
+          next_hop:
+            set_none: true
+          vnic:
+            set_none: true
+            type: string
+          mtu:
+            set_none: true
+            type: string
+          admin_distance:
+            set_none: true
+            type: string
+          description:
+            set_none: true
       route:
         default:
-          # The name of the ESG where the route should be added
-          esg_name: ''
+          # The id of the ESG to configure interfaces on
+          esg_id: ''
           # The routes network in the x.x.x.x/yy format, e.g. 192.168.1.0/24
           network: ''
           # The next hop ip
@@ -1572,6 +1660,8 @@ node_types:
   cloudify.nsx.dhcp_pool:
     derived_from: cloudify.nodes.ApplicationServer
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1579,25 +1669,43 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
+      validate_pool:
+        default:
+          esg_id:
+            required: true
+          ip_range:
+            required: true
+          default_gateway:
+            set_none: true
+          subnet_mask:
+            set_none: true
+          domain_name:
+            set_none: true
+          dns_server_1:
+            set_none: true
+          dns_server_2:
+            set_none: true
+          lease_time:
+            set_none: true
+          auto_dns:
+            set_none: true
       pool:
         default:
-          # The display name of a Edge Service Gateway used for DHCP
-          esg_name: ""
+          # The id of the ESG to configure interfaces on
+          esg_id: ''
           # An IP range, e.g. 192.168.178.10-192.168.178.100 for this IP Pool
           ip_range: {}
-          # The default gateway for the specified subnet
+          # (Optional) The default gateway for the specified subnet
           default_gateway: {}
-          # The subnet mask (e.g. 255.255.255.0) for the specified subnet
+          # (Optional) The subnet mask (e.g. 255.255.255.0) for the specified subnet
           subnet_mask: {}
-          # The DNS domain name (e.g. vmware.com) for the specified subnet
+          # (Optional) The DNS domain name (e.g. vmware.com) for the specified subnet
           domain_name: ""
-          # The primary DNS Server
+          # (Optional) The primary DNS Server
           dns_server_1: {}
-          # The secondary DNS Server
+          # (Optional) The secondary DNS Server
           dns_server_2: {}
-          # The lease time in seconds, use 'infinite' to disable expiry of DHCP leases
+          # (Optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases
           lease_time: infinite
           # ('true'/'false') If set to true, the DNS servers and domain name set for NSX-Manager will be used
           auto_dns: true
@@ -1612,6 +1720,8 @@ node_types:
   cloudify.nsx.dhcp_binding:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1619,12 +1729,39 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
+      validate_bind:
+        default:
+          esg_id:
+            required: true
+          vm_id:
+            set_none: true
+          vnic_id:
+            set_none: true
+            type: string
+          mac:
+            set_none: true
+          hostname:
+            required: true
+          ip:
+            required: true
+          default_gateway:
+            set_none: true
+          subnet_mask:
+            set_none: true
+          domain_name:
+            set_none: true
+          dns_server_1:
+            set_none: true
+          dns_server_2:
+            set_none: true
+          lease_time:
+            set_none: true
+          auto_dns:
+            set_none: true
       bind:
         default:
-          # The display name of a Edge Service Gateway used for DHCP
-          esg_name: ""
+          # The id of the ESG to configure interfaces on
+          esg_id: ''
           # (Optional, case vm_id/vnic_id) The VM managed object Id in vCenter for the VM to be attached to this binding entry
           vm_id: {}
           # (Optional, case vm_id/vnic_id) The vnic index for the VM interface attached to this binding entry (e.g. vnic0 has index 0)
@@ -1635,17 +1772,17 @@ node_types:
           hostname: ""
           # The IP Address for this static binding
           ip: {}
-          # The default gateway for the specified binding
+          # (Optional) The default gateway for the specified binding
           default_gateway: {}
-          # The subnet mask (e.g. 255.255.255.0) for the specified binding
+          # (Optional) The subnet mask (e.g. 255.255.255.0) for the specified binding
           subnet_mask: {}
-          # The DNS domain name (e.g. vmware.com) for the specified binding
+          # (Optional) The DNS domain name (e.g. vmware.com) for the specified binding
           domain_name: ""
-          # The primary DNS Server
+          # (Optional) The primary DNS Server
           dns_server_1: {}
-          # The secondary DNS Server
+          # (Optional) The secondary DNS Server
           dns_server_2: {}
-          # The lease time in seconds, use 'infinite' to disable expiry of DHCP leases
+          # (Optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases
           lease_time: infinite
           # ('true'/'false') If set to true, the DNS servers and domain name set for NSX-Manager will be used
           auto_dns: true
@@ -1660,6 +1797,8 @@ node_types:
   cloudify.nsx.dfw_section:
     derived_from: cloudify.nodes.SecurityGroup
     properties:
+      nsx_auth:
+        type: nsx_auth_type
       # reuse id/name
       use_external_resource:
         default: false
@@ -1667,8 +1806,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      nsx_auth:
-        type: nsx_auth_type
       section:
         default:
           # The name of the dfw section to be created

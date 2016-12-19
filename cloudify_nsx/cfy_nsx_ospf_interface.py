@@ -33,18 +33,18 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.esg_ospf_interface_add(client_session,
-                                   interface['dlr_id'],
-                                   interface['areaId'],
-                                   interface['vnic'],
-                                   use_existed,
-                                   interface['helloInterval'],
-                                   interface['deadInterval'],
-                                   interface['priority'],
-                                   interface['cost'])
+    resource_id = cfy_dlr.add_esg_ospf_interface(
+        client_session,
+        interface['dlr_id'],
+        interface['areaId'],
+        interface['vnic'],
+        use_existed,
+        interface['helloInterval'],
+        interface['deadInterval'],
+        interface['priority'],
+        interface['cost']
+    )
 
-    resource_id = "%s|%s" % (str(interface['areaId']), str(interface['vnic']))
-    ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
 
@@ -65,12 +65,9 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    ids = resource_id.split("|")
-    cfy_dlr.esg_ospf_interface_delete(
+    cfy_dlr.del_esg_ospf_interface(
         client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
-        ids[0],
-        ids[1]
+        ctx.instance.runtime_properties['resource_id']
     )
 
     ctx.logger.info("deleted %s" % resource_id)

@@ -14,14 +14,14 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import pynsxv.library.nsx_esg as nsx_esg
+import library.nsx_esg_dlr as nsx_esg
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
-    use_existed, route = common.get_properties('route', kwargs)
+    use_existed, route = common.get_properties_and_validate('route', kwargs)
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -34,7 +34,7 @@ def create(**kwargs):
 
     result_raw = nsx_esg.esg_route_add(
         client_session,
-        route['esg_name'],
+        route['esg_id'],
         route['network'],
         resource_id,
         route['vnic'],
@@ -47,7 +47,7 @@ def create(**kwargs):
             "Can't set route."
         )
 
-    location = route['esg_name'] + "/" + resource_id
+    location = route['esg_id'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
@@ -70,7 +70,7 @@ def delete(**kwargs):
 
     result_raw = nsx_esg.esg_route_del(
         client_session,
-        route['esg_name'],
+        route['esg_id'],
         route['network'],
         resource_id
     )

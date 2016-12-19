@@ -33,15 +33,15 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.esg_ospf_area_add(client_session,
-                              area['dlr_id'],
-                              area['areaId'],
-                              use_existed,
-                              area['type'],
-                              area['authentication'])
+    resource_id = cfy_dlr.add_esg_ospf_area(
+        client_session,
+        area['dlr_id'],
+        area['areaId'],
+        use_existed,
+        area['type'],
+        area['authentication']
+    )
 
-    resource_id = area['areaId']
-    ctx.instance.runtime_properties['resource_dlr_id'] = area['dlr_id']
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
 
@@ -62,9 +62,8 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.esg_ospf_area_delete(
+    cfy_dlr.del_esg_ospf_area(
         client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
         resource_id
     )
 
