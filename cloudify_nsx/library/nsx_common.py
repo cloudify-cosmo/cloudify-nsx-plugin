@@ -75,6 +75,7 @@ def validate(check_dict, validate_rules, use_existed):
         values = rule.get('values', False)
         sub_checks = rule.get('sub', None)
         value_type = rule.get('type', 'string')
+        caseinsensitive = rule.get('caseinsensitive', False)
 
         # we can have value == false and default == true, so only check
         # field in list
@@ -96,6 +97,13 @@ def validate(check_dict, validate_rules, use_existed):
                 raise cfy_exc.NonRecoverableError(
                     "don't have value for %s " % name
                 )
+
+        # cleanup value/values in case caseinsensitive string
+        if caseinsensitive and value:
+            value = value.lower()
+
+        if caseinsensitive and values:
+            values = [v.lower() for v in values]
 
         if set_none and not value:
             # empty value

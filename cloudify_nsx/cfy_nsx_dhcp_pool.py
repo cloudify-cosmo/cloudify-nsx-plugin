@@ -16,22 +16,22 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
-import pynsxv.library.nsx_dhcp as nsx_dhcp
+import library.nsx_esg_dlr as nsx_dhcp
 
 
 @operation
 def create(**kwargs):
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
-    use_existed, pool_dict = common.get_properties('pool', kwargs)
+    use_existed, pool_dict = common.get_properties_and_validate('pool', kwargs)
 
     if use_existed:
         ctx.logger.info("Used pre existed!")
         return
 
+    # credentials
+    client_session = common.nsx_login(kwargs)
+
     resource_id = nsx_dhcp.add_dhcp_pool(client_session,
-                                         pool_dict['esg_name'],
+                                         pool_dict['esg_id'],
                                          pool_dict['ip_range'],
                                          pool_dict['default_gateway'],
                                          pool_dict['subnet_mask'],
@@ -43,7 +43,7 @@ def create(**kwargs):
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
 
-    ctx.logger.info("created %s | %s" % (resource_id, pool_dict['esg_name']))
+    ctx.logger.info("created %s | %s" % (resource_id, pool_dict['esg_id']))
 
 
 @operation
@@ -63,7 +63,7 @@ def delete(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if not nsx_dhcp.delete_dhcp_pool(client_session,
-                                     pool_dict['esg_name'],
+                                     pool_dict['esg_id'],
                                      resource_id):
         raise cfy_exc.NonRecoverableError(
             "Can't drop dhcp pool"

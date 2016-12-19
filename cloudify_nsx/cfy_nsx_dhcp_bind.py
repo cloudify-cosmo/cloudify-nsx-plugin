@@ -16,23 +16,23 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
-import pynsxv.library.nsx_dhcp as nsx_dhcp
+import library.nsx_esg_dlr as nsx_dhcp
 
 
 @operation
 def create(**kwargs):
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
-    use_existed, bind_dict = common.get_properties('bind', kwargs)
+    use_existed, bind_dict = common.get_properties_and_validate('bind', kwargs)
 
     if use_existed:
         ctx.logger.info("Used pre existed!")
         return
 
+    # credentials
+    client_session = common.nsx_login(kwargs)
+
     if 'mac' in bind_dict:
         resource_id = nsx_dhcp.add_mac_binding(client_session,
-                                               bind_dict['esg_name'],
+                                               bind_dict['esg_id'],
                                                bind_dict['mac'],
                                                bind_dict['hostname'],
                                                bind_dict['ip'],
@@ -45,7 +45,7 @@ def create(**kwargs):
                                                bind_dict['auto_dns'])
     elif 'mac' in bind_dict and 'mac' in bind_dict:
         resource_id = nsx_dhcp.add_vm_binding(client_session,
-                                              bind_dict['esg_name'],
+                                              bind_dict['esg_id'],
                                               bind_dict['vm_id'],
                                               bind_dict['vnic_id'],
                                               bind_dict['hostname'],
@@ -84,7 +84,7 @@ def delete(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if not nsx_dhcp.delete_dhcp_binding(client_session,
-                                        bind_dict['esg_name'],
+                                        bind_dict['esg_id'],
                                         resource_id):
         raise cfy_exc.NonRecoverableError(
             "Ca't drop dhcp bind"

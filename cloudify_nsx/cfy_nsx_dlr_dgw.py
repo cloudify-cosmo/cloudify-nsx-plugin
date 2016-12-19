@@ -37,9 +37,8 @@ def create(**kwargs):
 
     common.check_raw_result(result_raw)
 
-    ctx.instance.runtime_properties['resource_dlr_id'] = gateway['dlr_id']
-    ctx.instance.runtime_properties['resource_id'] = gateway['address']
-    ctx.logger.info("created %s" % gateway['address'])
+    ctx.instance.runtime_properties['resource_id'] = gateway['dlr_id']
+    ctx.logger.info("created %s" % gateway['dlr_id'])
 
 
 @operation
@@ -59,7 +58,7 @@ def delete(**kwargs):
 
     result_raw = nsx_router.dlr_del_dgw(
         client_session,
-        ctx.instance.runtime_properties['resource_dlr_id']
+        ctx.instance.runtime_properties['resource_id']
     )
 
     common.check_raw_result(result_raw)

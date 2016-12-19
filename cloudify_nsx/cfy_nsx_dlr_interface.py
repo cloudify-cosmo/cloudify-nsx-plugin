@@ -42,7 +42,8 @@ def create(**kwargs):
                                            interface['interface_ls_id'],
                                            interface['interface_ip'],
                                            interface['interface_subnet'],
-                                           interface['name'])
+                                           interface['name'],
+                                           interface['vnic'])
 
     resource_id = result_raw['body']['interfaces']['interface']['index']
     ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']

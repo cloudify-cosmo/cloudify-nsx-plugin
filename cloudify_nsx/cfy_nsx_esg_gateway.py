@@ -14,14 +14,16 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import pynsxv.library.nsx_esg as nsx_esg
+import library.nsx_esg_dlr as nsx_esg
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
-    use_existed, gateway = common.get_properties('gateway', kwargs)
+    use_existed, gateway = common.get_properties_and_validate(
+        'gateway', kwargs
+    )
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -34,7 +36,7 @@ def create(**kwargs):
 
     result_raw = nsx_esg.esg_dgw_set(
         client_session,
-        gateway['esg_name'],
+        gateway['esg_id'],
         resource_id,
         gateway['vnic'],
         gateway['mtu'],
@@ -45,7 +47,7 @@ def create(**kwargs):
             "Can't set gateway."
         )
 
-    location = gateway['esg_name'] + "/" + resource_id
+    location = gateway['esg_id'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['location'] = location
     ctx.logger.info("created %s | %s" % (resource_id, location))
@@ -69,7 +71,7 @@ def delete(**kwargs):
 
     result_raw = nsx_esg.esg_dgw_clear(
         client_session,
-        gateway['esg_name']
+        gateway['esg_id']
     )
     if not result_raw:
         ctx.logger.error("Status %s" % result_raw['status'])

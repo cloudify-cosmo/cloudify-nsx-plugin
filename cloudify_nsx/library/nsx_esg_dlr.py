@@ -17,7 +17,7 @@ from cloudify import exceptions as cfy_exc
 
 
 def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
-                      interface_subnet, name=None):
+                      interface_subnet, name=None, vnic=None):
     """
     This function adds an interface gw to one dlr
     :param dlr_id: dlr uuid
@@ -38,6 +38,7 @@ def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
     interface['isConnected'] = "True"
     interface['connectedToId'] = interface_ls_id
     interface['name'] = name
+    interface['index'] = vnic
 
     dlr_interface = client_session.create(
         'interfaces', uri_parameters={'edgeId': dlr_id},
@@ -223,7 +224,7 @@ def routing_global_config(client_session, esg_id, enabled,
     common.check_raw_result(raw_result)
 
 
-def bgp_create(client_session, esg_id, enabled, defaultOriginate,
+def update_bgp(client_session, esg_id, enabled, defaultOriginate,
                gracefulRestart, redistribution, localAS):
 
     raw_result = client_session.read(
@@ -664,7 +665,7 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
     common.check_raw_result(raw_result)
 
 
-def esg_ospf_area_add(client_session, esg_id, area_id, use_existed, area_type,
+def add_esg_ospf_area(client_session, esg_id, area_id, use_existed, area_type,
                       auth):
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId':  esg_id})
@@ -718,8 +719,10 @@ def esg_ospf_area_add(client_session, esg_id, area_id, use_existed, area_type,
 
     common.check_raw_result(raw_result)
 
+    return "%s|%s" % (esg_id, area_id)
 
-def esg_ospf_interface_add(client_session, esg_id, area_id, vnic, use_existed,
+
+def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existed,
                            hello_interval, dead_interval, priority, cost):
 
     raw_result = client_session.read(
@@ -783,8 +786,13 @@ def esg_ospf_interface_add(client_session, esg_id, area_id, vnic, use_existed,
 
     common.check_raw_result(raw_result)
 
+    return "%s|%s|%s" % (esg_id, area_id, vnic)
 
-def esg_ospf_area_delete(client_session, esg_id, area_id):
+
+def del_esg_ospf_area(client_session, resource_id):
+
+    esg_id, area_id = resource_id.split("|")
+
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId':  esg_id})
 
@@ -816,7 +824,10 @@ def esg_ospf_area_delete(client_session, esg_id, area_id):
     common.check_raw_result(raw_result)
 
 
-def esg_ospf_interface_delete(client_session, esg_id, area_id, vnic):
+def del_esg_ospf_interface(client_session, resource_id):
+
+    esg_id, area_id, vnic = resource_id.split("|")
+
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId':  esg_id})
 
@@ -996,7 +1007,7 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
 
     # disable bgp before change ospf (if need)
     if not bgp['enabled']:
-        bgp_create(
+        update_bgp(
             client_session, resource_id,
             bgp['enabled'], bgp['defaultOriginate'],
             bgp['gracefulRestart'], bgp['redistribution'],
@@ -1019,7 +1030,7 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
 
     # enable bgp after change ospf (if need)
     if bgp['enabled']:
-        bgp_create(
+        update_bgp(
             client_session, resource_id,
             bgp['enabled'], bgp['defaultOriginate'],
             bgp['gracefulRestart'], bgp['redistribution'],
@@ -1305,3 +1316,379 @@ def del_routing_rule(client_session, resource_id):
     )
 
     common.check_raw_result(raw_result)
+
+
+def esg_dgw_clear(client_session, esg_id):
+    """
+    This function clears the default gateway config on an ESG
+    :param client_session: An instance of an NsxClient Session
+    :param esg_id: The id of the ESG to list interfaces of
+    :return: True on success, False on failure
+    """
+
+    rtg_cfg = client_session.read(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id}
+    )['body']
+    rtg_cfg['staticRouting']['defaultRoute'] = None
+
+    cfg_result = client_session.update(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id},
+        request_body_dict=rtg_cfg
+    )
+    if cfg_result['status'] == 204:
+        return True
+    else:
+        return False
+
+
+def esg_dgw_set(client_session, esg_id, dgw_ip, vnic, mtu=None,
+                admin_distance=None):
+    """
+    This function sets the default gateway on an ESG
+    :param client_session: An instance of an NsxClient Session
+    :param esg_id: The id of the ESG to list interfaces of
+    :param dgw_ip: The default gateway ip (next hop)
+    :param vnic: (Optional) The vnic index of were the default gateway
+        is reachable on
+    :param mtu: (Optional) The MTU of the defautl gateway (default=1500)
+    :param admin_distance: (OIptional) Admin distance of the defautl
+        route (default=1)
+    :return: True on success, False on failure
+    """
+    if not mtu:
+        mtu = '1500'
+    if not admin_distance:
+        admin_distance = '1'
+
+    rtg_cfg = client_session.read(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id}
+    )['body']
+    rtg_cfg['staticRouting']['defaultRoute'] = {
+        'vnic': vnic, 'gatewayAddress': dgw_ip,
+        'adminDistance': admin_distance, 'mtu': mtu
+    }
+
+    cfg_result = client_session.update(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id},
+        request_body_dict=rtg_cfg
+    )
+    if cfg_result['status'] == 204:
+        return True
+    else:
+        return False
+
+
+def esg_route_add(client_session, esg_id, network, next_hop, vnic=None,
+                  mtu=None, admin_distance=None, description=None):
+    """
+    This function adds a static route to an ESG
+    :param client_session: An instance of an NsxClient Session
+    :param esg_id: The name of the ESG where the route should be added
+    :param network: The routes network in the x.x.x.x/yy format,
+        e.g. 192.168.1.0/24
+    :param next_hop: The next hop ip
+    :param vnic: (Optional) The vnic index of were this route is reachable on
+    :param mtu: (Optional) The MTU of the route (default=1500)
+    :param admin_distance: (Optional) Admin distance of the defautl route
+        (default=1)
+    :param description: (Optional) A description for this route
+    :return: True on success, False on failure
+    """
+    if not mtu:
+        mtu = '1500'
+    if not admin_distance:
+        admin_distance = '1'
+
+    rtg_cfg = client_session.read(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id}
+    )['body']
+    if rtg_cfg['staticRouting']['staticRoutes']:
+        routes = client_session.normalize_list_return(
+            rtg_cfg['staticRouting']['staticRoutes']['route']
+        )
+    else:
+        routes = []
+
+    new_route = {
+        'vnic': vnic, 'network': network, 'nextHop': next_hop,
+        'adminDistance': admin_distance, 'mtu': mtu,
+        'description': description
+    }
+    routes.append(new_route)
+    rtg_cfg['staticRouting']['staticRoutes'] = {'route': routes}
+
+    cfg_result = client_session.update(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id},
+        request_body_dict=rtg_cfg
+    )
+
+    if cfg_result['status'] == 204:
+        return True
+    else:
+        return False
+
+
+def esg_route_del(client_session, esg_id, network, next_hop):
+    """
+    This function deletes a static route to an ESG
+    :param client_session: An instance of an NsxClient Session
+    :param esg_id: The id of the ESG where the route should be deleted
+    :param network: The routes network in the x.x.x.x/yy format,
+        e.g. 192.168.1.0/24
+    :param next_hop: The next hop ip
+    :return: True on success, False on failure
+    """
+
+    rtg_cfg = client_session.read(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id}
+    )['body']
+    if rtg_cfg['staticRouting']['staticRoutes']:
+        routes = client_session.normalize_list_return(
+            rtg_cfg['staticRouting']['staticRoutes']['route']
+        )
+    else:
+        return False
+
+    routes_filtered = [
+        route for route in routes if not (
+            route['network'] == network and route['nextHop'] == next_hop
+        )
+    ]
+    if len(routes_filtered) == len(routes):
+        return False
+    rtg_cfg['staticRouting']['staticRoutes'] = {'route': routes_filtered}
+
+    cfg_result = client_session.update(
+        'routingConfigStatic', uri_parameters={'edgeId': esg_id},
+        request_body_dict=rtg_cfg
+    )
+    if cfg_result['status'] == 204:
+        return True
+    else:
+        return False
+
+
+def add_dhcp_pool(client_session, esg_id, ip_range, default_gateway=None,
+                  subnet_mask=None, domain_name=None, dns_server_1=None,
+                  dns_server_2=None, lease_time=None, auto_dns=None):
+    """
+    This function adds a DHCP Pool to an edge DHCP Server
+
+    :type client_session: nsxramlclient.client.NsxClient
+    :param client_session: A nsxramlclient session Object
+    :type esg_id: str
+    :param esg_id: The id of a Edge Service Gateway used for DHCP
+    :type ip_range: str
+    :param ip_range: An IP range, e.g. 192.168.178.10-192.168.178.100
+        for this IP Pool
+    :type default_gateway: str
+    :param default_gateway: The default gateway for the specified subnet
+    :type subnet_mask: str
+    :param subnet_mask: The subnet mask (e.g. 255.255.255.0) for the
+        specified subnet
+    :type domain_name: str
+    :param domain_name: The DNS domain name (e.g. vmware.com) for the
+        specified subnet
+    :type dns_server_1: str
+    :param dns_server_1: The primary DNS Server
+    :type dns_server_2: str
+    :param dns_server_2: The secondary DNS Server
+    :type lease_time: str
+    :param lease_time: The lease time in seconds, use 'infinite' to
+        disable expiry of DHCP leases
+    :type auto_dns: str
+    :param auto_dns: ('true'/'false') If set to true, the DNS servers
+        and domain name set for NSX-Manager will be used
+    :rtype: str
+    :return: Returns a string containing the pool id of the created
+        DHCP Pool
+    """
+
+    dhcp_pool_dict = {'ipRange': ip_range,
+                      'defaultGateway': default_gateway,
+                      'subnetMask': subnet_mask,
+                      'domainName': domain_name,
+                      'primaryNameServer': dns_server_1,
+                      'secondaryNameServer': dns_server_2,
+                      'leaseTime': lease_time,
+                      'autoConfigureDNS': auto_dns}
+
+    result = client_session.create(
+        'dhcpPool', uri_parameters={'edgeId': esg_id},
+        request_body_dict={'ipPool': dhcp_pool_dict}
+    )
+
+    if result['status'] != 204:
+        return None
+    else:
+        return result['objectId']
+
+
+def delete_dhcp_pool(client_session, esg_id, pool_id):
+    """
+    This function deletes a DHCP Pools from an edge DHCP Server
+
+    :type client_session: nsxramlclient.client.NsxClient
+    :param client_session: A nsxramlclient session Object
+    :type esg_id: str
+    :param esg_id: The id of a Edge Service Gateway used for DHCP
+    :type pool_id: str
+    :param pool_id: The Id of the pool to be deleted (e.g. pool-3)
+    :rtype: bool
+    :return: Returns None if Edge was not found or the operation failed,
+        returns true on success
+    """
+
+    result = client_session.delete(
+        'dhcpPoolID', uri_parameters={'edgeId': esg_id, 'poolID': pool_id})
+
+    if result['status'] == 204:
+        return True
+    else:
+        return None
+
+
+def add_mac_binding(client_session, esg_id, mac, hostname, ip,
+                    default_gateway=None, subnet_mask=None, domain_name=None,
+                    dns_server_1=None, dns_server_2=None, lease_time=None,
+                    auto_dns=None):
+    """
+    This function add a MAC based static binding entry to an edge DHCP Server
+
+    :type client_session: nsxramlclient.client.NsxClient
+    :param client_session: A nsxramlclient session Object
+    :type esg_id: str
+    :param esg_id: The display name of a Edge Service Gateway used for DHCP
+    :type mac: str
+    :param mac: The MAC Address of the static binding
+    :type hostname: str
+    :param hostname: The hostname for this static binding
+    :type ip: str
+    :param ip: The IP Address for this static binding
+    :type default_gateway: str
+    :param default_gateway: The default gateway for the specified binding
+    :type subnet_mask: str
+    :param subnet_mask: The subnet mask (e.g. 255.255.255.0) for the
+        specified binding
+    :type domain_name: str
+    :param domain_name: The DNS domain name (e.g. vmware.com) for the
+        specified binding
+    :type dns_server_1: str
+    :param dns_server_1: The primary DNS Server
+    :type dns_server_2: str
+    :param dns_server_2: The secondary DNS Server
+    :type lease_time: str
+    :param lease_time: The lease time in seconds, use 'infinite' to
+        disable expiry of DHCP leases
+    :type auto_dns: str
+    :param auto_dns: ('true'/'false') If set to true, the DNS servers
+        and domain name set for NSX-Manager will be used
+    :rtype: str
+    :return: Returns a string containing the binding id of the created DHCP
+        binding
+    """
+
+    binding_dict = {
+        'macAddress': mac, 'hostname': hostname, 'ipAddress': ip,
+        'defaultGateway': default_gateway, 'subnetMask': subnet_mask,
+        'domainName': domain_name, 'primaryNameServer': dns_server_1,
+        'secondaryNameServer': dns_server_2, 'leaseTime': lease_time,
+        'autoConfigureDNS': auto_dns
+    }
+
+    result = client_session.create(
+        'dhcpStaticBinding', uri_parameters={'edgeId': esg_id},
+        request_body_dict={'staticBinding': binding_dict}
+    )
+    if result['status'] != 204:
+        return None
+    else:
+        return result['objectId']
+
+
+def add_vm_binding(client_session, esg_id, vm_id, vnic_id, hostname, ip,
+                   default_gateway=None, subnet_mask=None, domain_name=None,
+                   dns_server_1=None, dns_server_2=None, lease_time=None,
+                   auto_dns=None):
+    """
+    This function add a VM based static binding entry to an edge DHCP Server
+
+    :type client_session: nsxramlclient.client.NsxClient
+    :param client_session: A nsxramlclient session Object
+    :type esg_id: str
+    :param esg_id: The id of a Edge Service Gateway used for DHCP
+    :type vm_id: str
+    :param vm_id: The VM managed object Id in vCenter for the VM to be
+        attached to this binding entry
+    :type vnic_id: str
+    :param vnic_id: The vnic index for the VM interface attached to this
+        binding entry (e.g. vnic0 has index 0)
+    :type hostname: str
+    :param hostname: The hostname for this static binding
+    :type ip: str
+    :param ip: The IP Address for this static binding
+    :type default_gateway: str
+    :param default_gateway: The default gateway for the specified binding
+    :type subnet_mask: str
+    :param subnet_mask: The subnet mask (e.g. 255.255.255.0) for the
+        specified binding
+    :type domain_name: str
+    :param domain_name: The DNS domain name (e.g. vmware.com) for the
+        specified binding
+    :type dns_server_1: str
+    :param dns_server_1: The primary DNS Server
+    :type dns_server_2: str
+    :param dns_server_2: The secondary DNS Server
+    :type lease_time: str
+    :param lease_time: The lease time in seconds, use 'infinite' to disable
+        expiry of DHCP leases
+    :type auto_dns: str
+    :param auto_dns: ('true'/'false') If set to true, the DNS servers and
+        domain name set for NSX-Manager will be used
+    :rtype: str
+    :return: Returns a string containing the binding id of the created DHCP
+        binding
+    """
+
+    binding_dict = {'vmId': vm_id, 'vnicId': vnic_id, 'hostname': hostname,
+                    'ipAddress': ip, 'defaultGateway': default_gateway,
+                    'subnetMask': subnet_mask, 'domainName': domain_name,
+                    'primaryNameServer': dns_server_1,
+                    'secondaryNameServer': dns_server_2,
+                    'leaseTime': lease_time,
+                    'autoConfigureDNS': auto_dns}
+
+    result = client_session.create(
+        'dhcpStaticBinding', uri_parameters={'edgeId': esg_id},
+        request_body_dict={'staticBinding': binding_dict}
+    )
+    if result['status'] != 204:
+        return None
+    else:
+        return result['objectId']
+
+
+def delete_dhcp_binding(client_session, esg_id, binding_id):
+    """
+    This function deletes a DHCP binding from an edge DHCP Server
+
+    :type client_session: nsxramlclient.client.NsxClient
+    :param client_session: A nsxramlclient session Object
+    :type esg_id: str
+    :param esg_id: The id of a Edge Service Gateway used for DHCP
+    :type binding_id: str
+    :param binding_id: The Id of the binding to be deleted (e.g. binding-3)
+    :rtype: bool
+    :return: Returns None if Edge was not found or the operation failed,
+        returns true on success
+    """
+
+    result = client_session.delete(
+        'dhcpStaticBindingID',
+        uri_parameters={'edgeId': esg_id, 'bindingID': binding_id}
+    )
+
+    if result['status'] == 204:
+        return True
+    else:
+        return None

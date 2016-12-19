@@ -241,7 +241,7 @@ node_templates:
         create:
           inputs:
             gateway:
-              esg_name: { get_attribute: [ esg, edge, name ] }
+              esg_id: { get_attribute: [ esg, resource_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: esg
@@ -264,7 +264,7 @@ node_templates:
         create:
           inputs:
             route:
-              esg_name: { get_attribute: [ esg, edge, name ] }
+              esg_id: { get_attribute: [ esg, resource_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: esg
@@ -289,7 +289,7 @@ node_templates:
         create:
           inputs:
             pool:
-              esg_name: { get_attribute: [ esg, edge, name ] }
+              esg_id: { get_attribute: [ esg, resource_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: esg
@@ -316,7 +316,7 @@ node_templates:
         create:
           inputs:
             bind:
-              esg_name: { get_attribute: [ esg, edge, name ] }
+              esg_id: { get_attribute: [ esg, resource_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: esg_pool
