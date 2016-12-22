@@ -41,6 +41,8 @@ def create(**kwargs):
     resource_id = nsx_utils.get_datacentermoid(
         vccontent, datacenter['name']
     )
+
+    ctx.logger.info("Found %s" % resource_id)
     ctx.instance.runtime_properties['resource_id'] = resource_id
 
 

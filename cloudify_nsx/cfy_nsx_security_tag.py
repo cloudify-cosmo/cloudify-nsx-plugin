@@ -72,7 +72,7 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    nsx_security_tag.del_tag(
+    nsx_security_tag.delete_tag(
         client_session,
         resource_id
     )
