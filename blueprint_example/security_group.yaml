@@ -112,3 +112,20 @@ node_templates:
       use_external_resource: true
       server:
         name: LabsTest
+
+  tag_vm:
+    type: cloudify.nsx.security_tag_vm
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            vm_tag:
+              tag_id: { get_attribute: [ security_tag, resource_id ] }
+              vm_id: { get_attribute: [ vm, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: security_tag
+      - type: cloudify.relationships.connected_to
+        target: vm

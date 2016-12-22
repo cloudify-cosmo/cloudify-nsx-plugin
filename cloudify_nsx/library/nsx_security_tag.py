@@ -69,3 +69,30 @@ def delete_tag(client_session, securityid):
         return True
     else:
         return None
+
+
+def add_tag_vm(client_session, tag_id, vm_id):
+    result_raw = client_session.update(
+        'securityTagVM',
+        uri_parameters={
+            'tagId': tag_id,
+            'vmMoid': vm_id
+        }
+    )
+    common.check_raw_result(result_raw)
+
+    return "%s|%s" % (tag_id, vm_id)
+
+
+def delete_tag_vm(client_session, resource_id):
+    ids = resource_id.split("|")
+
+    result_raw = client_session.delete(
+        'securityTagVM',
+        uri_parameters={
+            'tagId': ids[0],
+            'vmMoid': ids[1]
+        }
+    )
+
+    common.check_raw_result(result_raw)
