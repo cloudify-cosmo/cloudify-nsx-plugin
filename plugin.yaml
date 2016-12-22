@@ -163,6 +163,38 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_vcenter_dvportgroup.delete
 
+  # vcenter vm
+  cloudify.vcenter.server:
+    derived_from: cloudify.nodes.Compute
+    properties:
+      # Supported only True - search vm in vcenter by id/name
+      use_external_resource:
+        default: true
+        type: boolean
+      # resource vcenter id
+      resource_id:
+        required: false
+      vcenter_auth:
+        type: vcenter_auth_type
+      validate_server:
+        default:
+          # we need name in any case of usage except predefined 'id'
+          name:
+            required: true
+      # install agent needt only for correcxt support Nodes.Compute
+      install_agent:
+        default: false
+      server:
+        default:
+          # name distributed port group
+          name: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_vcenter_vm.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_vcenter_vm.delete
+
   # SecuriteGroup
   cloudify.nsx.security_group:
     derived_from: cloudify.nodes.SecurityGroup
@@ -265,7 +297,7 @@ node_types:
             required: true
           description:
             set_none: true
-      policy:
+      tag:
         default:
           name: ""
           description: ""

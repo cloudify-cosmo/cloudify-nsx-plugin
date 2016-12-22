@@ -101,3 +101,14 @@ node_templates:
             tag:
               name: secret_tag
               description: What can i say?
+
+  vm:
+    type: cloudify.vcenter.server
+    properties:
+      vcenter_auth: &vcenter_auth
+        username: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        host: { get_input: vcenter_ip }
+      use_external_resource: true
+      server:
+        name: LabsTest

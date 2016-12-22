@@ -21,8 +21,8 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, resource_pool = common.get_properties_and_validate(
-        'resource_pool', kwargs
+    use_existed, vm = common.get_properties_and_validate(
+        'server', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
@@ -38,8 +38,8 @@ def create(**kwargs):
     # credentials
     vccontent = common.vcenter_state(kwargs)
 
-    resource_id = nsx_utils.get_edgeresourcepoolmoid(
-        vccontent, resource_pool['name']
+    resource_id = nsx_utils.get_vm_by_name(
+        vccontent, vm['name']
     )
 
     ctx.logger.info("Found %s" % resource_id)
