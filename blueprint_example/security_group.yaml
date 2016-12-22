@@ -89,3 +89,15 @@ node_templates:
     relationships:
       - type: cloudify.relationships.connected_to
         target: master_security_group
+
+  security_tag:
+    type: cloudify.nsx.security_tag
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            tag:
+              name: secret_tag
+              description: What can i say?

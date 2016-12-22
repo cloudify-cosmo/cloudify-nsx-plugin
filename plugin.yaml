@@ -246,6 +246,36 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_security_policy.delete
 
+  # Security Tag
+  cloudify.nsx.security_tag:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      validate_tag:
+        default:
+          name:
+            required: true
+          description:
+            set_none: true
+      policy:
+        default:
+          name: ""
+          description: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_tag.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_tag.delete
+
   # logical switches
   cloudify.nsx.lswitch:
     derived_from: cloudify.nodes.Network
