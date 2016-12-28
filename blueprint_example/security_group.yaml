@@ -51,7 +51,7 @@ inputs:
 
 node_templates:
 
-  master_security_group:
+  slave_security_group:
     type: cloudify.nsx.security_group
     properties:
       nsx_auth: &nsx_auth
@@ -61,7 +61,58 @@ node_templates:
         raml: { get_input: nsx_raml }
       group:
         scopeId: globalroot-0
+        name: SlaveSecureGroup
+
+  master_security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: *nsx_auth
+      group:
+        scopeId: globalroot-0
         name: MasterSecureGroup
+
+  slave_master_security_group_bind:
+    type: cloudify.nsx.security_group_member
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group_member:
+              security_group_id: { get_attribute: [ master_security_group, resource_id ] }
+              objectId: { get_attribute: [ slave_security_group, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: master_security_group
+      - type: cloudify.relationships.connected_to
+        target: slave_security_group
+
+  root_security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group:
+              scopeId: globalroot-0
+              name: RootSecureGroup
+              member:
+                objectId: { get_attribute: [ master_security_group, resource_id ] }
+              dynamicMemberDefinition:
+                dynamicSet:
+                  operator: OR
+                  dynamicCriteria:
+                    operator: OR
+                    isValid: true
+                    key: VM.GUEST_HOST_NAME
+                    value: linux
+                    criteria: contains
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: master_security_group
 
   master_security_policy:
     type: cloudify.nsx.security_policy
@@ -127,5 +178,22 @@ node_templates:
     relationships:
       - type: cloudify.relationships.connected_to
         target: security_tag
+      - type: cloudify.relationships.connected_to
+        target: vm
+
+  security_group_member_vm:
+    type: cloudify.nsx.security_group_member
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group_member:
+              security_group_id: { get_attribute: [ root_security_group, resource_id ] }
+              objectId: { get_attribute: [ vm, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: root_security_group
       - type: cloudify.relationships.connected_to
         target: vm

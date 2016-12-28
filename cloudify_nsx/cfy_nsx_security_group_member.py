@@ -14,15 +14,14 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import library.nsx_security_tag as nsx_security_tag
+import library.nsx_security_group as nsx_security_group
 import library.nsx_common as common
-from cloudify import exceptions as cfy_exc
 
 
 @operation
 def create(**kwargs):
-    use_existed, tag = common.get_properties_and_validate(
-        'tag', kwargs
+    use_existed, group_member = common.get_properties_and_validate(
+        'group_member', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
@@ -33,32 +32,21 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    if not resource_id:
-        resource_id, _ = nsx_security_tag.get_tag(client_session,
-                                                  tag['name'])
+    resource_id = nsx_security_group.add_group_member(
+        client_session,
+        group_member['security_group_id'],
+        group_member['objectId'],
+    )
 
-        if use_existed and resource_id:
-            ctx.instance.runtime_properties['resource_id'] = resource_id
-            ctx.logger.info("Used existed %s" % resource_id)
-        elif resource_id:
-            raise cfy_exc.NonRecoverableError(
-                "We already have such security tag"
-            )
-
-    if not resource_id:
-        resource_id, location = nsx_security_tag.add_tag(
-            client_session,
-            tag['name'],
-            tag['description'],
-        )
-
-        ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("created %s|%s" % (resource_id, location))
+    ctx.instance.runtime_properties['resource_id'] = resource_id
+    ctx.logger.info("created %s" % resource_id)
 
 
 @operation
 def delete(**kwargs):
-    use_existed, tag = common.get_properties('tag', kwargs)
+    use_existed, group_member = common.get_properties(
+        'group_member', kwargs
+    )
 
     if use_existed:
         ctx.logger.info("Used existed")
@@ -72,7 +60,7 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    nsx_security_tag.delete_tag(
+    nsx_security_group.delete_group_member(
         client_session,
         resource_id
     )

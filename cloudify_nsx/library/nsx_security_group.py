@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import nsx_common as common
+from cloudify import exceptions as cfy_exc
 
 
 def get_policy(client_session, name):
@@ -76,6 +77,76 @@ def add_group(client_session, scopeId, name, member, excludeMember,
     common.check_raw_result(raw_result)
 
     return raw_result['objectId']
+
+
+def add_group_member(client_session, security_group_id, member_id):
+
+    raw_result = client_session.read(
+        'secGroupObject', uri_parameters={'objectId': security_group_id}
+    )
+
+    common.check_raw_result(raw_result)
+
+    security_group = raw_result['body']
+
+    if 'member' not in security_group['securitygroup']:
+        security_group['securitygroup']['member'] = []
+
+    members = security_group['securitygroup']['member']
+    if isinstance(members, dict):
+        members = [members]
+
+    for member in members:
+        if member.get("objectId") == member_id:
+            raise cfy_exc.NonRecoverableError(
+                "You already have such member in security group."
+            )
+
+    members.append({"objectId": member_id})
+
+    security_group['securitygroup']['member'] = members
+
+    raw_result = client_session.update(
+        'secGroupObject', uri_parameters={'objectId': security_group_id},
+        request_body_dict=security_group
+    )
+
+    common.check_raw_result(raw_result)
+
+    return "%s|%s" % (security_group_id, member_id)
+
+
+def delete_group_member(client_session, resource_id):
+    security_group_id, member_id = resource_id.split("|")
+
+    raw_result = client_session.read(
+        'secGroupObject', uri_parameters={'objectId': security_group_id}
+    )
+
+    common.check_raw_result(raw_result)
+
+    security_group = raw_result['body']
+
+    if 'member' not in security_group['securitygroup']:
+        return
+
+    members = security_group['securitygroup']['member']
+    if isinstance(members, dict):
+        members = [members]
+
+    for member in members:
+        if member.get("objectId") == member_id:
+            members.remove(member)
+            break
+
+    security_group['securitygroup']['member'] = members
+
+    raw_result = client_session.update(
+        'secGroupObject', uri_parameters={'objectId': security_group_id},
+        request_body_dict=security_group
+    )
+
+    common.check_raw_result(raw_result)
 
 
 def add_policy(client_session, name, description, precedence, parent,
