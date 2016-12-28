@@ -20,8 +20,8 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, group_member = common.get_properties_and_validate(
-        'group_member', kwargs
+    use_existed, group_exclude_member = common.get_properties_and_validate(
+        'group_exclude_member', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
@@ -32,10 +32,10 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    resource_id = nsx_security_group.add_group_member(
+    resource_id = nsx_security_group.add_group_exclude_member(
         client_session,
-        group_member['security_group_id'],
-        group_member['objectId'],
+        group_exclude_member['security_group_id'],
+        group_exclude_member['objectId'],
     )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
@@ -44,8 +44,8 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, group_member = common.get_properties(
-        'group_member', kwargs
+    use_existed, group_exclude_member = common.get_properties(
+        'group_exclude_member', kwargs
     )
 
     if use_existed:
@@ -60,7 +60,7 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    nsx_security_group.del_group_member(
+    nsx_security_group.del_group_exclude_member(
         client_session,
         resource_id
     )
