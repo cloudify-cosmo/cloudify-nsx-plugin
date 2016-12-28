@@ -42,7 +42,7 @@ def create(**kwargs):
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
-                "We already have such security group"
+                "We already have such security policy"
             )
 
     if not resource_id:
