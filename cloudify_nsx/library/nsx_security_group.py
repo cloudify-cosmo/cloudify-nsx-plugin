@@ -20,7 +20,7 @@ def get_policy(client_session, name):
 
     common.check_raw_result(raw_result)
 
-    if not 'securityPolicies' in raw_result['body']:
+    if 'securityPolicies' not in raw_result['body']:
         return None
 
     policies = raw_result['body']['securityPolicies'].get('securityPolicy')
@@ -41,7 +41,7 @@ def get_group(client_session, scopeId, name):
 
     common.check_raw_result(raw_result)
 
-    if not 'list' in raw_result['body']:
+    if 'list' not in raw_result['body']:
         return None
 
     groups = raw_result['body']['list'].get('securitygroup')
