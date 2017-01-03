@@ -228,7 +228,7 @@ def update_bgp(client_session, esg_id, enabled, defaultOriginate,
                gracefulRestart, redistribution, localAS):
 
     raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId':  esg_id})
+        'routingBGP', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -278,7 +278,7 @@ def add_bgp_neighbour(client_session, esg_id, use_existed, ipAddress,
                       remoteAS, weight, holdDownTimer, keepAliveTimer,
                       password, protocolAddress, forwardingAddress):
     raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId':  esg_id})
+        'routingBGP', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -376,7 +376,7 @@ def del_bgp_neighbour(client_session, neighbour_id):
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
     raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId':  esg_id})
+        'routingBGP', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -433,7 +433,7 @@ def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
     raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId':  esg_id})
+        'routingBGP', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -518,8 +518,8 @@ def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
                 'network': network,
                 'action': action,
                 'ipPrefixGe': ipPrefixGe,
-                'ipPrefixLe':  ipPrefixLe,
-                'direction':  direction
+                'ipPrefixLe': ipPrefixLe,
+                'direction': direction
             }
             bgp_filters.append(bgp_filter)
 
@@ -544,7 +544,7 @@ def del_bgp_neighbour_filter(client_session, resource_id):
     forwardingAddress = ids[5]
 
     raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId':  esg_id})
+        'routingBGP', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -616,7 +616,7 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
                 forwardingAddress=None):
 
     raw_result = client_session.read(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+        'routingOSPF', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -668,7 +668,7 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
 def add_esg_ospf_area(client_session, esg_id, area_id, use_existed, area_type,
                       auth):
     raw_result = client_session.read(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+        'routingOSPF', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -713,7 +713,7 @@ def add_esg_ospf_area(client_session, esg_id, area_id, use_existed, area_type,
                 'authentication': auth})
 
     raw_result = client_session.update(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        'routingOSPF', uri_parameters={'edgeId': esg_id},
         request_body_dict=ospf
     )
 
@@ -726,7 +726,7 @@ def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existed,
                            hello_interval, dead_interval, priority, cost):
 
     raw_result = client_session.read(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+        'routingOSPF', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -780,7 +780,7 @@ def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existed,
                 'cost': cost})
 
     raw_result = client_session.update(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        'routingOSPF', uri_parameters={'edgeId': esg_id},
         request_body_dict=ospf
     )
 
@@ -794,7 +794,7 @@ def del_esg_ospf_area(client_session, resource_id):
     esg_id, area_id = resource_id.split("|")
 
     raw_result = client_session.read(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+        'routingOSPF', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -818,7 +818,7 @@ def del_esg_ospf_area(client_session, resource_id):
             break
 
     raw_result = client_session.update(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        'routingOSPF', uri_parameters={'edgeId': esg_id},
         request_body_dict=ospf
     )
     common.check_raw_result(raw_result)
@@ -829,7 +829,7 @@ def del_esg_ospf_interface(client_session, resource_id):
     esg_id, area_id, vnic = resource_id.split("|")
 
     raw_result = client_session.read(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id})
+        'routingOSPF', uri_parameters={'edgeId': esg_id})
 
     common.check_raw_result(raw_result)
 
@@ -858,7 +858,7 @@ def del_esg_ospf_interface(client_session, resource_id):
         break
 
     raw_result = client_session.update(
-        'routingOSPF', uri_parameters={'edgeId':  esg_id},
+        'routingOSPF', uri_parameters={'edgeId': esg_id},
         request_body_dict=ospf
     )
     common.check_raw_result(raw_result)
