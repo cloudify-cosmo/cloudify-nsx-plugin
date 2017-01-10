@@ -21,9 +21,9 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, route = common.get_properties_and_validate('route', kwargs)
+    use_existing, route = common.get_properties_and_validate('route', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 
@@ -55,9 +55,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, route = common.get_properties('route', kwargs)
+    use_existing, route = common.get_properties('route', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

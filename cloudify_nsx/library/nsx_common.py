@@ -64,7 +64,7 @@ def clenup_if_empty(value):
     return value
 
 
-def validate(check_dict, validate_rules, use_existed):
+def validate(check_dict, validate_rules, use_existing):
     result = {}
     for name in validate_rules:
         rule = validate_rules[name]
@@ -85,13 +85,13 @@ def validate(check_dict, validate_rules, use_existed):
             value = check_dict.get(name)
 
         # external
-        if use_existed and external_use_value and not value:
+        if use_existing and external_use_value and not value:
             raise cfy_exc.NonRecoverableError(
                 "don't have external value for %s" % name
             )
 
         # not external
-        if not use_existed and not external_use_value:
+        if not use_existing and not external_use_value:
             # zero/true/false is also value
             if required_value and not value and not isinstance(value, int):
                 raise cfy_exc.NonRecoverableError(
@@ -118,7 +118,7 @@ def validate(check_dict, validate_rules, use_existed):
                         )
                     )
             if sub_checks:
-                value = validate(value, sub_checks, use_existed)
+                value = validate(value, sub_checks, use_existing)
                 if set_none:
                     value = clenup_if_empty(value)
 
@@ -195,18 +195,18 @@ def nsx_login(kwargs):
 
 def get_properties(name, kwargs):
     properties_dict = __get_properties(name, kwargs)
-    use_existed = ctx.node.properties.get(
+    use_existing = ctx.node.properties.get(
         'use_external_resource', False
     )
-    return use_existed, properties_dict
+    return use_existing, properties_dict
 
 
 def get_properties_and_validate(name, kwargs):
-    use_existed, properties_dict = get_properties(name, kwargs)
+    use_existing, properties_dict = get_properties(name, kwargs)
     _, validate_dict = get_properties('validate_' + name, kwargs)
     ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
-    return use_existed, validate(
-        properties_dict, validate_dict, use_existed
+    return use_existing, validate(
+        properties_dict, validate_dict, use_existing
     )
 
 

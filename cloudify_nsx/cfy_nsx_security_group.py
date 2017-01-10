@@ -21,7 +21,7 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, group = common.get_properties_and_validate(
+    use_existing, group = common.get_properties_and_validate(
         'group', kwargs
     )
 
@@ -38,12 +38,12 @@ def create(**kwargs):
                                                    group['scopeId'],
                                                    group['name'])
 
-        if use_existed and resource_id:
+        if use_existing and resource_id:
             ctx.instance.runtime_properties['resource_id'] = resource_id
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
-                "We already have such security group"
+                "Security group '%s' already exists" % group['name']
             )
 
     if not resource_id:
@@ -62,9 +62,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, group = common.get_properties('group', kwargs)
+    use_existing, group = common.get_properties('group', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

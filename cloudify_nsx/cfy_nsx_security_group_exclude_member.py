@@ -20,7 +20,7 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, group_exclude_member = common.get_properties_and_validate(
+    use_existing, group_exclude_member = common.get_properties_and_validate(
         'group_exclude_member', kwargs
     )
 
@@ -44,11 +44,11 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, group_exclude_member = common.get_properties(
+    use_existing, group_exclude_member = common.get_properties(
         'group_exclude_member', kwargs
     )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

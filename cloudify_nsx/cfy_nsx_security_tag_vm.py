@@ -20,7 +20,7 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, vm_tag = common.get_properties_and_validate(
+    use_existing, vm_tag = common.get_properties_and_validate(
         'vm_tag', kwargs
     )
 
@@ -44,9 +44,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, vm_tag = common.get_properties('vm_tag', kwargs)
+    use_existing, vm_tag = common.get_properties('vm_tag', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

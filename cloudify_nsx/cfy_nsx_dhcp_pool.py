@@ -21,9 +21,11 @@ import library.nsx_esg_dlr as nsx_dhcp
 
 @operation
 def create(**kwargs):
-    use_existed, pool_dict = common.get_properties_and_validate('pool', kwargs)
+    use_existing, pool_dict = common.get_properties_and_validate(
+        'pool', kwargs
+    )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used pre existed!")
         return
 
@@ -48,9 +50,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, pool_dict = common.get_properties('pool', kwargs)
+    use_existing, pool_dict = common.get_properties('pool', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used pre existed!")
         return
 

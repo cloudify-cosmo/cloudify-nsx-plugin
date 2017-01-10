@@ -20,11 +20,11 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, neighbour_filter = common.get_properties_and_validate(
+    use_existing, neighbour_filter = common.get_properties_and_validate(
         'filter', kwargs
     )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed, no changes made")
         return
 
@@ -38,7 +38,7 @@ def create(**kwargs):
 
     resource_id = cfy_dlr.add_bgp_neighbour_filter(
         client_session,
-        use_existed,
+        use_existing,
         neighbour_filter['neighbour_id'],
         neighbour_filter['action'],
         neighbour_filter['ipPrefixGe'],
@@ -53,9 +53,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, neighbour = common.get_properties('neighbour', kwargs)
+    use_existing, neighbour = common.get_properties('neighbour', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

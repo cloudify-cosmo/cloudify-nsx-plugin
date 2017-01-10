@@ -20,11 +20,11 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, relay_dict = common.get_properties_and_validate(
+    use_existing, relay_dict = common.get_properties_and_validate(
         'relay', kwargs
     )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed, no chnages made")
         return
 
@@ -45,11 +45,11 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, relay_dict = common.get_properties(
+    use_existing, relay_dict = common.get_properties(
         'relay', kwargs
     )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

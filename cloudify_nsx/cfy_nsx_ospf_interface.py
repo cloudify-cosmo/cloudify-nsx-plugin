@@ -20,14 +20,14 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, interface = common.get_properties_and_validate(
+    use_existing, interface = common.get_properties_and_validate(
         'interface', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)
-        if not use_existed:
+        if not use_existing:
             return
 
     # credentials
@@ -38,7 +38,7 @@ def create(**kwargs):
         interface['dlr_id'],
         interface['areaId'],
         interface['vnic'],
-        use_existed,
+        use_existing,
         interface['helloInterval'],
         interface['deadInterval'],
         interface['priority'],
@@ -51,9 +51,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, interface = common.get_properties('interface', kwargs)
+    use_existing, interface = common.get_properties('interface', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

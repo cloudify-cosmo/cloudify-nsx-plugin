@@ -24,13 +24,13 @@ def create(**kwargs):
     # credentials
     vccontent = common.vcenter_state(kwargs)
 
-    use_existed, dvportgroup = common.get_properties_and_validate(
+    use_existing, dvportgroup = common.get_properties_and_validate(
         'dvportgroup', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 
-    if not use_existed:
+    if not use_existing:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
@@ -69,9 +69,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, _ = common.get_properties('dvportgroup', kwargs)
+    use_existing, _ = common.get_properties('dvportgroup', kwargs)
 
-    if not use_existed:
+    if not use_existing:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented!"
         )
