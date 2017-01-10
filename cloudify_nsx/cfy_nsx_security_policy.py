@@ -21,7 +21,7 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, policy = common.get_properties_and_validate(
+    use_existing, policy = common.get_properties_and_validate(
         'policy', kwargs
     )
 
@@ -37,12 +37,12 @@ def create(**kwargs):
         resource_id = nsx_security_group.get_policy(client_session,
                                                     policy['name'])
 
-        if use_existed and resource_id:
+        if use_existing and resource_id:
             ctx.instance.runtime_properties['resource_id'] = resource_id
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
-                "We already have such security policy"
+                "Security policy '%s' already exists" % policy['name']
             )
 
     if not resource_id:
@@ -62,9 +62,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, group = common.get_properties('group', kwargs)
+    use_existing, group = common.get_properties('group', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

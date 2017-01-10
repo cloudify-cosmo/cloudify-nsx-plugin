@@ -21,11 +21,11 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, interface = common.get_properties_and_validate(
+    use_existing, interface = common.get_properties_and_validate(
         'interface', kwargs
     )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 
@@ -67,9 +67,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, interface = common.get_properties('interface', kwargs)
+    use_existing, interface = common.get_properties('interface', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

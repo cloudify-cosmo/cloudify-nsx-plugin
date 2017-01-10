@@ -21,7 +21,7 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, switch_dict = common.get_properties_and_validate(
+    use_existing, switch_dict = common.get_properties_and_validate(
         'switch', kwargs
     )
 
@@ -41,16 +41,16 @@ def create(**kwargs):
         resource_id, switch_params = nsx_logical_switch.logical_switch_read(
             client_session, switch_dict["name"]
         )
-        if use_existed:
+        if use_existing:
             ctx.instance.runtime_properties['resource_id'] = resource_id
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
-                "We already have such switch"
+                "Switch '%s' already exists" % switch_dict["name"]
             )
 
         # create new logical switch
-        if not use_existed:
+        if not use_existing:
             switch_mode = switch_dict.get("mode")
             # nsx does not understand unicode strings
             ctx.logger.info("creating %s" % switch_dict["name"])
@@ -86,9 +86,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, switch_dict = common.get_properties('switch', kwargs)
+    use_existing, switch_dict = common.get_properties('switch', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used pre existed!")
         return
 

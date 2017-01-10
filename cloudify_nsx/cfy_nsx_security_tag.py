@@ -21,7 +21,7 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, tag = common.get_properties_and_validate(
+    use_existing, tag = common.get_properties_and_validate(
         'tag', kwargs
     )
 
@@ -37,12 +37,12 @@ def create(**kwargs):
         resource_id, _ = nsx_security_tag.get_tag(client_session,
                                                   tag['name'])
 
-        if use_existed and resource_id:
+        if use_existing and resource_id:
             ctx.instance.runtime_properties['resource_id'] = resource_id
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
-                "We already have such security tag"
+                "Security tag '%s' already exists" % tag['name']
             )
 
     if not resource_id:
@@ -58,9 +58,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, tag = common.get_properties('tag', kwargs)
+    use_existing, tag = common.get_properties('tag', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

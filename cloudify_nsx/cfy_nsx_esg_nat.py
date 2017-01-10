@@ -21,11 +21,11 @@ import library.nsx_nat as nsx_nat
 
 @operation
 def create(**kwargs):
-    use_existed, nat_dict = common.get_properties_and_validate(
+    use_existing, nat_dict = common.get_properties_and_validate(
         'rule', kwargs
     )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 
@@ -59,9 +59,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, nat_dict = common.get_properties('rule', kwargs)
+    use_existing, nat_dict = common.get_properties('rule', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

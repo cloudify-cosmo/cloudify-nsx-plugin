@@ -23,14 +23,16 @@ import library.nsx_esg_dlr as nsx_dlr
 @operation
 def create(**kwargs):
 
-    use_existed, edge_dict = common.get_properties_and_validate('edge', kwargs)
+    use_existing, edge_dict = common.get_properties_and_validate(
+        'edge', kwargs
+    )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    if use_existed and resource_id:
+    if use_existing and resource_id:
         name = common.get_edgegateway(client_session, resource_id)['name']
         edge_dict['name'] = name
         ctx.instance.runtime_properties['edge']['name'] = name
@@ -41,12 +43,12 @@ def create(**kwargs):
 
     if not resource_id:
         resource_id, _ = nsx_esg.esg_read(client_session, edge_dict["name"])
-        if use_existed:
+        if use_existing:
             ctx.instance.runtime_properties['resource_id'] = resource_id
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
-                "We already have such router"
+                "Edge '%s' already exists" % edge_dict["name"]
             )
 
     if not resource_id:
@@ -72,7 +74,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, edge_dict = common.get_properties('edge', kwargs)
+    use_existing, edge_dict = common.get_properties('edge', kwargs)
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
@@ -82,7 +84,7 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed %s" % edge_dict.get('name'))
         nsx_dlr.update_common_edges(client_session, resource_id, kwargs, True)
         return

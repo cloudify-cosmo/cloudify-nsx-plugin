@@ -21,9 +21,11 @@ import library.nsx_esg_dlr as nsx_dhcp
 
 @operation
 def create(**kwargs):
-    use_existed, bind_dict = common.get_properties_and_validate('bind', kwargs)
+    use_existing, bind_dict = common.get_properties_and_validate(
+        'bind', kwargs
+    )
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used pre existed!")
         return
 
@@ -69,9 +71,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, bind_dict = common.get_properties('bind', kwargs)
+    use_existing, bind_dict = common.get_properties('bind', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used pre existed!")
         return
 
@@ -87,7 +89,7 @@ def delete(**kwargs):
                                         bind_dict['esg_id'],
                                         resource_id):
         raise cfy_exc.NonRecoverableError(
-            "Ca't drop dhcp bind"
+            "Can't drop dhcp bind"
         )
 
     ctx.instance.runtime_properties['resource_id'] = None

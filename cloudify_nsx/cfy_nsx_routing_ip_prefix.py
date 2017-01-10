@@ -20,21 +20,21 @@ import library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    use_existed, prefix = common.get_properties_and_validate(
+    use_existing, prefix = common.get_properties_and_validate(
         'prefix', kwargs
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)
-        if not use_existed:
+        if not use_existing:
             return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
     resource_id = cfy_dlr.add_routing_prefix(client_session,
-                                             use_existed,
+                                             use_existing,
                                              prefix['dlr_id'],
                                              prefix['name'],
                                              prefix['ipAddress'])
@@ -45,9 +45,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, area = common.get_properties('area', kwargs)
+    use_existing, area = common.get_properties('area', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used existed")
         return
 

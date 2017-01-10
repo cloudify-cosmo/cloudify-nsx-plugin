@@ -21,7 +21,7 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existed, resource_pool = common.get_properties_and_validate(
+    use_existing, resource_pool = common.get_properties_and_validate(
         'resource_pool', kwargs
     )
 
@@ -30,7 +30,7 @@ def create(**kwargs):
         ctx.logger.info("Reused %s" % resource_id)
         return
 
-    if not use_existed:
+    if not use_existing:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )
@@ -48,9 +48,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, _ = common.get_properties('resource_pool', kwargs)
+    use_existing, _ = common.get_properties('resource_pool', kwargs)
 
-    if not use_existed:
+    if not use_existing:
         raise cfy_exc.NonRecoverableError(
             "Not Implemented"
         )

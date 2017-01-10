@@ -22,7 +22,7 @@ import library.nsx_esg_dlr as nsx_dlr
 
 @operation
 def create(**kwargs):
-    use_existed, router_dict = common.get_properties_and_validate(
+    use_existing, router_dict = common.get_properties_and_validate(
         'router', kwargs
     )
 
@@ -33,16 +33,16 @@ def create(**kwargs):
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 
-    if not use_existed and not resource_id:
+    if not use_existing and not resource_id:
         resource_id, _ = nsx_router.dlr_read(
             client_session, router_dict["name"]
         )
-        if use_existed:
+        if use_existing:
             ctx.instance.runtime_properties['resource_id'] = resource_id
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
-                "We already have such router"
+                "Router '%s' already exists" % router_dict["name"]
             )
     if not resource_id:
         resource_id, location = nsx_router.dlr_create(
@@ -72,9 +72,9 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existed, router_dict = common.get_properties('router', kwargs)
+    use_existing, router_dict = common.get_properties('router', kwargs)
 
-    if use_existed:
+    if use_existing:
         ctx.logger.info("Used pre existed!")
         return
 

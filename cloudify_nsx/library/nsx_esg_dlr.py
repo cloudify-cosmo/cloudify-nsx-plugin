@@ -274,7 +274,7 @@ def update_bgp(client_session, esg_id, enabled, defaultOriginate,
     common.check_raw_result(raw_result)
 
 
-def add_bgp_neighbour(client_session, esg_id, use_existed, ipAddress,
+def add_bgp_neighbour(client_session, esg_id, use_existing, ipAddress,
                       remoteAS, weight, holdDownTimer, keepAliveTimer,
                       password, protocolAddress, forwardingAddress):
     raw_result = client_session.read(
@@ -319,7 +319,7 @@ def add_bgp_neighbour(client_session, esg_id, use_existed, ipAddress,
             if bgp_neighbour['protocolAddress'] != protocolAddress:
                 continue
 
-        if not use_existed:
+        if not use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You already have such rule"
             )
@@ -336,7 +336,7 @@ def add_bgp_neighbour(client_session, esg_id, use_existed, ipAddress,
             break
 
     if need_add:
-        if use_existed:
+        if use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You don't have such rule"
             )
@@ -425,7 +425,7 @@ def del_bgp_neighbour(client_session, neighbour_id):
     common.check_raw_result(raw_result)
 
 
-def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
+def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
                              action, ipPrefixGe, ipPrefixLe, direction,
                              network):
     ids = neighbour_id.split("|")
@@ -496,7 +496,7 @@ def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
     for bgp_filter in bgp_filters:
         if str(bgp_filter['network']) != network:
             continue
-        if not use_existed:
+        if not use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You already have such filter(same network)"
             )
@@ -509,7 +509,7 @@ def add_bgp_neighbour_filter(client_session, use_existed, neighbour_id,
             break
 
     if need_add:
-        if use_existed:
+        if use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You don't have such rule"
             )
@@ -665,7 +665,7 @@ def ospf_create(client_session, esg_id, enabled, defaultOriginate,
     common.check_raw_result(raw_result)
 
 
-def add_esg_ospf_area(client_session, esg_id, area_id, use_existed, area_type,
+def add_esg_ospf_area(client_session, esg_id, area_id, use_existing, area_type,
                       auth):
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId': esg_id})
@@ -691,7 +691,7 @@ def add_esg_ospf_area(client_session, esg_id, area_id, use_existed, area_type,
     for area in ospf_areas:
         if str(area['areaId']) != str(area_id):
             continue
-        if not use_existed:
+        if not use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You already have such rule"
             )
@@ -702,7 +702,7 @@ def add_esg_ospf_area(client_session, esg_id, area_id, use_existed, area_type,
             break
 
     if need_add:
-        if use_existed:
+        if use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You don't have such rule"
             )
@@ -722,7 +722,7 @@ def add_esg_ospf_area(client_session, esg_id, area_id, use_existed, area_type,
     return "%s|%s" % (esg_id, area_id)
 
 
-def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existed,
+def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existing,
                            hello_interval, dead_interval, priority, cost):
 
     raw_result = client_session.read(
@@ -753,7 +753,7 @@ def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existed,
         if str(interface['vnic']) != str(vnic):
             continue
 
-        if not use_existed:
+        if not use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You already have such rule"
             )
@@ -766,7 +766,7 @@ def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existed,
             break
 
     if need_add:
-        if use_existed:
+        if use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You don't have such rule"
             )
@@ -1050,7 +1050,7 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
             )
 
 
-def add_routing_prefix(client_session, use_existed, esg_id, name, ipAddress):
+def add_routing_prefix(client_session, use_existing, esg_id, name, ipAddress):
 
     raw_result = client_session.read(
         'routingConfig', uri_parameters={'edgeId': str(esg_id)})
@@ -1086,7 +1086,7 @@ def add_routing_prefix(client_session, use_existed, esg_id, name, ipAddress):
         if prefix['name'] != name:
             continue
 
-        if not use_existed:
+        if not use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You already have such prefix"
             )
@@ -1096,7 +1096,7 @@ def add_routing_prefix(client_session, use_existed, esg_id, name, ipAddress):
             break
 
     if need_add:
-        if use_existed:
+        if use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You don't have such prefix"
             )
@@ -1163,7 +1163,7 @@ def del_routing_prefix(client_session, resource_id):
     common.check_raw_result(raw_result)
 
 
-def add_routing_rule(client_session, use_existed, esg_id, routing_type,
+def add_routing_rule(client_session, use_existing, esg_id, routing_type,
                      prefixName, routing_from, action):
 
     # convert boolean to 'correct' string values for routing
@@ -1221,7 +1221,7 @@ def add_routing_rule(client_session, use_existed, esg_id, routing_type,
         if rule['prefixName'] != prefixName:
             continue
 
-        if not use_existed:
+        if not use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You already have such rule"
             )
@@ -1232,7 +1232,7 @@ def add_routing_rule(client_session, use_existed, esg_id, routing_type,
             break
 
     if need_add:
-        if use_existed:
+        if use_existing:
             raise cfy_exc.NonRecoverableError(
                 "You don't have such rule"
             )
