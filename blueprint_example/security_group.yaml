@@ -96,6 +96,35 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: slave_security_group
 
+  update_dynamic_members:
+    type: cloudify.nsx.security_group_dynamic_member
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            dynamic_member:
+              security_group_id: { get_attribute: [ slave_security_group, resource_id ] }
+              dynamic_set:
+                - operator: OR
+                  dynamicCriteria:
+                    operator: AND
+                    isValid: true
+                    key: VM.GUEST_OS_FULL_NAME
+                    value: Server
+                    criteria: contains
+                - operator: OR
+                  dynamicCriteria:
+                    operator: AND
+                    isValid: true
+                    key: VM.GUEST_OS_FULL_NAME
+                    value: Teapot
+                    criteria: contains
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: slave_security_group
+
   slave_exclude_master_security_group_bind:
     type: cloudify.nsx.security_group_exclude_member
     properties:
