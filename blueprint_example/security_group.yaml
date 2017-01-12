@@ -233,6 +233,32 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: master_security_policy
 
+  master_security_policy_section:
+    type: cloudify.nsx.security_policy_section
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy_section:
+              security_policy_id: { get_attribute: [ master_security_policy, resource_id ] }
+              category: endpoint
+              action:
+                '@class': endpointSecurityAction
+                name: endpoint_check
+                actionType: DATA_SECURITY
+                description: description for DATA_SECURITY
+                isEnabled: "true"
+                isActionEnforced: "false"
+                category: endpoint
+                isActive: "true"
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: master_security_policy_bind
+      - type: cloudify.relationships.connected_to
+        target: master_security_policy
+
   vm:
     type: cloudify.vcenter.server
     properties:

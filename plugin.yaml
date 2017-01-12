@@ -401,6 +401,39 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.cfy_nsx_security_policy_group_bind.delete
 
+  # Security Group Policy bind
+  cloudify.nsx.security_policy_section:
+    derived_from: cloudify.nodes.SecurityGroup
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      # reuse id/name
+      use_external_resource:
+        default: false
+        type: boolean
+      # resource nsx id
+      resource_id:
+        required: false
+      validate_policy_section:
+        default:
+          security_policy_id:
+            required: true
+          category:
+            required: true
+          action:
+            required: true
+      policy_section:
+        default:
+          security_policy_id: ""
+          category: ""
+          action: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy_section.create
+        delete:
+          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy_section.delete
+
   # Security Tag
   cloudify.nsx.security_tag:
     derived_from: cloudify.nodes.SecurityGroup
