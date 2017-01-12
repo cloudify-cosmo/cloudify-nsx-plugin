@@ -14,9 +14,19 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import library.nsx_security_group as nsx_security_group
+import library.nsx_security_policy as nsx_security_policy
 import library.nsx_common as common
 from cloudify import exceptions as cfy_exc
+
+
+def _update_policy(exist_policy):
+    """update policy info by existed policy"""
+    new_policy = ctx.instance.runtime_properties['policy']
+    new_policy['description'] = exist_policy['description']
+    new_policy['precedence'] = exist_policy['precedence']
+    new_policy['parent'] = exist_policy['parent']
+    new_policy['securityGroupBinding'] = exist_policy['securityGroupBinding']
+    new_policy['actionsByCategory'] = exist_policy['actionsByCategory']
 
 
 @operation
@@ -34,11 +44,14 @@ def create(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if not resource_id:
-        resource_id = nsx_security_group.get_policy(client_session,
-                                                    policy['name'])
+        resource_id, exist_policy = nsx_security_policy.get_policy(
+            client_session,
+            policy['name']
+        )
 
         if use_existing and resource_id:
             ctx.instance.runtime_properties['resource_id'] = resource_id
+            _update_policy(exist_policy)
             ctx.logger.info("Used existed %s" % resource_id)
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
@@ -46,7 +59,7 @@ def create(**kwargs):
             )
 
     if not resource_id:
-        resource_id = nsx_security_group.add_policy(
+        resource_id = nsx_security_policy.add_policy(
             client_session,
             policy['name'],
             policy['description'],
@@ -76,7 +89,7 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    nsx_security_group.del_policy(
+    nsx_security_policy.del_policy(
         client_session,
         resource_id
     )

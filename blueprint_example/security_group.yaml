@@ -216,6 +216,23 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: master_security_group
 
+  master_security_policy_bind:
+    type: cloudify.nsx.security_policy_group_bind
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy_group_bind:
+              security_policy_id: { get_attribute: [ master_security_policy, resource_id ] }
+              security_group_id: { get_attribute: [ slave_security_group, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: slave_security_group
+      - type: cloudify.relationships.connected_to
+        target: master_security_policy
+
   vm:
     type: cloudify.vcenter.server
     properties:
