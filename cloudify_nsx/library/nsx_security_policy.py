@@ -83,7 +83,10 @@ def add_policy_group_bind(client_session, security_policy_id,
     for bind in bindings:
         if bind.get('objectId') == security_group_id:
             raise cfy_exc.NonRecoverableError(
-                "You already have such group in security policy."
+                "Group %s already exists in %s" % (
+                    security_group_id,
+                    security_policy['securityPolicy']['name']
+                )
             )
 
     bindings.append({'objectId': security_group_id})
@@ -98,6 +101,79 @@ def add_policy_group_bind(client_session, security_policy_id,
     common.check_raw_result(raw_result)
 
     return "%s|%s" % (security_group_id, security_policy_id)
+
+
+def add_policy_section(client_session, security_policy_id, category, action):
+    raw_result = client_session.read(
+        'securityPolicyID', uri_parameters={'ID': security_policy_id}
+    )
+
+    common.check_raw_result(raw_result)
+
+    security_policy = raw_result['body']
+
+    actionsByCategory = security_policy['securityPolicy'].get(
+        'actionsByCategory', []
+    )
+
+    if isinstance(actionsByCategory, dict):
+        actionsByCategory = [actionsByCategory]
+
+    for actions in actionsByCategory:
+        if actions.get('category') == category:
+            actions['action'] = action
+            break
+    else:
+        actionsByCategory.append({
+            'category': category,
+            'action': action
+        })
+
+    security_policy['securityPolicy']['actionsByCategory'] = actionsByCategory
+
+    raw_result = client_session.update(
+        'securityPolicyID', uri_parameters={'ID': security_policy_id},
+        request_body_dict=security_policy
+    )
+
+    common.check_raw_result(raw_result)
+
+    return "%s|%s" % (category, security_policy_id)
+
+
+def del_policy_section(client_session, resource_id):
+    category, security_policy_id = resource_id.split("|")
+
+    raw_result = client_session.read(
+        'securityPolicyID', uri_parameters={'ID': security_policy_id}
+    )
+
+    common.check_raw_result(raw_result)
+
+    security_policy = raw_result['body']
+
+    actionsByCategory = security_policy['securityPolicy'].get(
+        'actionsByCategory', []
+    )
+
+    if isinstance(actionsByCategory, dict):
+        actionsByCategory = [actionsByCategory]
+
+    for actions in actionsByCategory:
+        if actions.get('category') == category:
+            actionsByCategory.remove(actions)
+            break
+    else:
+        return
+
+    security_policy['securityPolicy']['actionsByCategory'] = actionsByCategory
+
+    raw_result = client_session.update(
+        'securityPolicyID', uri_parameters={'ID': security_policy_id},
+        request_body_dict=security_policy
+    )
+
+    common.check_raw_result(raw_result)
 
 
 def del_policy_group_bind(client_session, resource_id):
@@ -119,14 +195,11 @@ def del_policy_group_bind(client_session, resource_id):
     if isinstance(bindings, dict):
         bindings = [bindings]
 
-    found = True
     for bind in bindings:
         if bind.get('objectId') == security_group_id:
             bindings.remove(bind)
-            found = True
             break
-
-    if not found:
+    else:
         return
 
     security_policy['securityPolicy']['securityGroupBinding'] = bindings
