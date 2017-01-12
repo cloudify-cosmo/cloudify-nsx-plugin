@@ -156,6 +156,56 @@ def add_group_member(client_session, security_group_id, member_id):
     return "%s|%s" % (security_group_id, member_id)
 
 
+def set_dynamic_member(client_session, security_group_id, dynamic_set):
+
+    raw_result = client_session.read(
+        'secGroupObject', uri_parameters={'objectId': security_group_id}
+    )
+
+    common.check_raw_result(raw_result)
+
+    security_group = raw_result['body']
+
+    # fully overwrite previous state
+    security_group['securitygroup']['dynamicMemberDefinition'] = {
+        'dynamicSet': dynamic_set
+    }
+
+    # it is not error!
+    # We need to use bulk to update dynamic members
+    # with use security_group_id as scope
+    raw_result = client_session.update(
+        'secGroupBulk', uri_parameters={'scopeId': security_group_id},
+        request_body_dict=security_group
+    )
+
+    common.check_raw_result(raw_result)
+
+    return security_group_id
+
+
+def del_dynamic_member(client_session, security_group_id):
+    raw_result = client_session.read(
+        'secGroupObject', uri_parameters={'objectId': security_group_id}
+    )
+
+    common.check_raw_result(raw_result)
+
+    security_group = raw_result['body']
+
+    security_group['securitygroup']['dynamicMemberDefinition'] = {}
+
+    # it is not error!
+    # We need to use bulk to update dynamic members
+    # with use security_group_id as scope
+    raw_result = client_session.update(
+        'secGroupBulk', uri_parameters={'scopeId': security_group_id},
+        request_body_dict=security_group
+    )
+
+    common.check_raw_result(raw_result)
+
+
 def del_group_member(client_session, resource_id):
     security_group_id, member_id = resource_id.split("|")
 
