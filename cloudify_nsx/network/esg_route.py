@@ -21,7 +21,36 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existing, route = common.get_properties_and_validate('route', kwargs)
+    validation_rules = {
+        "esg_id": {
+            "required": True
+        },
+        "network": {
+            "required": True
+        },
+        "next_hop": {
+            "set_none": True
+        },
+        "vnic": {
+            "set_none": True,
+            "type": "string"
+        },
+        "mtu": {
+            "set_none": True,
+            "type": "string"
+        },
+        "admin_distance": {
+            "set_none": True,
+            "type": "string"
+        },
+        "description": {
+            "set_none": True
+        }
+    }
+
+    use_existing, route = common.get_properties_and_validate(
+        'route', kwargs, validation_rules
+    )
 
     if use_existing:
         ctx.logger.info("Used existed")

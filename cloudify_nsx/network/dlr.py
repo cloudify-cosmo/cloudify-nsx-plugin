@@ -22,8 +22,44 @@ import cloudify_nsx.library.nsx_esg_dlr as nsx_dlr
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "name": {
+            "required": True
+        },
+        "dlr_pwd": {
+            "required": True
+        },
+        "dlr_size": {
+            "required": True
+        },
+        "datacentermoid": {
+            "required": True
+        },
+        "datastoremoid": {
+            "required": True
+        },
+        "resourcepoolid": {
+            "required": True
+        },
+        "ha_ls_id": {
+            "required": True
+        },
+        "uplink_ls_id": {
+            "required": True
+        },
+        "uplink_ip": {
+            "required": True
+        },
+        "uplink_subnet": {
+            "required": True
+        },
+        "uplink_dgw": {
+            "required": True
+        }
+    }
+
     use_existing, router_dict = common.get_properties_and_validate(
-        'router', kwargs
+        'router', kwargs, validation_rules
     )
 
     ctx.logger.info("checking %s" % router_dict["name"])

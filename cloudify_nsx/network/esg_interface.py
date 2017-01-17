@@ -21,8 +21,55 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "esg_id": {
+            "required": True
+        },
+        "ifindex": {
+            "required": True,
+            "type": "string"
+        },
+        "ipaddr": {
+            "set_none": True
+        },
+        "netmask": {
+            "set_none": True
+        },
+        "prefixlen": {
+            "set_none": True
+        },
+        "name": {
+            "set_none": True
+        },
+        "mtu": {
+            "set_none": True
+        },
+        "is_connected": {
+            "set_none": True
+        },
+        "portgroup_id": {
+            "set_none": True
+        },
+        "vnic_type": {
+            "set_none": True,
+            "values": [
+                "uplink",
+                "internal"
+            ]
+        },
+        "enable_send_redirects": {
+            "set_none": True
+        },
+        "enable_proxy_arp": {
+            "set_none": True
+        },
+        "secondary_ips": {
+            "set_none": True
+        }
+    }
+
     use_existing, interface = common.get_properties_and_validate(
-        'interface', kwargs
+        'interface', kwargs, validation_rules
     )
 
     if use_existing:

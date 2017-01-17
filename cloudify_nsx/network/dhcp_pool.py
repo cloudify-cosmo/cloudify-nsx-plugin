@@ -21,8 +21,38 @@ import cloudify_nsx.library.nsx_esg_dlr as nsx_dhcp
 
 @operation
 def create(**kwargs):
+    validations_rules = {
+        "esg_id": {
+            "required": True
+        },
+        "ip_range": {
+            "required": True
+        },
+        "default_gateway": {
+            "set_none": True
+        },
+        "subnet_mask": {
+            "set_none": True
+        },
+        "domain_name": {
+            "set_none": True
+        },
+        "dns_server_1": {
+            "set_none": True
+        },
+        "dns_server_2": {
+            "set_none": True
+        },
+        "lease_time": {
+            "set_none": True
+        },
+        "auto_dns": {
+            "set_none": True
+        }
+    }
+
     use_existing, pool_dict = common.get_properties_and_validate(
-        'pool', kwargs
+        'pool', kwargs, validations_rules
     )
 
     if use_existing:

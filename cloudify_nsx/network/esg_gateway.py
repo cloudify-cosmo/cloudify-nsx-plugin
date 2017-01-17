@@ -21,8 +21,29 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "esg_id": {
+            "required": True
+        },
+        "dgw_ip": {
+            "required": True
+        },
+        "vnic": {
+            "set_none": True,
+            "type": "string"
+        },
+        "mtu": {
+            "set_none": True,
+            "type": "string"
+        },
+        "admin_distance": {
+            "set_none": True,
+            "type": "string"
+        }
+    }
+
     use_existing, gateway = common.get_properties_and_validate(
-        'gateway', kwargs
+        'gateway', kwargs, validation_rules
     )
 
     if use_existing:

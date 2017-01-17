@@ -21,8 +21,51 @@ import cloudify_nsx.library.nsx_esg_dlr as nsx_dhcp
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "esg_id": {
+            "required": True
+        },
+        "vm_id": {
+            "set_none": True
+        },
+        "vnic_id": {
+            "set_none": True,
+            "type": "string"
+        },
+        "mac": {
+            "set_none": True
+        },
+        "hostname": {
+            "required": True
+        },
+        "ip": {
+            "required": True
+        },
+        "default_gateway": {
+            "set_none": True
+        },
+        "subnet_mask": {
+            "set_none": True
+        },
+        "domain_name": {
+            "set_none": True
+        },
+        "dns_server_1": {
+            "set_none": True
+        },
+        "dns_server_2": {
+            "set_none": True
+        },
+        "lease_time": {
+            "set_none": True
+        },
+        "auto_dns": {
+            "set_none": True
+        }
+    }
+
     use_existing, bind_dict = common.get_properties_and_validate(
-        'bind', kwargs
+        'bind', kwargs, validation_rules
     )
 
     if use_existing:
