@@ -31,8 +31,30 @@ def _update_policy(exist_policy):
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "name": {
+            "required": True
+        },
+        "description": {
+            "set_none": True
+        },
+        "precedence": {
+            "type": "string",
+            "required": True
+        },
+        "parent": {
+            "set_none": True
+        },
+        "securityGroupBinding": {
+            "set_none": True
+        },
+        "actionsByCategory": {
+            "set_none": True
+        }
+    }
+
     use_existing, policy = common.get_properties_and_validate(
-        'policy', kwargs
+        'policy', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

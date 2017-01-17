@@ -21,8 +21,28 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
+
+    validation_rules = {
+        "scopeId": {
+            "default": "globalroot-0",
+            "required": True
+        },
+        "name": {
+            "required": True
+        },
+        "member": {
+            "set_none": True
+        },
+        "excludeMember": {
+            "set_none": True
+        },
+        "dynamicMemberDefinition": {
+            "set_none": True
+        }
+    }
+
     use_existing, group = common.get_properties_and_validate(
-        'group', kwargs
+        'group', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

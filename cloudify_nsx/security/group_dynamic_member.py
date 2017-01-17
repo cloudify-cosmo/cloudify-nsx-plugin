@@ -20,8 +20,19 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+
+    validation_rules = {
+        "security_group_id": {
+            "required": True
+        },
+        # dynamic member definition
+        "dynamic_set": {
+            "required": True
+        }
+    }
+
     use_existing, dynamic_member = common.get_properties_and_validate(
-        'dynamic_member', kwargs
+        'dynamic_member', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

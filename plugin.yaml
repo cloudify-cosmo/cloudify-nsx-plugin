@@ -180,19 +180,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_group:
-        default:
-          scopeId:
-            default: globalroot-0
-            required: true
-          name:
-            required: true
-          member:
-            set_none: true
-          excludeMember:
-            set_none: true
-          dynamicMemberDefinition:
-            set_none: true
       group:
         default:
           scopeId: globalroot-0
@@ -220,13 +207,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_dynamic_member:
-        default:
-          security_group_id:
-            required: true
-          # dynamic member definition
-          dynamic_set:
-            required: true
       dynamic_member:
         default:
           dynamic_set: ""
@@ -251,13 +231,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_group_member:
-        default:
-          security_group_id:
-            required: true
-          # member id
-          objectId:
-            required: true
       group_member:
         default:
           security_group_id: ""
@@ -282,13 +255,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_group_exclude_member:
-        default:
-          security_group_id:
-            required: true
-          # member id
-          objectId:
-            required: true
       group_exclude_member:
         default:
           security_group_id: ""
@@ -313,21 +279,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_policy:
-        default:
-          name:
-            required: true
-          description:
-            set_none: true
-          precedence:
-            type: string
-            required: true
-          parent:
-            set_none: true
-          securityGroupBinding:
-            set_none: true
-          actionsByCategory:
-            set_none: true
       policy:
         default:
           name: ""
@@ -356,12 +307,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_policy_group_bind:
-        default:
-          security_policy_id:
-            required: true
-          security_group_id:
-            required: true
       policy_group_bind:
         default:
           security_policy_id: ""
@@ -386,14 +331,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_policy_section:
-        default:
-          security_policy_id:
-            required: true
-          category:
-            required: true
-          action:
-            required: true
       policy_section:
         default:
           security_policy_id: ""
@@ -419,12 +356,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_tag:
-        default:
-          name:
-            required: true
-          description:
-            set_none: true
       tag:
         default:
           name: ""
@@ -449,12 +380,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_vm_tag:
-        default:
-          tag_id:
-            required: true
-          vm_id:
-            required: true
       vm_tag:
         default:
           tag_id: ""

@@ -29,7 +29,7 @@ def create(**kwargs):
         }
     }
 
-    use_existing, resource_pool = common.get_properties_and_validate(
+    use_existing, dvportgroup = common.get_properties_and_validate(
         'dvportgroup', kwargs, validation_rules
     )
 

@@ -20,8 +20,17 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "security_policy_id": {
+            "required": True
+        },
+        "security_group_id": {
+            "required": True
+        }
+    }
+
     use_existing, policy_group_bind = common.get_properties_and_validate(
-        'policy_group_bind', kwargs
+        'policy_group_bind', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

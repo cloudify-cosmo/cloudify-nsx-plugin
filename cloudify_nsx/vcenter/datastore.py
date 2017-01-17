@@ -30,7 +30,7 @@ def create(**kwargs):
         }
     }
 
-    use_existing, resource_pool = common.get_properties_and_validate(
+    use_existing, datastore = common.get_properties_and_validate(
         'datastore', kwargs, validation_rules
     )
 
