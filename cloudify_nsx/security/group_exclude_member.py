@@ -20,8 +20,19 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+
+    validate_rules = {
+        "security_group_id": {
+            "required": True
+        },
+        # member id
+        "objectId": {
+            "required": True
+        }
+    }
+
     use_existing, group_exclude_member = common.get_properties_and_validate(
-        'group_exclude_member', kwargs
+        'group_exclude_member', kwargs, validate_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

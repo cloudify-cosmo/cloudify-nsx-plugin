@@ -21,8 +21,17 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "name": {
+            "required": True
+        },
+        "description": {
+            "set_none": True
+        }
+    }
+
     use_existing, tag = common.get_properties_and_validate(
-        'tag', kwargs
+        'tag', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

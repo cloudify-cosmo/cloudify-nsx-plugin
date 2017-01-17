@@ -20,8 +20,17 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "tag_id": {
+            "required": True
+        },
+        "vm_id": {
+            "required": True
+        }
+    }
+
     use_existing, vm_tag = common.get_properties_and_validate(
-        'vm_tag', kwargs
+        'vm_tag', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
