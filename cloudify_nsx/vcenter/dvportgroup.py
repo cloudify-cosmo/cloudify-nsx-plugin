@@ -21,12 +21,20 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
+
+    validation_rules = {
+        # we need name in any case of usage except predefined 'id'
+        'name': {
+            'required': True
+        }
+    }
+
+    use_existing, resource_pool = common.get_properties_and_validate(
+        'dvportgroup', kwargs, validation_rules
+    )
+
     # credentials
     vccontent = common.vcenter_state(kwargs)
-
-    use_existing, dvportgroup = common.get_properties_and_validate(
-        'dvportgroup', kwargs
-    )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 

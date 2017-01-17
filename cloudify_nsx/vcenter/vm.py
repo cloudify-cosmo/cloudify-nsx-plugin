@@ -21,8 +21,17 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
-    use_existing, vm = common.get_properties_and_validate(
-        'server', kwargs
+
+    validation_rules = {
+        # we need name in any case of usage except predefined 'id'
+        'name': {
+            'required': True,
+            'external_use': True
+        }
+    }
+
+    use_existing, resource_pool = common.get_properties_and_validate(
+        'server', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
