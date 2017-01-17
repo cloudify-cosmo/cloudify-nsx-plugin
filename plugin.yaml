@@ -53,12 +53,6 @@ node_types:
         required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate_resource_pool:
-        default:
-          # we need name in any case of usage except predefined 'id'
-          name:
-            required: true
-            external_use: true
       resource_pool:
         default:
           # name of resource pool
@@ -83,12 +77,6 @@ node_types:
         required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate_datastore:
-        default:
-          # we need name in any case of usage except predefined 'id'
-          name:
-            required: true
-            external_use: true
       datastore:
         default:
           # name of datastore
@@ -113,12 +101,6 @@ node_types:
         required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate_datacenter:
-        default:
-          # we need name in any case of usage except predefined 'id'
-          name:
-            required: true
-            external_use: true
       datacenter:
         default:
           # name of datacenter
@@ -143,11 +125,6 @@ node_types:
         required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate_dvportgroup:
-        default:
-          # we need name in any case of usage except predefined 'id'
-          name:
-            required: true
       dvportgroup:
         default:
           # name distributed port group
@@ -176,12 +153,7 @@ node_types:
         required: false
       vcenter_auth:
         type: vcenter_auth_type
-      validate_server:
-        default:
-          # we need name in any case of usage except predefined 'id'
-          name:
-            required: true
-      # install agent needt only for correcxt support Nodes.Compute
+      # install agent need only for correct support Nodes.Compute
       install_agent:
         default: false
       server:
