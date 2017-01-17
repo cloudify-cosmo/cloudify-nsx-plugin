@@ -21,8 +21,49 @@ import cloudify_nsx.library.nsx_nat as nsx_nat
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "esg_id": {
+            "required": True
+        },
+        "action": {
+            "required": True
+        },
+        "originalAddress": {
+            "required": True
+        },
+        "translatedAddress": {
+            "required": True
+        },
+        "vnic": {
+            "set_none": True
+        },
+        "ruleTag": {
+            "set_none": True
+        },
+        "loggingEnabled": {
+            "default": False,
+            "type": "boolean",
+        },
+        "enabled": {
+            "default": True,
+            "type": "boolean"
+        },
+        "description": {
+            "set_none": True
+        },
+        "protocol": {
+            "default": "any"
+        },
+        "translatedPort": {
+            "default": "any"
+        },
+        "originalPort": {
+            "default": "any"
+        }
+    }
+
     use_existing, nat_dict = common.get_properties_and_validate(
-        'rule', kwargs
+        'rule', kwargs, validation_rules
     )
 
     if use_existing:

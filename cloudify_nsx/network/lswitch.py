@@ -21,8 +21,30 @@ from cloudify import exceptions as cfy_exc
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        # we need name in any case of usage except predefined 'id'
+        "name": {
+            "required": True,
+            "external_use": True
+        },
+        "transport_zone": {
+            "required": True,
+            "external_use": False
+        },
+        "mode": {
+            "required": False,
+            "external_use": False,
+            "set_none": True,
+            "values": [
+                "UNICAST_MODE",
+                "MULTYCAST_MODE",
+                "HYBRID_MODE"
+            ]
+        }
+    }
+
     use_existing, switch_dict = common.get_properties_and_validate(
-        'switch', kwargs
+        'switch', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

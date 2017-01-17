@@ -404,23 +404,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_switch:
-        default:
-          # we need name in any case of usage except predefined 'id'
-          name:
-            required: true
-            external_use: true
-          transport_zone:
-            required: true
-            external_use: false
-          mode:
-            required: false
-            external_use: false
-            set_none: true
-            values:
-              - UNICAST_MODE
-              - MULTYCAST_MODE
-              - HYBRID_MODE
       switch:
         default:
           # The name of the Scope (Transport Zone)
@@ -449,30 +432,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_router:
-        default:
-          name:
-            required: true
-          dlr_pwd:
-            required: true
-          dlr_size:
-            required: true
-          datacentermoid:
-            required: true
-          datastoremoid:
-            required: true
-          resourcepoolid:
-            required: true
-          ha_ls_id:
-            required: true
-          uplink_ls_id:
-            required: true
-          uplink_ip:
-            required: true
-          uplink_subnet:
-            required: true
-          uplink_dgw:
-            required: true
       router:
         default:
           # The name that will be assigned to the new dlr
@@ -1468,34 +1427,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_rule:
-        default:
-          esg_id:
-            required: true
-          action:
-            required: true
-          originalAddress:
-            required: true
-          translatedAddress:
-            required: true
-          vnic:
-            set_none: true
-          ruleTag:
-            set_none: true
-          loggingEnabled:
-            default: false
-            type: boolean
-          enabled:
-            default: true
-            type: boolean
-          description:
-            set_none: true
-          protocol:
-            default: any
-          translatedPort:
-            default: any
-          originalPort:
-            default: any
       rule:
         default:
           # id of esg
@@ -1544,42 +1475,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_rule:
-        default:
-          esg_id:
-            required: true
-          ruleTag:
-            set_none: true
-          name:
-            set_none: true
-          source:
-            set_none: true
-          destination:
-            set_none: true
-          application:
-            set_none: true
-          matchTranslated:
-            default: false
-            type: boolean
-          direction:
-            values:
-              - in
-              - out
-            set_none: true
-          action:
-            required: true
-            values:
-              - accept
-              - deny
-              - reject
-          enabled:
-            default: true
-            type: boolean
-          loggingEnabled:
-            default: false
-            type: boolean
-          description:
-            set_none: true
       rule:
         default:
           # id of esg
@@ -1632,38 +1527,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_interface:
-        default:
-          esg_id:
-            required: true
-          ifindex:
-            required: true
-            type: string
-          ipaddr:
-            set_none: true
-          netmask:
-            set_none: true
-          prefixlen:
-            set_none: true
-          name:
-            set_none: true
-          mtu:
-            set_none: true
-          is_connected:
-            set_none: true
-          portgroup_id:
-            set_none: true
-          vnic_type:
-            set_none: true
-            values:
-              - uplink
-              - internal
-          enable_send_redirects:
-            set_none: true
-          enable_proxy_arp:
-            set_none: true
-          secondary_ips:
-            set_none: true
       interface:
         default:
           # The id of the ESG to configure interfaces on
@@ -1712,21 +1575,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_gateway:
-        default:
-          esg_id:
-            required: true
-          dgw_ip:
-            required: true
-          vnic:
-            set_none: true
-            type: string
-          mtu:
-            set_none: true
-            type: string
-          admin_distance:
-            set_none: true
-            type: string
       gateway:
         default:
           # The id of the ESG to configure interfaces on
@@ -1759,25 +1607,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_route:
-        default:
-          esg_id:
-            required: true
-          network:
-            required: true
-          next_hop:
-            set_none: true
-          vnic:
-            set_none: true
-            type: string
-          mtu:
-            set_none: true
-            type: string
-          admin_distance:
-            set_none: true
-            type: string
-          description:
-            set_none: true
       route:
         default:
           # The id of the ESG to configure interfaces on
@@ -1814,26 +1643,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_pool:
-        default:
-          esg_id:
-            required: true
-          ip_range:
-            required: true
-          default_gateway:
-            set_none: true
-          subnet_mask:
-            set_none: true
-          domain_name:
-            set_none: true
-          dns_server_1:
-            set_none: true
-          dns_server_2:
-            set_none: true
-          lease_time:
-            set_none: true
-          auto_dns:
-            set_none: true
       pool:
         default:
           # The id of the ESG to configure interfaces on
@@ -1874,35 +1683,6 @@ node_types:
       # resource nsx id
       resource_id:
         required: false
-      validate_bind:
-        default:
-          esg_id:
-            required: true
-          vm_id:
-            set_none: true
-          vnic_id:
-            set_none: true
-            type: string
-          mac:
-            set_none: true
-          hostname:
-            required: true
-          ip:
-            required: true
-          default_gateway:
-            set_none: true
-          subnet_mask:
-            set_none: true
-          domain_name:
-            set_none: true
-          dns_server_1:
-            set_none: true
-          dns_server_2:
-            set_none: true
-          lease_time:
-            set_none: true
-          auto_dns:
-            set_none: true
       bind:
         default:
           # The id of the ESG to configure interfaces on

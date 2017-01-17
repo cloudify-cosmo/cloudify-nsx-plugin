@@ -21,9 +21,59 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "esg_id": {
+            "required": True
+        },
+        "ruleTag": {
+            "set_none": True
+        },
+        "name": {
+            "set_none": True
+        },
+        "source": {
+            "set_none": True
+        },
+        "destination": {
+            "set_none": True
+        },
+        "application": {
+            "set_none": True
+        },
+        "matchTranslated": {
+            "default": False,
+            "type": "boolean"
+        },
+        "direction": {
+            "values": [
+                "in",
+                "out"
+            ],
+            "set_none": True
+        },
+        "action": {
+            "required": True,
+            "values": [
+                "accept",
+                "deny",
+                "reject"
+            ]
+        },
+        "enabled": {
+            "default": True,
+            "type": "boolean"
+        },
+        "loggingEnabled": {
+            "default": False,
+            "type": "boolean"
+        },
+        "description": {
+            "set_none": True
+        }
+    }
 
     use_existing, firewall_dict = common.get_properties_and_validate(
-        'rule', kwargs
+        'rule', kwargs, validation_rules
     )
 
     if use_existing:
