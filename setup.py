@@ -22,7 +22,10 @@ setup(
     license='LICENSE',
     packages=[
         'cloudify_nsx',
-        'cloudify_nsx/library'
+        'cloudify_nsx/library',
+        'cloudify_nsx/network',
+        'cloudify_nsx/security',
+        'cloudify_nsx/vcenter'
     ],
     package_data={
         'cloudify_nsx': [

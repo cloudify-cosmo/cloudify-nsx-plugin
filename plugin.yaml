@@ -66,9 +66,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_resource_pool.create
+          implementation: nsx.cloudify_nsx.vcenter.resource_pool.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_resource_pool.delete
+          implementation: nsx.cloudify_nsx.vcenter.resource_pool.delete
 
   # vcenter datastore
   cloudify.vcenter.datastore:
@@ -96,9 +96,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_datastore.create
+          implementation: nsx.cloudify_nsx.vcenter.datastore.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_datastore.delete
+          implementation: nsx.cloudify_nsx.vcenter.datastore.delete
 
   # vcenter datacenter
   cloudify.vcenter.datacenter:
@@ -126,9 +126,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_datacenter.create
+          implementation: nsx.cloudify_nsx.vcenter.datacenter.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_datacenter.delete
+          implementation: nsx.cloudify_nsx.vcenter.datacenter.delete
 
   # vcenter distributed port group
   cloudify.vcenter.dvportgroup:
@@ -159,9 +159,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_dvportgroup.create
+          implementation: nsx.cloudify_nsx.vcenter.dvportgroup.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_dvportgroup.delete
+          implementation: nsx.cloudify_nsx.vcenter.dvportgroup.delete
 
   # vcenter vm
   cloudify.vcenter.server:
@@ -191,9 +191,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_vm.create
+          implementation: nsx.cloudify_nsx.vcenter.vm.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_vcenter_vm.delete
+          implementation: nsx.cloudify_nsx.vcenter.vm.delete
 
   # SecuriteGroup
   cloudify.nsx.security_group:
@@ -231,9 +231,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group.create
+          implementation: nsx.cloudify_nsx.security.group.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group.delete
+          implementation: nsx.cloudify_nsx.security.group.delete
 
   # SecuriteGroup Dynamic Member Update
   cloudify.nsx.security_group_dynamic_member:
@@ -262,9 +262,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group_dynamic_member.create
+          implementation: nsx.cloudify_nsx.security.group_dynamic_member.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group_dynamic_member.delete
+          implementation: nsx.cloudify_nsx.security.group_dynamic_member.delete
 
   # SecuriteGroup Member
   cloudify.nsx.security_group_member:
@@ -293,9 +293,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group_member.create
+          implementation: nsx.cloudify_nsx.security.group_member.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group_member.delete
+          implementation: nsx.cloudify_nsx.security.group_member.delete
 
   # SecuriteGroup Exclude Member
   cloudify.nsx.security_group_exclude_member:
@@ -324,9 +324,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group_exclude_member.create
+          implementation: nsx.cloudify_nsx.security.group_exclude_member.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_group_exclude_member.delete
+          implementation: nsx.cloudify_nsx.security.group_exclude_member.delete
 
   # Security Group Policy
   cloudify.nsx.security_policy:
@@ -367,9 +367,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy.create
+          implementation: nsx.cloudify_nsx.security.policy.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy.delete
+          implementation: nsx.cloudify_nsx.security.policy.delete
 
   # Security Group Policy bind
   cloudify.nsx.security_policy_group_bind:
@@ -397,9 +397,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy_group_bind.create
+          implementation: nsx.cloudify_nsx.security.policy_group_bind.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy_group_bind.delete
+          implementation: nsx.cloudify_nsx.security.policy_group_bind.delete
 
   # Security Group Policy bind
   cloudify.nsx.security_policy_section:
@@ -430,9 +430,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy_section.create
+          implementation: nsx.cloudify_nsx.security.policy_section.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_policy_section.delete
+          implementation: nsx.cloudify_nsx.security.policy_section.delete
 
   # Security Tag
   cloudify.nsx.security_tag:
@@ -460,9 +460,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_tag.create
+          implementation: nsx.cloudify_nsx.security.tag.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_tag.delete
+          implementation: nsx.cloudify_nsx.security.tag.delete
 
   # Security Tag VM
   cloudify.nsx.security_tag_vm:
@@ -490,9 +490,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_tag_vm.create
+          implementation: nsx.cloudify_nsx.security.tag_vm.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_security_tag_vm.delete
+          implementation: nsx.cloudify_nsx.security.tag_vm.delete
 
   # logical switches
   cloudify.nsx.lswitch:
@@ -535,9 +535,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_lswitch.create
+          implementation: nsx.cloudify_nsx.network.lswitch.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_lswitch.delete
+          implementation: nsx.cloudify_nsx.network.lswitch.delete
 
   # distributed logical routers
   cloudify.nsx.dlr:
@@ -782,9 +782,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr.create
+          implementation: nsx.cloudify_nsx.network.dlr.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr.delete
+          implementation: nsx.cloudify_nsx.network.dlr.delete
 
   # distributed logical routers interface ospf areas, use only after all
   # interfaces creation!
@@ -840,9 +840,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_area.create
+          implementation: nsx.cloudify_nsx.network.ospf_area.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_area.delete
+          implementation: nsx.cloudify_nsx.network.ospf_area.delete
 
   # distributed logical routers interface ospf interfaces
   cloudify.nsx.ospf_interfaces:
@@ -896,9 +896,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_interface.create
+          implementation: nsx.cloudify_nsx.network.ospf_interface.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_ospf_interface.delete
+          implementation: nsx.cloudify_nsx.network.ospf_interface.delete
 
   # BGP Neighbour
   cloudify.nsx.dlrBGPNeighbour:
@@ -961,9 +961,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.create
+          implementation: nsx.cloudify_nsx.network.dlr_bgp_neighbour.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.delete
+          implementation: nsx.cloudify_nsx.network.dlr_bgp_neighbour.delete
 
   # BGP Neighbour Filter
   cloudify.nsx.esgBGPNeighbourFilter:
@@ -1020,9 +1020,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_bgp_neighbour_filter.create
+          implementation: nsx.cloudify_nsx.network.bgp_neighbour_filter.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_bgp_neighbour_filter.delete
+          implementation: nsx.cloudify_nsx.network.bgp_neighbour_filter.delete
 
   # distributed logical routers interface routing ip prefixes
   # Optional. Required only if user wants to define redistribution
@@ -1057,9 +1057,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_routing_ip_prefix.create
+          implementation: nsx.cloudify_nsx.network.routing_ip_prefix.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_routing_ip_prefix.delete
+          implementation: nsx.cloudify_nsx.network.routing_ip_prefix.delete
 
   # distributed logical routers interface ospf redistribution rule
   cloudify.nsx.routing_redistribution_rule:
@@ -1133,9 +1133,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_routing_redistribution.create
+          implementation: nsx.cloudify_nsx.network.routing_redistribution.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_routing_redistribution.delete
+          implementation: nsx.cloudify_nsx.network.routing_redistribution.delete
 
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
@@ -1182,9 +1182,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_interface.create
+          implementation: nsx.cloudify_nsx.network.dlr_interface.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_interface.delete
+          implementation: nsx.cloudify_nsx.network.dlr_interface.delete
 
   # distributed router dhcp relay, we need separate type because we can
   # change it only after set all settings for interfaces
@@ -1218,9 +1218,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_relay.create
+          implementation: nsx.cloudify_nsx.network.relay.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_relay.delete
+          implementation: nsx.cloudify_nsx.network.relay.delete
 
   # distributed logical routers gateway
   cloudify.nsx.dlr_dgw:
@@ -1249,9 +1249,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_dgw.create
+          implementation: nsx.cloudify_nsx.network.dlr_dgw.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_dgw.delete
+          implementation: nsx.cloudify_nsx.network.dlr_dgw.delete
 
   # edge services gateways
   cloudify.nsx.esg:
@@ -1499,9 +1499,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg.create
+          implementation: nsx.cloudify_nsx.network.esg.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg.delete
+          implementation: nsx.cloudify_nsx.network.esg.delete
 
   # BGP Neighbour
   cloudify.nsx.esgBGPNeighbour:
@@ -1554,9 +1554,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.create
+          implementation: nsx.cloudify_nsx.network.dlr_bgp_neighbour.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dlr_bgp_neighbour.delete
+          implementation: nsx.cloudify_nsx.network.dlr_bgp_neighbour.delete
 
   # edge services gateways interfaces
   cloudify.nsx.esg_nat:
@@ -1630,9 +1630,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_nat.create
+          implementation: nsx.cloudify_nsx.network.esg_nat.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_nat.delete
+          implementation: nsx.cloudify_nsx.network.esg_nat.delete
 
   # edge services gateways firewall
   cloudify.nsx.esg_firewall:
@@ -1718,9 +1718,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_firewall.create
+          implementation: nsx.cloudify_nsx.network.esg_firewall.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_firewall.delete
+          implementation: nsx.cloudify_nsx.network.esg_firewall.delete
 
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:
@@ -1798,9 +1798,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_interface.create
+          implementation: nsx.cloudify_nsx.network.esg_interface.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_interface.delete
+          implementation: nsx.cloudify_nsx.network.esg_interface.delete
 
   # edge services gateways interfaces
   cloudify.nsx.esg_gateway:
@@ -1845,9 +1845,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_gateway.create
+          implementation: nsx.cloudify_nsx.network.esg_gateway.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_gateway.delete
+          implementation: nsx.cloudify_nsx.network.esg_gateway.delete
 
   # edge services gateways route
   cloudify.nsx.esg_route:
@@ -1900,9 +1900,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_route.create
+          implementation: nsx.cloudify_nsx.network.esg_route.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_esg_route.delete
+          implementation: nsx.cloudify_nsx.network.esg_route.delete
 
   # Edge DHCP pool
   cloudify.nsx.dhcp_pool:
@@ -1960,9 +1960,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_pool.create
+          implementation: nsx.cloudify_nsx.network.dhcp_pool.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_pool.delete
+          implementation: nsx.cloudify_nsx.network.dhcp_pool.delete
 
   # Edge DHCP binding
   cloudify.nsx.dhcp_binding:
@@ -2037,9 +2037,9 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_bind.create
+          implementation: nsx.cloudify_nsx.network.dhcp_bind.create
         delete:
-          implementation: nsx.cloudify_nsx.cfy_nsx_dhcp_bind.delete
+          implementation: nsx.cloudify_nsx.network.dhcp_bind.delete
 
   # distributed firewall
   cloudify.nsx.dfw_section:
