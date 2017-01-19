@@ -7,18 +7,6 @@ plugins:
 
 data_types:
 
-  vcenter_auth_type:
-    properties:
-      username:
-        default: administrator@vsphere.local
-        required: true
-      password:
-        default: vcenter
-        required: true
-      host:
-        default: vcenter.local
-        required: true
-
   nsx_auth_type:
     properties:
       username:
@@ -39,133 +27,6 @@ data_types:
         required: false
 
 node_types:
-
-  # vcenter resource pool
-  cloudify.vcenter.resource_pool:
-    derived_from: cloudify.nodes.ObjectStorage
-    properties:
-      # reuse existed resource pool
-      use_external_resource:
-        default: true
-        type: boolean
-      # resource vcenter id
-      resource_id:
-        required: false
-      vcenter_auth:
-        type: vcenter_auth_type
-      resource_pool:
-        default:
-          # name of resource pool
-          name: ""
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.vcenter.resource_pool.create
-        delete:
-          implementation: nsx.cloudify_nsx.vcenter.resource_pool.delete
-
-  # vcenter datastore
-  cloudify.vcenter.datastore:
-    derived_from: cloudify.nodes.ObjectStorage
-    properties:
-      # reuse existed resource pool
-      use_external_resource:
-        default: true
-        type: boolean
-      # resource vcenter id
-      resource_id:
-        required: false
-      vcenter_auth:
-        type: vcenter_auth_type
-      datastore:
-        default:
-          # name of datastore
-          name: ""
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.vcenter.datastore.create
-        delete:
-          implementation: nsx.cloudify_nsx.vcenter.datastore.delete
-
-  # vcenter datacenter
-  cloudify.vcenter.datacenter:
-    derived_from: cloudify.nodes.Tier
-    properties:
-      # reuse existed resource pool
-      use_external_resource:
-        default: true
-        type: boolean
-      # resource vcenter id
-      resource_id:
-        required: false
-      vcenter_auth:
-        type: vcenter_auth_type
-      datacenter:
-        default:
-          # name of datacenter
-          name: ""
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.vcenter.datacenter.create
-        delete:
-          implementation: nsx.cloudify_nsx.vcenter.datacenter.delete
-
-  # vcenter distributed port group
-  cloudify.vcenter.dvportgroup:
-    derived_from: cloudify.nodes.Subnet
-    properties:
-      # Supported only True - search port group in vcenter by id/name
-      use_external_resource:
-        default: true
-        type: boolean
-      # resource vcenter id
-      resource_id:
-        required: false
-      vcenter_auth:
-        type: vcenter_auth_type
-      dvportgroup:
-        default:
-          # name distributed port group
-          name: ""
-      update_to:
-        default:
-          # rename distributed port group
-          name: ""
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.vcenter.dvportgroup.create
-        delete:
-          implementation: nsx.cloudify_nsx.vcenter.dvportgroup.delete
-
-  # vcenter vm
-  cloudify.vcenter.server:
-    derived_from: cloudify.nodes.Compute
-    properties:
-      # Supported only True - search vm in vcenter by id/name
-      use_external_resource:
-        default: true
-        type: boolean
-      # resource vcenter id
-      resource_id:
-        required: false
-      vcenter_auth:
-        type: vcenter_auth_type
-      # install agent need only for correct support Nodes.Compute
-      install_agent:
-        default: false
-      server:
-        default:
-          # name distributed port group
-          name: ""
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: nsx.cloudify_nsx.vcenter.vm.create
-        delete:
-          implementation: nsx.cloudify_nsx.vcenter.vm.delete
 
   # SecuriteGroup
   cloudify.nsx.security_group:
@@ -1386,3 +1247,13 @@ node_types:
           implementation: nsx.cloudify_nsx.cfy_stub.create
         delete:
           implementation: nsx.cloudify_nsx.cfy_stub.delete
+
+relationships:
+    cloudify.nsx.relationships.deployed_on_datacenter:
+        derived_from: cloudify.relationships.connected_to
+
+    cloudify.nsx.relationships.deployed_on_datastore:
+        derived_from: cloudify.relationships.connected_to
+
+    cloudify.nsx.relationships.deployed_on_cluster:
+        derived_from: cloudify.relationships.connected_to

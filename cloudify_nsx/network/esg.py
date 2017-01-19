@@ -41,18 +41,9 @@ def create(**kwargs):
                 "xlarge"
             ]
         },
-        "datacentermoid": {
-            "required": True,
-            "external_use": False
-        },
-        "datastoremoid": {
-            "required": True,
-            "external_use": False
-        },
-        "resourcepoolid": {
-            "required": True,
-            "external_use": False
-        },
+        "datacentermoid": {},
+        "datastoremoid": {},
+        "resourcepoolid": {},
         "default_pg": {
             "required": True,
             "external_use": False
@@ -69,6 +60,7 @@ def create(**kwargs):
     use_existing, edge_dict = common.get_properties_and_validate(
         'edge', kwargs, validation_rules
     )
+    edge_dict = common.possibly_assign_vm_creation_props(edge_dict)
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 

@@ -15,10 +15,7 @@
 from cloudify import ctx
 from pkg_resources import resource_filename
 from nsxramlclient.client import NsxClient
-import pynsxv.library.libutils as nsx_utils
 from cloudify import exceptions as cfy_exc
-import time
-from pyVmomi import vim
 
 
 def __cleanup_prioperties(value):
@@ -154,17 +151,6 @@ def __get_properties(name, kwargs):
     return __cleanup_prioperties_dict(properties_dict)
 
 
-def vcenter_state(kwargs):
-    vcenter_auth = __get_properties('vcenter_auth', kwargs)
-    ctx.logger.info("VCenter login...")
-    user = vcenter_auth.get('username')
-    password = vcenter_auth.get('password')
-    ip = vcenter_auth.get('host')
-    state = nsx_utils.connect_to_vc(ip, user, password)
-    ctx.logger.info("VCenter logged in")
-    return state
-
-
 def nsx_login(kwargs):
     nsx_auth = __get_properties('nsx_auth', kwargs)
 
@@ -211,23 +197,6 @@ def get_properties_and_validate(name, kwargs, validate_dict=None):
     )
 
 
-def get_mo_by_id(content, searchedid, vim_type):
-    mo_dict = nsx_utils.get_all_objs(content, vim_type)
-    for obj in mo_dict:
-        if obj._moId == searchedid:
-            return obj
-    return None
-
-
-def get_vdsportgroupname(content, searchedid):
-    portgroup_mo = get_mo_by_id(content, searchedid,
-                                nsx_utils.VIM_TYPES['dportgroup'])
-    if portgroup_mo:
-        return str(portgroup_mo.name)
-    else:
-        return None
-
-
 def check_raw_result(result_raw):
     if result_raw['status'] < 200 and result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
@@ -252,20 +221,109 @@ def get_edgegateway(client_session, edgeId):
     return raw_result['body']['edge']
 
 
-def _wait_for_task(task):
-    while task.info.state == vim.TaskInfo.State.running:
-        time.sleep(30)
-    ctx.logger.info("Waiting...")
-    if task.info.state != vim.TaskInfo.State.success:
+def all_relationships_are_present(relationships,
+                                  expected_relationships):
+    relationships = [relationship.type for relationship in relationships]
+    return all((
+        expected in relationships
+        for expected in expected_relationships
+    ))
+
+
+def any_relationships_are_present(relationships,
+                                  expected_relationships):
+    relationships = [relationship.type for relationship in relationships]
+    return any((
+        expected in relationships
+        for expected in expected_relationships
+    ))
+
+
+def get_attribute_from_relationship(relationships,
+                                    target_relationship,
+                                    target_property):
+    result = None
+    for relationship in relationships:
+        if relationship.type == target_relationship:
+            result = relationship.target.instance.runtime_properties.get(
+                target_property,
+            )
+    return result
+
+
+def possibly_assign_vm_creation_props(properties_dict):
+    vsphere_id_property_attribute_mapping = (
+        (
+            'cloudify.nsx.relationships.deployed_on_datacenter',
+            'datacentermoid',
+            'vsphere_datacenter_id',
+        ),
+        (
+            'cloudify.nsx.relationships.deployed_on_datastore',
+            'datastoremoid',
+            'vsphere_datastore_id',
+        ),
+        (
+            'cloudify.nsx.relationships.deployed_on_cluster',
+            # Yes, it's not a resource pool, but this is the way
+            # pynsxv wants things called...
+            'resourcepoolid',
+            'vsphere_cluster_id',
+        ),
+    )
+    vsphere_id_relationships = (
+        item[0] for item in vsphere_id_property_attribute_mapping
+    )
+    prop_ids = (
+        item[1] for item in vsphere_id_property_attribute_mapping
+    )
+
+    all_vsphere_id_relationships = all_relationships_are_present(
+        relationships=ctx.instance.relationships,
+        expected_relationships=vsphere_id_relationships,
+    )
+    any_vsphere_id_relationships = any_relationships_are_present(
+        relationships=ctx.instance.relationships,
+        expected_relationships=vsphere_id_relationships,
+    )
+    any_prop_ids_set = any((
+        properties_dict.get(prop) is not None
+        for prop in prop_ids
+    ))
+
+    if (
+        (any_vsphere_id_relationships and any_prop_ids_set)
+        or (any_vsphere_id_relationships
+            and not all_vsphere_id_relationships)
+    ):
         raise cfy_exc.NonRecoverableError(
-            "Error during executing task on vSphere: '{0}'"
-            .format(task.info.error))
+            'vSphere object IDs must either be provided entirely from '
+            'relationships ({rels}) or entirely from properties '
+            '({props}).'.format(
+                rels=', '.join(vsphere_id_relationships),
+                props=', '.join(prop_ids),
+            )
+        )
+    elif all_vsphere_id_relationships:
+        # Set the attributes based on the relationships
+        for rel, prop, attr in vsphere_id_property_attribute_mapping:
+            value = get_attribute_from_relationship(
+                relationships=ctx.instance.relationships,
+                target_relationship=rel,
+                target_property=attr,
+            )
+            if value is None:
+                raise cfy_exc.NonRecoverableError(
+                    'Failed to retrieve {prop} from target of {rel}. '
+                    'Could not get appropriate value from runtime '
+                    'property: {attr}'.format(
+                        prop=prop,
+                        rel=rel,
+                        attr=attr,
+                    )
+                )
+            # We have to cast to str, because if we don't then we pass unicode
+            # which causes pynsxv to complain that the value is set to 'null'
+            properties_dict[prop] = str(value)
 
-
-def rename_vdsportgroupname(content, searchedid, new_name):
-    portgroup_mo = get_mo_by_id(content, searchedid,
-                                nsx_utils.VIM_TYPES['dportgroup'])
-    if not portgroup_mo:
-        return False
-    task = portgroup_mo.Rename(new_name)
-    _wait_for_task(task)
+    return properties_dict

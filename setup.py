@@ -22,16 +22,15 @@ setup(
     license='LICENSE',
     packages=[
         'cloudify_nsx',
-        'cloudify_nsx/library',
-        'cloudify_nsx/network',
-        'cloudify_nsx/security',
-        'cloudify_nsx/vcenter'
+        'cloudify_nsx.library',
+        'cloudify_nsx.network',
+        'cloudify_nsx.security',
     ],
     package_data={
         'cloudify_nsx': [
             'library/api_spec/nsxvapi.raml',
             'library/api_spec/schemas/*',
-            'library/api_spec/templates/documentation/introduction.md'
+            'library/api_spec/templates/documentation/introduction.md',
         ]
     },
     install_requires=[

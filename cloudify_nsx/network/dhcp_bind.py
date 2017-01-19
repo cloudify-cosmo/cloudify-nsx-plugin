@@ -88,7 +88,7 @@ def create(**kwargs):
                                                bind_dict['dns_server_2'],
                                                bind_dict['lease_time'],
                                                bind_dict['auto_dns'])
-    elif bind_dict.get('vnic_id') and bind_dict.get('vm_id'):
+    elif bind_dict.get('vnic_id') is not None and bind_dict.get('vm_id'):
         resource_id = nsx_dhcp.add_vm_binding(client_session,
                                               bind_dict['esg_id'],
                                               bind_dict['vm_id'],

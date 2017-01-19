@@ -3,6 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
   - ../plugin.yaml
+  - ../../cloudify-vsphere-plugin/plugin.yaml
 
 inputs:
 
@@ -54,10 +55,10 @@ inputs:
        vcenter server user password
     default: nsx
 
-  vcenter_vresourcepool:
+  vcenter_cluster:
     type: string
     description: >
-       vcenter resourcepool
+       vcenter cluster to deploy ESG node on
     default: Cluster
 
   vcenter_datastore:
@@ -72,7 +73,45 @@ inputs:
        vcenter datacenter
     default: Datacenter
 
+node_types:
+  connection_configuration:
+     derived_from: cloudify.nodes.Root                                                                    
+     properties:
+       connection_config: {}                                                                              
+
 node_templates:
+  connection_configuration:
+    type: connection_configuration                                                                        
+    properties:
+      connection_config:
+        username: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        host: { get_input: vcenter_ip }
+        port: 443
+        datacenter_name: { get_input: vcenter_datacenter }
+        resource_pool_name: Resources
+        auto_placement: true
+
+  datacenter:
+    type: cloudify.vsphere.nodes.Datacenter
+    properties:
+      use_existing_resource: true
+      name: { get_input: vcenter_datacenter }
+      connection_config: { get_property: [connection_configuration, connection_config] }
+
+  datastore:
+    type: cloudify.vsphere.nodes.Datastore
+    properties:
+      use_existing_resource: true
+      name: { get_input: vcenter_datastore }
+      connection_config: { get_property: [connection_configuration, connection_config] }
+
+  cluster:
+    type: cloudify.vsphere.nodes.Cluster
+    properties:
+      use_existing_resource: true
+      name: { get_input: vcenter_cluster }
+      connection_config: { get_property: [connection_configuration, connection_config] }
 
   master_lswith:
     type: cloudify.nsx.lswitch
@@ -87,33 +126,6 @@ node_templates:
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
-
-  vresourcepool:
-    type: cloudify.vcenter.resource_pool
-    properties:
-      vcenter_auth: &vcenter_auth
-        username: { get_input: vcenter_user }
-        password: { get_input: vcenter_password }
-        host: { get_input: vcenter_ip }
-      use_external_resource: true
-      resource_pool:
-        name: { get_input: vcenter_vresourcepool }
-
-  datastore:
-    type: cloudify.vcenter.datastore
-    properties:
-      vcenter_auth: *vcenter_auth
-      use_external_resource: true
-      datastore:
-        name: { get_input: vcenter_datastore }
-
-  datacenter:
-    type: cloudify.vcenter.datacenter
-    properties:
-      vcenter_auth: *vcenter_auth
-      use_external_resource: true
-      datacenter:
-        name: { get_input: vcenter_datacenter }
 
   esg:
     type: cloudify.nsx.esg
@@ -139,21 +151,17 @@ node_templates:
         create:
           inputs:
             edge:
-              datacentermoid: { get_attribute: [ datacenter, resource_id ] }
-              datastoremoid: { get_attribute: [ datastore, resource_id ] }
-              resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
-              default_pg: { get_attribute: [ master_lswith, resource_dvportgroup_id ] }
+              default_pg: { get_attribute: [ master_lswith, vsphere_network_id ] }
     relationships:
       # connected as network link
       - type: cloudify.relationships.connected_to
         target: master_lswith
-      # Contained in global sense
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.nsx.relationships.deployed_on_datacenter
         target: datacenter
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.nsx.relationships.deployed_on_datastore
         target: datastore
-      - type: cloudify.relationships.connected_to
-        target: vresourcepool
+      - type: cloudify.nsx.relationships.deployed_on_cluster
+        target: cluster
 
   slave_lswith:
     type: cloudify.nsx.lswitch

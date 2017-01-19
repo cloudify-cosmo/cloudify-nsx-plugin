@@ -32,15 +32,6 @@ def create(**kwargs):
         "dlr_size": {
             "required": True
         },
-        "datacentermoid": {
-            "required": True
-        },
-        "datastoremoid": {
-            "required": True
-        },
-        "resourcepoolid": {
-            "required": True
-        },
         "ha_ls_id": {
             "required": True
         },
@@ -61,6 +52,8 @@ def create(**kwargs):
     use_existing, router_dict = common.get_properties_and_validate(
         'router', kwargs, validation_rules
     )
+
+    router_dict = common.possibly_assign_vm_creation_props(router_dict)
 
     ctx.logger.info("checking %s" % router_dict["name"])
 
