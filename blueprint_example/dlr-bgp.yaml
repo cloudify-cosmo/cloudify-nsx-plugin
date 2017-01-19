@@ -49,6 +49,24 @@ inputs:
        vcenter server user password
     default: nsx
 
+  vcenter_vresourcepool:
+    type: string
+    description: >
+       vcenter resourcepool
+    default: Cluster
+
+  vcenter_datastore:
+    type: string
+    description: >
+       vcenter datastore
+    default: datastore1
+
+  vcenter_datacenter:
+    type: string
+    description: >
+       vcenter datacenter
+    default: Datacenter
+
 node_templates:
 
   master_lswith:
@@ -74,7 +92,7 @@ node_templates:
         host: { get_input: vcenter_ip }
       use_external_resource: true
       resource_pool:
-        name: Cluster
+        name: { get_input: vcenter_vresourcepool }
 
   datastore:
     type: cloudify.vcenter.datastore
@@ -82,7 +100,7 @@ node_templates:
       vcenter_auth: *vcenter_auth
       use_external_resource: true
       datastore:
-        name: datastore1
+        name: { get_input: vcenter_datastore }
 
   datacenter:
     type: cloudify.vcenter.datacenter
@@ -90,7 +108,7 @@ node_templates:
       vcenter_auth: *vcenter_auth
       use_external_resource: true
       datacenter:
-        name: Datacenter
+        name: { get_input: vcenter_datacenter }
 
   nsx_dlr:
     type: cloudify.nsx.dlr

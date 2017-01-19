@@ -75,7 +75,7 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    if 'mac' in bind_dict:
+    if bind_dict.get('mac'):  # if NONE skip this part
         resource_id = nsx_dhcp.add_mac_binding(client_session,
                                                bind_dict['esg_id'],
                                                bind_dict['mac'],
@@ -88,7 +88,7 @@ def create(**kwargs):
                                                bind_dict['dns_server_2'],
                                                bind_dict['lease_time'],
                                                bind_dict['auto_dns'])
-    elif 'mac' in bind_dict and 'mac' in bind_dict:
+    elif bind_dict.get('vnic_id') and bind_dict.get('vm_id'):
         resource_id = nsx_dhcp.add_vm_binding(client_session,
                                               bind_dict['esg_id'],
                                               bind_dict['vm_id'],

@@ -161,7 +161,7 @@ def vcenter_state(kwargs):
     password = vcenter_auth.get('password')
     ip = vcenter_auth.get('host')
     state = nsx_utils.connect_to_vc(ip, user, password)
-    ctx.logger.info("VCenter logined")
+    ctx.logger.info("VCenter logged in")
     return state
 
 
@@ -189,7 +189,7 @@ def nsx_login(kwargs):
         ctx.logger.info("Will be used internal: %s" % raml_file)
 
     client = NsxClient(raml_file, ip, user, password)
-    ctx.logger.info("NSX logined")
+    ctx.logger.info("NSX logged in")
     return client
 
 
