@@ -21,8 +21,30 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "interface_ls_id": {
+            "required": True
+        },
+        "interface_ip": {
+            "required": True
+        },
+        "interface_subnet": {
+            "required": True
+        },
+        "name": {
+            "default": ""
+        },
+        "vnic": {
+            "type": "string",
+            "set_none": True
+        }
+    }
+
     use_existing, interface = common.get_properties_and_validate(
-        'interface', kwargs
+        'interface', kwargs, validation_rules
     )
 
     if use_existing:

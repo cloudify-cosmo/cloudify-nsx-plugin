@@ -2,10 +2,15 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-#  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-nsx-plugin/master/plugin.yaml
   - ../plugin.yaml
 
 inputs:
+
+  node_name_prefix:
+    type: string
+    description: >
+       Node name prefix
+    default: platform_test_
 
   nsx_ip:
     type: string
@@ -79,7 +84,7 @@ node_templates:
         raml: { get_input: nsx_raml }
       group:
         scopeId: globalroot-0
-        name: SlaveSecureGroup
+        name: {concat:[{get_input: node_name_prefix}, slave_group]}
 
   slave_exclude_security_group:
     type: cloudify.nsx.security_group
@@ -87,7 +92,7 @@ node_templates:
       nsx_auth: *nsx_auth
       group:
         scopeId: globalroot-0
-        name: SlaveExcludeSecureGroup
+        name: {concat:[{get_input: node_name_prefix}, slave_exclude_group]}
 
   master_security_group:
     type: cloudify.nsx.security_group
@@ -95,7 +100,7 @@ node_templates:
       nsx_auth: *nsx_auth
       group:
         scopeId: globalroot-0
-        name: MasterSecureGroup
+        name: {concat:[{get_input: node_name_prefix}, master_group]}
 
   slave_master_security_group_bind:
     type: cloudify.nsx.security_group_member
@@ -109,7 +114,7 @@ node_templates:
               security_group_id: { get_attribute: [ master_security_group, resource_id ] }
               objectId: { get_attribute: [ slave_security_group, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: master_security_group
       - type: cloudify.relationships.connected_to
         target: slave_security_group
@@ -140,7 +145,7 @@ node_templates:
                     value: Teapot
                     criteria: contains
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: slave_security_group
 
   slave_exclude_master_security_group_bind:
@@ -155,7 +160,9 @@ node_templates:
               security_group_id: { get_attribute: [ master_security_group, resource_id ] }
               objectId: { get_attribute: [ slave_exclude_security_group, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
+        target: master_security_group
+      - type: cloudify.relationships.depends_on
         target: slave_master_security_group_bind
       - type: cloudify.relationships.connected_to
         target: slave_exclude_security_group
@@ -169,7 +176,7 @@ node_templates:
         create:
           inputs:
             tag:
-              name: secret_tag
+              name: {concat:[{get_input: node_name_prefix}, secret_tag]}
               description: What can i say?
 
   root_security_group:
@@ -182,7 +189,7 @@ node_templates:
           inputs:
             group:
               scopeId: globalroot-0
-              name: RootSecureGroup
+              name: {concat:[{get_input: node_name_prefix}, root_group]}
               member:
                 objectId: { get_attribute: [ master_security_group, resource_id ] }
               dynamicMemberDefinition:
@@ -216,14 +223,14 @@ node_templates:
         create:
           inputs:
             policy:
-              name: MasterPolicy
+              name: {concat:[{get_input: node_name_prefix}, master_policy]}
               description: MasterPolicy
               precedence: 100
               actionsByCategory:
                 category: firewall
                 action:
                   '@class': firewallSecurityAction
-                  name: name
+                  name: {concat:[{get_input: node_name_prefix}, firewall_name]}
                   description: description
                   category: firewall
                   secondarySecurityGroup:
@@ -248,7 +255,7 @@ node_templates:
     relationships:
       - type: cloudify.relationships.connected_to
         target: slave_security_group
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: master_security_policy
 
   master_security_policy_section:
@@ -264,7 +271,7 @@ node_templates:
               category: endpoint
               action:
                 '@class': endpointSecurityAction
-                name: endpoint_check
+                name: {concat:[{get_input: node_name_prefix}, endpoint_check]}
                 actionType: DATA_SECURITY
                 description: description for DATA_SECURITY
                 isEnabled: "true"
@@ -274,7 +281,7 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: master_security_policy_bind
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: master_security_policy
 
   vm:
@@ -300,7 +307,7 @@ node_templates:
               tag_id: { get_attribute: [ security_tag, resource_id ] }
               vm_id: { get_attribute: [ vm, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: security_tag
       - type: cloudify.relationships.connected_to
         target: vm
@@ -317,7 +324,7 @@ node_templates:
               security_group_id: { get_attribute: [ root_security_group, resource_id ] }
               objectId: { get_attribute: [ vm, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: root_security_group
       - type: cloudify.relationships.connected_to
         target: vm

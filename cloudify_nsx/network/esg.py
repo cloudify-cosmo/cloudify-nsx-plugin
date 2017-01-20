@@ -22,9 +22,52 @@ import cloudify_nsx.library.nsx_esg_dlr as nsx_dlr
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        # we need name in any case of usage except predefined 'id'
+        "name": {
+            "required": True,
+            "external_use": False
+        },
+        "esg_pwd": {
+            "required": True,
+            "external_use": False
+        },
+        "esg_size": {
+            "default": "compact",
+            "values": [
+                "compact",
+                "large",
+                "quadlarge",
+                "xlarge"
+            ]
+        },
+        "datacentermoid": {
+            "required": True,
+            "external_use": False
+        },
+        "datastoremoid": {
+            "required": True,
+            "external_use": False
+        },
+        "resourcepoolid": {
+            "required": True,
+            "external_use": False
+        },
+        "default_pg": {
+            "required": True,
+            "external_use": False
+        },
+        "esg_username": {
+            "default": "admin"
+        },
+        "esg_remote_access": {
+            "default": False,
+            "type": "boolean"
+        }
+    }
 
     use_existing, edge_dict = common.get_properties_and_validate(
-        'edge', kwargs
+        'edge', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

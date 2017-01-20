@@ -20,8 +20,20 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "name": {
+            "required": True
+        },
+        "ipAddress": {
+            "required": True
+        }
+    }
+
     use_existing, prefix = common.get_properties_and_validate(
-        'prefix', kwargs
+        'prefix', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

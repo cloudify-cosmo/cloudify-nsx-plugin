@@ -20,8 +20,39 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "neighbour_id": {
+            "required": True
+        },
+        "action": {
+            "required": True,
+            "values": [
+                "permit",
+                "deny"
+            ]
+        },
+        "ipPrefixGe": {
+            "type": "string",
+            "set_none": True
+        },
+        "ipPrefixLe": {
+            "type": "string",
+            "set_none": True
+        },
+        "direction": {
+            "required": True,
+            "values": [
+                "in",
+                "out"
+            ]
+        },
+        "network": {
+            "required": True
+        }
+    }
+
     use_existing, neighbour_filter = common.get_properties_and_validate(
-        'filter', kwargs
+        'filter', kwargs, validation_rules
     )
 
     if use_existing:

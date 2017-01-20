@@ -18,11 +18,12 @@ import cloudify_nsx.library.nsx_esg_dlr as cfy_dlr
 import cloudify_nsx.library.nsx_common as common
 
 
-@operation
-def create(**kwargs):
+def _create(kwargs, validation_rules):
     use_existing, neighbour = common.get_properties_and_validate(
-        'neighbour', kwargs
+        'neighbour', kwargs, validation_rules
     )
+
+    print use_existing, neighbour
 
     if use_existing:
         ctx.logger.info("Used existed, no changes made")
@@ -52,6 +53,53 @@ def create(**kwargs):
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
+
+
+common_validation_rules = {
+    "dlr_id": {
+        "required": True
+    },
+    "ipAddress": {
+        "required": True
+    },
+    'remoteAS': {
+        'required': True
+    },
+    'weight': {
+        'default': 60,
+        'type': 'string'
+    },
+    'holdDownTimer': {
+        'default': 180,
+        'type': 'string'
+    },
+    'password': {
+        'set_none': True
+    },
+    'keepAliveTimer': {
+        'default': 60,
+        'type': 'string'
+    }
+}
+
+
+@operation
+def create_dlr(**kwargs):
+    validation_rules = {
+        k: common_validation_rules[k] for k in common_validation_rules
+    }
+    validation_rules['protocolAddress'] = {
+        'required': True
+    }
+    validation_rules['forwardingAddress'] = {
+        'required': True
+    }
+    _create(kwargs, validation_rules)
+
+
+@operation
+def create_esg(**kwargs):
+    _create(kwargs, common_validation_rules)
 
 
 @operation

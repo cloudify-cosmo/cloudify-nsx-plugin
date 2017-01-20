@@ -20,8 +20,36 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "areaId": {
+            "required": True
+        },
+        # must be vnic with uplink
+        "vnic": {
+            "required": True
+        },
+        "helloInterval": {
+            "default": 10,
+            "type": "string"
+        },
+        "deadInterval": {
+            "default": 40,
+            "type": "string",
+        },
+        "priority": {
+            "default": 128,
+            "type": "string"
+        },
+        "cost": {
+            "set_none": True
+        }
+    }
+
     use_existing, interface = common.get_properties_and_validate(
-        'interface', kwargs
+        'interface', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')

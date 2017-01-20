@@ -2,10 +2,15 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-#  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-nsx-plugin/master/plugin.yaml
   - ../plugin.yaml
 
 inputs:
+
+  node_name_prefix:
+    type: string
+    description: >
+       Node name prefix
+    default: platform_test_
 
   nsx_ip:
     type: string
@@ -78,7 +83,7 @@ node_templates:
         host: { get_input: nsx_ip }
         raml: { get_input: nsx_raml }
       switch:
-        name: master_swith_name
+        name: {concat:[{get_input: node_name_prefix}, master_swith]}
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -115,7 +120,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       edge:
-        name: real_edge
+        name: {concat:[{get_input: node_name_prefix}, real_edge]}
         esg_pwd: SeCrEt010203!
         esg_remote_access: true
       firewall:
@@ -153,7 +158,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       switch:
-        name: slave_swith_name
+        name: {concat:[{get_input: node_name_prefix}, slave_swith]}
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -167,7 +172,7 @@ node_templates:
         ipaddr: 192.168.3.1
         netmask: 255.255.255.0
         prefixlen: 24
-        name: interface_name
+        name: {concat:[{get_input: node_name_prefix}, router_interface]}
         mtu: 1500
         is_connected: "true"
         vnic_type: internal

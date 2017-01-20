@@ -2,10 +2,15 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-#  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-nsx-plugin/master/plugin.yaml
   - ../plugin.yaml
 
 inputs:
+
+  node_name_prefix:
+    type: string
+    description: >
+       Node name prefix
+    default: platform_test_
 
   nsx_ip:
     type: string
@@ -78,7 +83,7 @@ node_templates:
         host: { get_input: nsx_ip }
         raml: { get_input: nsx_raml }
       switch:
-        name: master_swith_name
+        name: {concat:[{get_input: node_name_prefix}, master_swith]}
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -115,7 +120,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       router:
-        name: some_router_name
+        name: {concat:[{get_input: node_name_prefix}, some_router]}
         dlr_pwd: SeCrEt010203!
         # compact, large, quadlarge, xlarge
         dlr_size: compact
@@ -214,7 +219,7 @@ node_templates:
           inputs:
             prefix:
               dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-              name: Some_secret_name
+              name: {concat:[{get_input: node_name_prefix}, routing_prefix]}
               ipAddress: 10.112.196.160/24
     relationships:
       - type: cloudify.relationships.contained_in

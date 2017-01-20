@@ -20,8 +20,20 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "relayServer": {
+            "default": {}
+        },
+        "relayAgents": {
+            "default": {}
+        }
+    }
+
     use_existing, relay_dict = common.get_properties_and_validate(
-        'relay', kwargs
+        'relay', kwargs, validation_rules
     )
 
     if use_existing:

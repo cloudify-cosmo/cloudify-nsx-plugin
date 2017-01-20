@@ -20,8 +20,41 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "areaId": {
+            "required": True
+        },
+        "type": {
+            "required": True,
+            "values": [
+                "normal",
+                "nssa"
+            ]
+        },
+        "authentication": {
+            "set_none": True,
+            "sub": {
+                "type": {
+                    "required": True,
+                    "values": [
+                        "none",
+                        "password",
+                        "md5"
+                    ]
+                },
+                "value": {
+                    "set_none": True,
+                    "required": False
+                }
+            }
+        }
+    }
+
     use_existing, area = common.get_properties_and_validate(
-        'area', kwargs
+        'area', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
