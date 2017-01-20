@@ -20,16 +20,25 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
-    # credentials
-    client_session = common.nsx_login(kwargs)
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "address": {
+            "required": True
+        }
+    }
 
     use_existing, gateway = common.get_properties_and_validate(
-        'gateway', kwargs
+        'gateway', kwargs, validation_rules
     )
 
     if use_existing:
         ctx.logger.info("Used existed")
         return
+
+    # credentials
+    client_session = common.nsx_login(kwargs)
 
     result_raw = nsx_router.dlr_set_dgw(client_session,
                                         gateway['dlr_id'],

@@ -78,7 +78,7 @@ node_templates:
         host: { get_input: nsx_ip }
         raml: { get_input: nsx_raml }
       switch:
-        name: master_swith_name
+        name: platform_test_master_swith_name
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -88,7 +88,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       switch:
-        name: slave_swith_name
+        name: platform_test_slave_swith_name
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -125,7 +125,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       router:
-        name: some_router_name
+        name: platform_test_some_router_name
         dlr_pwd: SeCrEt010203!
         # compact, large, quadlarge, xlarge
         dlr_size: compact
@@ -190,7 +190,7 @@ node_templates:
               interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
               interface_ip: 192.168.2.11
               interface_subnet: 255.255.255.0
-              name: some_interface_name
+              name: platform_test_some_platform_test_interface_name
     relationships:
       - type: cloudify.relationships.contained_in
         target: nsx_dlr

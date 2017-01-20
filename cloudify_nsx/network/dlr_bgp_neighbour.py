@@ -18,11 +18,12 @@ import cloudify_nsx.library.nsx_esg_dlr as cfy_dlr
 import cloudify_nsx.library.nsx_common as common
 
 
-@operation
-def create(**kwargs):
+def _create(kwargs, validation_rules):
     use_existing, neighbour = common.get_properties_and_validate(
-        'neighbour', kwargs
+        'neighbour', kwargs, validation_rules
     )
+
+    print use_existing, neighbour
 
     if use_existing:
         ctx.logger.info("Used existed, no changes made")
@@ -52,6 +53,74 @@ def create(**kwargs):
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
+
+
+@operation
+def create_dlr(**kwargs):
+    validation_rules = {
+        'holdDownTimer': {
+            'default': 180,
+            'type': 'string'
+        },
+        'weight': {
+            'default': 60,
+            'type': 'string'
+        },
+        'remoteAS': {
+            'required': True
+        },
+        'protocolAddress': {
+            'required': True
+        },
+        'dlr_id': {
+            'required': True
+        },
+        'forwardingAddress': {
+            'required': True
+        },
+        'password': {
+            'set_none': True
+        },
+        'ipAddress': {
+            'required': True
+        },
+        'keepAliveTimer': {
+            'default': 60,
+            'type': 'string'
+        }
+    }
+    _create(kwargs, validation_rules)
+
+
+@operation
+def create_esg(**kwargs):
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "ipAddress": {
+            "required": True
+        },
+        "remoteAS": {
+            "required": True
+        },
+        "weight": {
+            "type": "string",
+            "default": 60
+        },
+        "holdDownTimer": {
+            "type": "string",
+            "default": 180
+        },
+        "keepAliveTimer": {
+            "type": "string",
+            "default": 60
+        },
+        "password": {
+            "set_none": True
+        }
+    }
+    _create(kwargs, validation_rules)
 
 
 @operation

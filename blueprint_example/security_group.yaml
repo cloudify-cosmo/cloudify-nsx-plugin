@@ -79,7 +79,7 @@ node_templates:
         raml: { get_input: nsx_raml }
       group:
         scopeId: globalroot-0
-        name: SlaveSecureGroup
+        name: platform_test_SlaveSecureGroup
 
   slave_exclude_security_group:
     type: cloudify.nsx.security_group
@@ -87,7 +87,7 @@ node_templates:
       nsx_auth: *nsx_auth
       group:
         scopeId: globalroot-0
-        name: SlaveExcludeSecureGroup
+        name: platform_test_SlaveExcludeSecureGroup
 
   master_security_group:
     type: cloudify.nsx.security_group
@@ -95,7 +95,7 @@ node_templates:
       nsx_auth: *nsx_auth
       group:
         scopeId: globalroot-0
-        name: MasterSecureGroup
+        name: platform_test_MasterSecureGroup
 
   slave_master_security_group_bind:
     type: cloudify.nsx.security_group_member
@@ -169,7 +169,7 @@ node_templates:
         create:
           inputs:
             tag:
-              name: secret_tag
+              name: platform_test_secret_tag
               description: What can i say?
 
   root_security_group:
@@ -182,7 +182,7 @@ node_templates:
           inputs:
             group:
               scopeId: globalroot-0
-              name: RootSecureGroup
+              name: platform_test_RootSecureGroup
               member:
                 objectId: { get_attribute: [ master_security_group, resource_id ] }
               dynamicMemberDefinition:
@@ -216,14 +216,14 @@ node_templates:
         create:
           inputs:
             policy:
-              name: MasterPolicy
+              name: platform_test_MasterPolicy
               description: MasterPolicy
               precedence: 100
               actionsByCategory:
                 category: firewall
                 action:
                   '@class': firewallSecurityAction
-                  name: name
+                  name: platform_test_name
                   description: description
                   category: firewall
                   secondarySecurityGroup:
@@ -264,7 +264,7 @@ node_templates:
               category: endpoint
               action:
                 '@class': endpointSecurityAction
-                name: endpoint_check
+                name: platform_test_endpoint_check
                 actionType: DATA_SECURITY
                 description: description for DATA_SECURITY
                 isEnabled: "true"

@@ -20,8 +20,56 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    validation_rules = {
+        "dlr_id": {
+            "required": True
+        },
+        "type": {
+            "required": True,
+            "values": [
+                "bgp",
+                "ospf"
+            ]
+        },
+        "prefixName": {
+            "default": "any"
+        },
+        "from": {
+            "set_none": True,
+            "sub": {
+                "isis": {
+                    "default": False,
+                    "type": "boolean"
+                },
+                "ospf": {
+                    "default": False,
+                    "type": "boolean"
+                },
+                "bgp": {
+                    "default": False,
+                    "type": "boolean"
+                },
+                "static": {
+                    "default": False,
+                    "type": "boolean"
+                },
+                "connected": {
+                    "default": False,
+                    "type": "boolean"
+                }
+            }
+        },
+        "action": {
+            "required": True,
+            "values": [
+                "deny",
+                "permit"
+            ]
+        }
+    }
+
     use_existing, rule = common.get_properties_and_validate(
-        'rule', kwargs
+        'rule', kwargs, validation_rules
     )
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
