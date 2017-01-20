@@ -169,7 +169,7 @@ node_types:
 
   # SecuriteGroup
   cloudify.nsx.security_group:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationServer
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -196,7 +196,7 @@ node_types:
 
   # SecuriteGroup Dynamic Member Update
   cloudify.nsx.security_group_dynamic_member:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationModule
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -220,7 +220,7 @@ node_types:
 
   # SecuriteGroup Member
   cloudify.nsx.security_group_member:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationModule
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -244,7 +244,7 @@ node_types:
 
   # SecuriteGroup Exclude Member
   cloudify.nsx.security_group_exclude_member:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationModule
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -268,7 +268,7 @@ node_types:
 
   # Security Group Policy
   cloudify.nsx.security_policy:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationServer
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -296,7 +296,7 @@ node_types:
 
   # Security Group Policy bind
   cloudify.nsx.security_policy_group_bind:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationModule
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -320,7 +320,7 @@ node_types:
 
   # Security Group Policy bind
   cloudify.nsx.security_policy_section:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationModule
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -345,7 +345,7 @@ node_types:
 
   # Security Tag
   cloudify.nsx.security_tag:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationServer
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -369,7 +369,7 @@ node_types:
 
   # Security Tag VM
   cloudify.nsx.security_tag_vm:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.ApplicationModule
     properties:
       nsx_auth:
         type: nsx_auth_type

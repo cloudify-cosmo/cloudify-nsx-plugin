@@ -2,7 +2,6 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-#  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-nsx-plugin/master/plugin.yaml
   - ../plugin.yaml
 
 inputs:
@@ -115,7 +114,7 @@ node_templates:
               security_group_id: { get_attribute: [ master_security_group, resource_id ] }
               objectId: { get_attribute: [ slave_security_group, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: master_security_group
       - type: cloudify.relationships.connected_to
         target: slave_security_group
@@ -146,7 +145,7 @@ node_templates:
                     value: Teapot
                     criteria: contains
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: slave_security_group
 
   slave_exclude_master_security_group_bind:
@@ -161,7 +160,9 @@ node_templates:
               security_group_id: { get_attribute: [ master_security_group, resource_id ] }
               objectId: { get_attribute: [ slave_exclude_security_group, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
+        target: master_security_group
+      - type: cloudify.relationships.depends_on
         target: slave_master_security_group_bind
       - type: cloudify.relationships.connected_to
         target: slave_exclude_security_group
@@ -254,7 +255,7 @@ node_templates:
     relationships:
       - type: cloudify.relationships.connected_to
         target: slave_security_group
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: master_security_policy
 
   master_security_policy_section:
@@ -280,7 +281,7 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: master_security_policy_bind
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: master_security_policy
 
   vm:
@@ -306,7 +307,7 @@ node_templates:
               tag_id: { get_attribute: [ security_tag, resource_id ] }
               vm_id: { get_attribute: [ vm, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: security_tag
       - type: cloudify.relationships.connected_to
         target: vm
@@ -323,7 +324,7 @@ node_templates:
               security_group_id: { get_attribute: [ root_security_group, resource_id ] }
               objectId: { get_attribute: [ vm, resource_id ] }
     relationships:
-      - type: cloudify.relationships.connected_to
+      - type: cloudify.relationships.contained_in
         target: root_security_group
       - type: cloudify.relationships.connected_to
         target: vm

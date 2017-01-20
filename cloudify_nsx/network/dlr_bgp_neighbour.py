@@ -55,72 +55,51 @@ def _create(kwargs, validation_rules):
     ctx.logger.info("created %s" % resource_id)
 
 
+common_validation_rules = {
+    "dlr_id": {
+        "required": True
+    },
+    "ipAddress": {
+        "required": True
+    },
+    'remoteAS': {
+        'required': True
+    },
+    'weight': {
+        'default': 60,
+        'type': 'string'
+    },
+    'holdDownTimer': {
+        'default': 180,
+        'type': 'string'
+    },
+    'password': {
+        'set_none': True
+    },
+    'keepAliveTimer': {
+        'default': 60,
+        'type': 'string'
+    }
+}
+
+
 @operation
 def create_dlr(**kwargs):
     validation_rules = {
-        'holdDownTimer': {
-            'default': 180,
-            'type': 'string'
-        },
-        'weight': {
-            'default': 60,
-            'type': 'string'
-        },
-        'remoteAS': {
-            'required': True
-        },
-        'protocolAddress': {
-            'required': True
-        },
-        'dlr_id': {
-            'required': True
-        },
-        'forwardingAddress': {
-            'required': True
-        },
-        'password': {
-            'set_none': True
-        },
-        'ipAddress': {
-            'required': True
-        },
-        'keepAliveTimer': {
-            'default': 60,
-            'type': 'string'
-        }
+        k: common_validation_rules[k] for k in common_validation_rules
+    }
+    validation_rules['protocolAddress'] = {
+        'required': True
+    }
+    validation_rules['forwardingAddress'] = {
+        'required': True
     }
     _create(kwargs, validation_rules)
 
 
 @operation
 def create_esg(**kwargs):
-    validation_rules = {
-        "dlr_id": {
-            "required": True
-        },
-        "ipAddress": {
-            "required": True
-        },
-        "remoteAS": {
-            "required": True
-        },
-        "weight": {
-            "type": "string",
-            "default": 60
-        },
-        "holdDownTimer": {
-            "type": "string",
-            "default": 180
-        },
-        "keepAliveTimer": {
-            "type": "string",
-            "default": 60
-        },
-        "password": {
-            "set_none": True
-        }
-    }
-    _create(kwargs, validation_rules)
+    _create(kwargs, common_validation_rules)
 
 
 @operation

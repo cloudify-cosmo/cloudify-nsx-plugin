@@ -970,26 +970,15 @@ def esg_clear_interface(client_session, esg_id, ifindex):
 
 def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
 
-    if esg_restriction:
-        validation_rules_firewall = {
-            "action": {
-                "default": "accept"
-            },
-            "logging": {
-                "default": False,
-                "type": "boolean"
-            }
+    validation_rules_firewall = {
+        "action": {
+            "default": "accept"
+        },
+        "logging": {
+            "default": False,
+            "type": "boolean"
         }
-    else:
-        validation_rules_firewall = {
-            "action": {
-                "default": "accept"
-            },
-            "logging": {
-                "default": False,
-                "type": "boolean"
-            }
-        }
+    }
 
     _, firewall = common.get_properties_and_validate(
         'firewall', kwargs, validation_rules_firewall
@@ -1005,56 +994,30 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
             "Can't change firewall rules"
         )
 
-    if esg_restriction:
-        validation_rules_dhcp = {
-            "enabled": {
-                "default": True,
-                "type": "boolean"
-            },
-            "syslog_enabled": {
-                "default": False,
-                "type": "boolean"
-            },
-            "syslog_level": {
-                "default": "INFO",
-                "values": [
-                    "EMERGENCY",
-                    "ALERT",
-                    "CRITICAL",
-                    "ERROR",
-                    "WARNING",
-                    "NOTICE",
-                    "INFO",
-                    "DEBUG"
-                ]
-            }
+    validation_rules_dhcp = {
+        "enabled": {
+            "default": True,
+            "type": "boolean"
+        },
+        "syslog_enabled": {
+            "default": False,
+            "type": "boolean"
+        },
+        "syslog_level": {
+            "default": "INFO",
+            "caseinsensitive": True,
+            "values": [
+                "EMERGENCY",
+                "ALERT",
+                "CRITICAL",
+                "ERROR",
+                "WARNING",
+                "NOTICE",
+                "INFO",
+                "DEBUG"
+            ]
         }
-    else:
-        validation_rules_dhcp = {
-            "enabled": {
-                "default": True,
-                "type": "boolean"
-
-            },
-            "syslog_enabled": {
-                "default": False,
-                "type": "boolean"
-            },
-            "syslog_level": {
-                "default": "INFO",
-                "caseinsensitive": True,
-                "values": [
-                    "EMERGENCY",
-                    "ALERT",
-                    "CRITICAL",
-                    "ERROR",
-                    "WARNING",
-                    "NOTICE",
-                    "INFO",
-                    "DEBUG"
-                ]
-            }
-        }
+    }
 
     _, dhcp = common.get_properties_and_validate(
         'dhcp', kwargs, validation_rules_dhcp
@@ -1071,124 +1034,64 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
             "Can't change dhcp rules"
         )
 
-    if esg_restriction:
-        validation_rules_routing = {
-            "enabled": {
-                "default": True,
-                "type": "boolean"
-            },
-            "staticRouting": {
-                "set_none": True,
-                "sub": {
-                    "defaultRoute": {
-                        "set_none": True,
-                        "sub": {
-                            "gatewayAddress": {
-                                "set_none": True
-                            },
-                            "vnic": {
-                                "set_none": True
-                            },
-                            "mtu": {
-                                "set_none": True
-                            }
+    validation_rules_routing = {
+        "enabled": {
+            "default": True,
+            "type": "boolean"
+        },
+        "staticRouting": {
+            "set_none": True,
+            "sub": {
+                "defaultRoute": {
+                    "set_none": True,
+                    "sub": {
+                        "gatewayAddress": {
+                            "set_none": True
+                        },
+                        "vnic": {
+                            "set_none": True
+                        },
+                        "mtu": {
+                            "set_none": True
                         }
                     }
                 }
-            },
-            "routingGlobalConfig": {
-                "sub": {
-                    "routerId": {
-                        "set_none": True
-                    },
-                    "ecmp": {
-                        "default": False,
-                        "type": "boolean"
-                    },
-                    "logging": {
-                        "sub": {
-                            "logLevel": {
-                                "default": "INFO",
-                                "caseinsensitive": True,
-                                "values": [
-                                    "EMERGENCY",
-                                    "ALERT",
-                                    "CRITICAL",
-                                    "ERROR",
-                                    "WARNING",
-                                    "NOTICE",
-                                    "INFO",
-                                    "DEBUG"
-                                ]
-                            },
-                            "enable": {
-                                "default": False,
-                                "type": "boolean"
-                            }
+            }
+        },
+        "routingGlobalConfig": {
+            "sub": {
+                "routerId": {
+                    "set_none": True
+                },
+                "ecmp": {
+                    "default": False,
+                    "type": "boolean"
+                },
+                "logging": {
+                    "sub": {
+                        "logLevel": {
+                            "default": "INFO",
+                            "caseinsensitive": True,
+                            "values": [
+                                "EMERGENCY",
+                                "ALERT",
+                                "CRITICAL",
+                                "ERROR",
+                                "WARNING",
+                                "NOTICE",
+                                "INFO",
+                                "DEBUG"
+                            ]
+                        },
+                        "enable": {
+                            "default": False,
+                            "type": "boolean"
                         }
                     }
                 }
             }
         }
-    else:
-        validation_rules_routing = {
-            "enabled": {
-                "default": True,
-                "type": "boolean"
-            },
-            "staticRouting": {
-                "set_none": True,
-                "sub": {
-                    "defaultRoute": {
-                        "set_none": True,
-                        "sub": {
-                            "gatewayAddress": {
-                                "set_none": True
-                            },
-                            "vnic": {
-                                "set_none": True
-                            },
-                            "mtu": {
-                                "set_none": True
-                            }
-                        }
-                    }
-                }
-            },
-            "routingGlobalConfig": {
-                "sub": {
-                    "routerId": {
-                        "set_none": True
-                    },
-                    "ecmp": {
-                        "default": False,
-                        "type": "boolean"
-                    },
-                    "logging": {
-                        "sub": {
-                            "logLevel": {
-                                "default": "INFO",
-                                "caseinsensitive": True,
-                                "values": [
-                                    "EMERGENCY",
-                                    "ALERT",
-                                    "CRITICAL",
-                                    "ERROR",
-                                    "WARNING",
-                                    "NOTICE",
-                                    "INFO",
-                                    "DEBUG"
-                                ]
-                            },
-                            "enable": {
-                                "default": False,
-                                "type": "boolean"
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    }
 
     _, routing = common.get_properties_and_validate(
         'routing', kwargs, validation_rules_routing
@@ -1199,101 +1102,59 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
         routing['staticRouting']
     )
 
-    if esg_restriction:
-        validation_rules_ospf = {
-            "enabled": {
-                "default": False,
-                "type": "boolean"
-            },
-            "defaultOriginate": {
-                "default": False,
-                "type": "boolean"
-            },
-            "gracefulRestart": {
-                "default": False,
-                "type": "boolean"
-            },
-            "redistribution": {
-                "default": False,
-                "type": "boolean"
-            }
+    validation_rules_ospf = {
+        "enabled": {
+            "default": False,
+            "type": "boolean"
+        },
+        "defaultOriginate": {
+            "default": False,
+            "type": "boolean"
+        },
+        "gracefulRestart": {
+            "default": False,
+            "type": "boolean"
+        },
+        "redistribution": {
+            "default": False,
+            "type": "boolean"
         }
-    else:
-        validation_rules_ospf = {
-            "enabled": {
-                "default": False,
-                "type": "boolean"
-            },
-            "defaultOriginate": {
-                "default": False,
-                "type": "boolean"
-            },
-            "gracefulRestart": {
-                "default": False,
-                "type": "boolean"
-            },
-            "redistribution": {
-                "default": False,
-                "type": "boolean"
-            },
-            "protocolAddress": {
-                "set_none": True
-            },
-            "forwardingAddress": {
-                "set_none": True
-            }
+    }
+
+    if not esg_restriction:
+        validation_rules_ospf["protocolAddress"] = {
+            "set_none": True
+        }
+        validation_rules_ospf["forwardingAddress"] = {
+            "set_none": True
         }
 
     _, ospf = common.get_properties_and_validate(
         'ospf', kwargs, validation_rules_ospf
     )
 
-    if esg_restriction:
-        validation_rules_bgp = {
-            "enabled": {
-                "default": False,
-                "type": "boolean"
-            },
-            "defaultOriginate": {
-                "default": False,
-                "type": "boolean"
-            },
-            "gracefulRestart": {
-                "default": False,
-                "type": "boolean"
-            },
-            "redistribution": {
-                "default": False,
-                "type": "boolean"
-            },
-            "localAS": {
-                "type": "string",
-                "set_none": True
-            }
+    validation_rules_bgp = {
+        "enabled": {
+            "default": False,
+            "type": "boolean"
+        },
+        "defaultOriginate": {
+            "default": False,
+            "type": "boolean"
+        },
+        "gracefulRestart": {
+            "default": False,
+            "type": "boolean"
+        },
+        "redistribution": {
+            "default": False,
+            "type": "boolean"
+        },
+        "localAS": {
+            "type": "string",
+            "set_none": True
         }
-    else:
-        validation_rules_bgp = {
-            "enabled": {
-                "default": False,
-                "type": "boolean"
-            },
-            "defaultOriginate": {
-                "default": False,
-                "type": "boolean"
-            },
-            "gracefulRestart": {
-                "default": False,
-                "type": "boolean"
-            },
-            "redistribution": {
-                "default": False,
-                "type": "boolean"
-            },
-            "localAS": {
-                "type": "string",
-                "set_none": True
-            }
-        }
+    }
 
     _, bgp = common.get_properties_and_validate(
         'bgp', kwargs, validation_rules_bgp
