@@ -144,13 +144,15 @@ node_templates:
               resourcepoolid: { get_attribute: [ vresourcepool, resource_id ] }
               default_pg: { get_attribute: [ master_lswith, resource_dvportgroup_id ] }
     relationships:
+      # connected as network link
       - type: cloudify.relationships.connected_to
         target: master_lswith
-      - type: cloudify.relationships.depends_on
+      # Contained in global sense
+      - type: cloudify.relationships.connected_to
         target: datacenter
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: datastore
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.connected_to
         target: vresourcepool
 
   slave_lswith:
