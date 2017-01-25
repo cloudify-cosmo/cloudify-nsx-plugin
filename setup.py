@@ -29,7 +29,9 @@ setup(
     ],
     package_data={
         'cloudify_nsx': [
-            'library/api_spec/nsxvapi.raml', 'library/api_spec/schemas/*'
+            'library/api_spec/nsxvapi.raml',
+            'library/api_spec/schemas/*',
+            'library/api_spec/templates/documentation/introduction.md'
         ]
     },
     install_requires=[

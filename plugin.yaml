@@ -421,7 +421,7 @@ node_types:
 
   # distributed logical routers
   cloudify.nsx.dlr:
-    derived_from: cloudify.nodes.Router
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -542,7 +542,7 @@ node_types:
   # distributed logical routers interface ospf areas, use only after all
   # interfaces creation!
   cloudify.nsx.ospf_areas:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -576,7 +576,7 @@ node_types:
 
   # distributed logical routers interface ospf interfaces
   cloudify.nsx.ospf_interfaces:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -612,7 +612,7 @@ node_types:
 
   # BGP Neighbour
   cloudify.nsx.dlrBGPNeighbour:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -654,7 +654,7 @@ node_types:
 
   # BGP Neighbour Filter
   cloudify.nsx.esgBGPNeighbourFilter:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -693,7 +693,7 @@ node_types:
   # Optional. Required only if user wants to define redistribution
   # rules in dynamic routing protocols like ospf, bgp
   cloudify.nsx.dlr_routing_ip_prefix:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -720,7 +720,7 @@ node_types:
 
   # distributed logical routers interface ospf redistribution rule
   cloudify.nsx.routing_redistribution_rule:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -762,7 +762,7 @@ node_types:
 
   # distributed logical routers interface
   cloudify.nsx.dlr_interface:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -797,7 +797,7 @@ node_types:
   # distributed router dhcp relay, we need separate type because we can
   # change it only after set all settings for interfaces
   cloudify.nsx.dlr_dhcp_relay:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -824,7 +824,7 @@ node_types:
 
   # distributed logical routers gateway
   cloudify.nsx.dlr_dgw:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -849,7 +849,7 @@ node_types:
 
   # edge services gateways
   cloudify.nsx.esg:
-    derived_from: cloudify.nodes.Router
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -963,7 +963,7 @@ node_types:
 
   # BGP Neighbour
   cloudify.nsx.esgBGPNeighbour:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -999,7 +999,7 @@ node_types:
 
   # edge services gateways interfaces
   cloudify.nsx.esg_nat:
-    derived_from: cloudify.nodes.VirtualIP
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1047,7 +1047,7 @@ node_types:
 
   # edge services gateways firewall
   cloudify.nsx.esg_firewall:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1099,7 +1099,7 @@ node_types:
 
   # edge services gateways interfaces
   cloudify.nsx.esg_interface:
-    derived_from: cloudify.nodes.Port
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1147,7 +1147,7 @@ node_types:
 
   # edge services gateways interfaces
   cloudify.nsx.esg_gateway:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1179,7 +1179,7 @@ node_types:
 
   # edge services gateways route
   cloudify.nsx.esg_route:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1215,7 +1215,7 @@ node_types:
 
   # Edge DHCP pool
   cloudify.nsx.dhcp_pool:
-    derived_from: cloudify.nodes.ApplicationServer
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1255,7 +1255,7 @@ node_types:
 
   # Edge DHCP binding
   cloudify.nsx.dhcp_binding:
-    derived_from: cloudify.nodes.ApplicationModule
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1303,7 +1303,7 @@ node_types:
 
   # distributed firewall
   cloudify.nsx.dfw_section:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.Root
     properties:
       nsx_auth:
         type: nsx_auth_type
@@ -1329,7 +1329,7 @@ node_types:
 
   # distributed firewall
   cloudify.nsx.dfw_rule:
-    derived_from: cloudify.nodes.SecurityGroup
+    derived_from: cloudify.nodes.Root
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

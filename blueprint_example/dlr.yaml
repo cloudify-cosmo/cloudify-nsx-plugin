@@ -244,6 +244,8 @@ node_templates:
         target: ospf_areas
       - type: cloudify.relationships.connected_to
         target: interface
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
 
   dlr_static_gateway:
     type: cloudify.nsx.dlr_dgw
