@@ -3,6 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
   - ../plugin.yaml
+  - ../../cloudify-vsphere-plugin/plugin.yaml
 
 inputs:
 
@@ -54,12 +55,6 @@ inputs:
        vcenter server user password
     default: nsx
 
-  vcenter_vresourcepool:
-    type: string
-    description: >
-       vcenter resourcepool
-    default: Cluster
-
   vcenter_datastore:
     type: string
     description: >
@@ -72,7 +67,29 @@ inputs:
        vcenter datacenter
     default: Datacenter
 
+  template_name:
+    description: >
+      Template to clone VMs from
+    default: CentOS-7.2-x86_64-1511-tmpl
+
+node_types:
+  connection_configuration:
+     derived_from: cloudify.nodes.Root
+     properties:
+       connection_config: {}
+
 node_templates:
+  connection_configuration:
+    type: connection_configuration
+    properties:
+      connection_config:
+        username: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        host: { get_input: vcenter_ip }
+        port: 443
+        datacenter_name: { get_input: vcenter_datacenter }
+        resource_pool_name: Resources
+        auto_placement: true
 
   slave_security_group:
     type: cloudify.nsx.security_group
@@ -285,15 +302,15 @@ node_templates:
         target: master_security_policy
 
   vm:
-    type: cloudify.vcenter.server
+    type: cloudify.vsphere.nodes.Server
     properties:
-      vcenter_auth: &vcenter_auth
-        username: { get_input: vcenter_user }
-        password: { get_input: vcenter_password }
-        host: { get_input: vcenter_ip }
-      use_external_resource: true
+      install_agent: false
       server:
-        name: LabsTest
+        name: systemtestlinuxnointerfaces
+        template: { get_input: template_name }
+        cpus: 1
+        memory: 2048
+      connection_config: { get_property: [connection_configuration, connection_config] }
 
   tag_vm:
     type: cloudify.nsx.security_tag_vm
@@ -305,7 +322,7 @@ node_templates:
           inputs:
             vm_tag:
               tag_id: { get_attribute: [ security_tag, resource_id ] }
-              vm_id: { get_attribute: [ vm, resource_id ] }
+              vm_id: { get_attribute: [ vm, vsphere_server_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: security_tag
@@ -322,7 +339,7 @@ node_templates:
           inputs:
             group_member:
               security_group_id: { get_attribute: [ root_security_group, resource_id ] }
-              objectId: { get_attribute: [ vm, resource_id ] }
+              objectId: { get_attribute: [ vm, vsphere_server_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: root_security_group

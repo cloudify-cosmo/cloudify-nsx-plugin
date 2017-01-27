@@ -101,7 +101,9 @@ def create(**kwargs):
                 message="We dont have such network yet", retry_after=10
             )
 
-        ctx.instance.runtime_properties['resource_dvportgroup_id'] = dpg_id
+        # If you change the following line you will probably break vsphere
+        # integration
+        ctx.instance.runtime_properties['vsphere_network_id'] = dpg_id
 
         ctx.logger.info("Distibuted port group id: %s" % dpg_id)
 
