@@ -457,7 +457,7 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
         current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
         bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
 
-    bgp_neighbour_rule = False
+    bgp_neighbour_rule = {}
 
     for bgp_neighbour in bgp_neighbours:
         if bgp_neighbour['ipAddress'] != ipAddress:
@@ -565,7 +565,7 @@ def del_bgp_neighbour_filter(client_session, resource_id):
         current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
         bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
 
-    bgp_neighbour_rule = False
+    bgp_neighbour_rule = {}
 
     for bgp_neighbour in bgp_neighbours:
         if bgp_neighbour['ipAddress'] != ipAddress:

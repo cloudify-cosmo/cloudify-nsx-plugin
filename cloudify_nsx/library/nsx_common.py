@@ -302,9 +302,8 @@ def possibly_assign_vm_creation_props(properties_dict):
     ))
 
     if (
-        (any_vsphere_id_relationships and any_prop_ids_set)
-        or (any_vsphere_id_relationships
-            and not all_vsphere_id_relationships)
+        (any_vsphere_id_relationships and any_prop_ids_set) or
+        (any_vsphere_id_relationships and not all_vsphere_id_relationships)
     ):
         raise cfy_exc.NonRecoverableError(
             'vSphere object IDs must either be provided entirely from '

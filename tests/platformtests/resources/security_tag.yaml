@@ -1,0 +1,55 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - ../../../plugin.yaml
+
+inputs:
+
+  node_name_prefix:
+    type: string
+    description: >
+       Node name prefix
+    default: platform_test_
+
+  nsx_ip:
+    type: string
+    description: >
+       nsx server ip
+    default: 127.0.0.1
+
+  nsx_user:
+    type: string
+    description: >
+       nsx server user
+    default: nsx
+
+  nsx_password:
+    type: string
+    description: >
+       nsx server user password
+    default: nsx
+
+  nsx_raml:
+    type: string
+    description: >
+       raml file path
+    default: ""
+
+node_templates:
+
+  security_tag:
+    type: cloudify.nsx.security_tag
+    properties:
+      nsx_auth: &nsx_auth
+        username: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        host: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            tag:
+              name: {concat:[{get_input: node_name_prefix}, secret_tag]}
+              description: What can i say?
