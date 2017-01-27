@@ -457,7 +457,7 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
         current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
         bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
 
-    bgp_neighbour_rule = False
+    bgp_neighbour_rule = {}
 
     for bgp_neighbour in bgp_neighbours:
         if bgp_neighbour['ipAddress'] != ipAddress:
@@ -565,7 +565,7 @@ def del_bgp_neighbour_filter(client_session, resource_id):
         current_bgp['bgp']['bgpNeighbours']['bgpNeighbour'] = [bgp_neighbours]
         bgp_neighbours = current_bgp['bgp']['bgpNeighbours']['bgpNeighbour']
 
-    bgp_neighbour_rule = False
+    bgp_neighbour_rule = {}
 
     for bgp_neighbour in bgp_neighbours:
         if bgp_neighbour['ipAddress'] != ipAddress:
@@ -966,6 +966,17 @@ def esg_clear_interface(client_session, esg_id, ifindex):
         return True
     else:
         return False
+
+
+def remove_properties_edges():
+    common.remove_properties('edge')
+    common.remove_properties('router')
+    common.remove_properties('firewall')
+    common.remove_properties('dhcp')
+    common.remove_properties('routing')
+    common.remove_properties('ospf')
+    common.remove_properties('bgp')
+    common.remove_properties('nat')
 
 
 def update_common_edges(client_session, resource_id, kwargs, esg_restriction):

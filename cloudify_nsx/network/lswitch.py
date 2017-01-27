@@ -124,13 +124,11 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    ctx.logger.info("deleting %s" % resource_id)
-
     client_session.delete(
         'logicalSwitch', uri_parameters={'virtualWireID': resource_id}
     )
 
     ctx.logger.info("deleted %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
-    ctx.instance.runtime_properties['resource_dvportgroup_id'] = None
+    common.remove_properties('switch')
+    common.remove_properties('resource_dvportgroup_id')

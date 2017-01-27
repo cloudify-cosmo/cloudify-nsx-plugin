@@ -18,39 +18,42 @@ from nsxramlclient.client import NsxClient
 from cloudify import exceptions as cfy_exc
 
 
-def __cleanup_prioperties(value):
+def _cleanup_properties(value):
     """we need such because nsxclient does not support unicode strings"""
     if isinstance(value, unicode):
         return str(value)
     if isinstance(value, dict):
-        return __cleanup_prioperties_dict(value)
+        return _cleanup_properties_dict(value)
     if isinstance(value, list):
-        return __cleanup_prioperties_list(value)
+        return _cleanup_properties_list(value)
     return value
 
 
-def __cleanup_prioperties_dict(properties_dict):
+def _cleanup_properties_dict(properties_dict):
+    """convert all fields in dict to string"""
     result = {}
 
     for key in properties_dict.iterkeys():
         value = properties_dict[key]
         if isinstance(key, (unicode, int)):
             key = str(key)
-        result[key] = __cleanup_prioperties(value)
+        result[key] = _cleanup_properties(value)
 
     return result
 
 
-def __cleanup_prioperties_list(properties_list):
+def _cleanup_properties_list(properties_list):
+    """convert all elements in list to string"""
     result = []
 
     for value in properties_list:
-        result.append(__cleanup_prioperties(value))
+        result.append(_cleanup_properties(value))
 
     return result
 
 
-def clenup_if_empty(value):
+def _cleanup_if_empty(value):
+    """return None if all fileds equal to None, else origin dict"""
     have_not_none = False
     for key in value:
         if value[key]:
@@ -117,7 +120,7 @@ def validate(check_dict, validate_rules, use_existing):
             if sub_checks:
                 value = validate(value, sub_checks, use_existing)
                 if set_none:
-                    value = clenup_if_empty(value)
+                    value = _cleanup_if_empty(value)
 
         # sory some time we have mistake in value for boolean fields
         if value_type == 'boolean' and isinstance(value, str):
@@ -148,7 +151,32 @@ def __get_properties(name, kwargs):
         if resource_id:
             ctx.instance.runtime_properties['resource_id'] = resource_id
 
-    return __cleanup_prioperties_dict(properties_dict)
+    return _cleanup_properties_dict(properties_dict)
+
+
+def get_properties(name, kwargs):
+    properties_dict = __get_properties(name, kwargs)
+    use_existing = ctx.node.properties.get(
+        'use_external_resource', False
+    )
+    return use_existing, properties_dict
+
+
+def get_properties_and_validate(name, kwargs, validate_dict=None):
+    use_existing, properties_dict = get_properties(name, kwargs)
+    if not validate_dict:
+        validate_dict = {}
+    ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
+    return use_existing, validate(
+        properties_dict, validate_dict, use_existing
+    )
+
+
+def remove_properties(name):
+    if 'resource_id' in ctx.instance.runtime_properties:
+        del ctx.instance.runtime_properties['resource_id']
+    if name in ctx.instance.runtime_properties:
+        del ctx.instance.runtime_properties[name]
 
 
 def nsx_login(kwargs):
@@ -177,24 +205,6 @@ def nsx_login(kwargs):
     client = NsxClient(raml_file, ip, user, password)
     ctx.logger.info("NSX logged in")
     return client
-
-
-def get_properties(name, kwargs):
-    properties_dict = __get_properties(name, kwargs)
-    use_existing = ctx.node.properties.get(
-        'use_external_resource', False
-    )
-    return use_existing, properties_dict
-
-
-def get_properties_and_validate(name, kwargs, validate_dict=None):
-    use_existing, properties_dict = get_properties(name, kwargs)
-    if not validate_dict:
-        validate_dict = {}
-    ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
-    return use_existing, validate(
-        properties_dict, validate_dict, use_existing
-    )
 
 
 def check_raw_result(result_raw):
@@ -292,9 +302,8 @@ def possibly_assign_vm_creation_props(properties_dict):
     ))
 
     if (
-        (any_vsphere_id_relationships and any_prop_ids_set)
-        or (any_vsphere_id_relationships
-            and not all_vsphere_id_relationships)
+        (any_vsphere_id_relationships and any_prop_ids_set) or
+        (any_vsphere_id_relationships and not all_vsphere_id_relationships)
     ):
         raise cfy_exc.NonRecoverableError(
             'vSphere object IDs must either be provided entirely from '

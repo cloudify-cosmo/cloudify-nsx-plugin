@@ -61,17 +61,18 @@ def delete(**kwargs):
         ctx.logger.info("Used existed")
         return
 
-    if 'resource_id' not in ctx.instance.runtime_properties:
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if not resource_id:
         ctx.logger.info("Not fully created, skip")
         return
 
     result_raw = nsx_router.dlr_del_dgw(
         client_session,
-        ctx.instance.runtime_properties['resource_id']
+        resource_id
     )
 
     common.check_raw_result(result_raw)
 
-    ctx.logger.info(
-        "delete %s" % ctx.instance.runtime_properties['resource_id'])
-    ctx.instance.runtime_properties['resource_id'] = None
+    ctx.logger.info("delete %s" % resource_id)
+
+    common.remove_properties('gateway')

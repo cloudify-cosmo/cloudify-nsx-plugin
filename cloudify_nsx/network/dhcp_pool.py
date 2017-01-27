@@ -59,6 +59,11 @@ def create(**kwargs):
         ctx.logger.info("Used pre existed!")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
@@ -101,4 +106,6 @@ def delete(**kwargs):
             "Can't drop dhcp pool"
         )
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    ctx.logger.info("deleted %s" % resource_id)
+
+    common.remove_properties('pool')
