@@ -968,6 +968,17 @@ def esg_clear_interface(client_session, esg_id, ifindex):
         return False
 
 
+def remove_properties_edges():
+    common.remove_properties('edge')
+    common.remove_properties('router')
+    common.remove_properties('firewall')
+    common.remove_properties('dhcp')
+    common.remove_properties('routing')
+    common.remove_properties('ospf')
+    common.remove_properties('bgp')
+    common.remove_properties('nat')
+
+
 def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
 
     validation_rules_firewall = {

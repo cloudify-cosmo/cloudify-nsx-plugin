@@ -84,7 +84,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existing, neighbour = common.get_properties('neighbour', kwargs)
+    use_existing, neighbour = common.get_properties('filter', kwargs)
 
     if use_existing:
         ctx.logger.info("Used existed")
@@ -103,6 +103,6 @@ def delete(**kwargs):
         resource_id
     )
 
-    ctx.logger.info("delete %s" % resource_id)
+    ctx.logger.info("deleted %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    common.remove_properties('filter')

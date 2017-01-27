@@ -102,4 +102,4 @@ def delete(**kwargs):
 
     ctx.logger.info("delete %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    common.remove_properties('gateway')

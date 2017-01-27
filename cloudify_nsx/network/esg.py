@@ -116,13 +116,12 @@ def delete(**kwargs):
         ctx.logger.info("We dont have resource_id")
         return
 
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
     if use_existing:
         ctx.logger.info("Used existed %s" % edge_dict.get('name'))
-        nsx_dlr.update_common_edges(client_session, resource_id, kwargs, True)
         return
+
+    # credentials
+    client_session = common.nsx_login(kwargs)
 
     ctx.logger.info("checking %s" % resource_id)
 
@@ -130,4 +129,4 @@ def delete(**kwargs):
 
     ctx.logger.info("delete %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    nsx_dlr.remove_properties_edges()

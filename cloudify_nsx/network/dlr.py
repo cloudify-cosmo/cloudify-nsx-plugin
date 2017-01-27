@@ -115,10 +115,8 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    ctx.logger.info("deleting %s" % resource_id)
-
     client_session.delete('nsxEdge', uri_parameters={'edgeId': resource_id})
 
     ctx.logger.info("deleted %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    nsx_dlr.remove_properties_edges()

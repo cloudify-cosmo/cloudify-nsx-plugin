@@ -57,7 +57,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existing, area = common.get_properties('area', kwargs)
+    use_existing, area = common.get_properties('prefix', kwargs)
 
     if use_existing:
         ctx.logger.info("Used existed")
@@ -78,4 +78,4 @@ def delete(**kwargs):
 
     ctx.logger.info("deleted %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    common.remove_properties('prefix')

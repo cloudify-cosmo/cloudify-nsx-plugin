@@ -72,6 +72,6 @@ def delete(**kwargs):
         resource_id
     )
 
-    ctx.logger.info("delete %s" % resource_id)
+    ctx.logger.info("deleted %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    common.remove_properties('vm_tag')

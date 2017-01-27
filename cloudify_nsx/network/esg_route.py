@@ -56,6 +56,11 @@ def create(**kwargs):
         ctx.logger.info("Used existed")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
@@ -111,4 +116,4 @@ def delete(**kwargs):
 
     ctx.logger.info("delete %s" % resource_id)
 
-    ctx.instance.runtime_properties['resource_id'] = None
+    common.remove_properties('route')
