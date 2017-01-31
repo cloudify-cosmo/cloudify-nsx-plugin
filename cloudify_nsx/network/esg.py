@@ -60,7 +60,6 @@ def create(**kwargs):
     use_existing, edge_dict = common.get_properties_and_validate(
         'edge', kwargs, validation_rules
     )
-    edge_dict = common.possibly_assign_vm_creation_props(edge_dict)
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 
@@ -87,7 +86,10 @@ def create(**kwargs):
             )
 
     if not resource_id:
-        resource_id, location = nsx_esg.esg_create(
+        # update properties with vcenter specific values,
+        # required only on create
+        edge_dict = common.possibly_assign_vm_creation_props(edge_dict)
+        resource_id, _ = nsx_esg.esg_create(
             client_session,
             edge_dict['name'],
             edge_dict['esg_pwd'],
@@ -101,8 +103,7 @@ def create(**kwargs):
         )
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.instance.runtime_properties['location'] = location
-        ctx.logger.info("created %s | %s" % (resource_id, location))
+        ctx.logger.info("created %s" % resource_id)
 
     nsx_dlr.update_common_edges(client_session, resource_id, kwargs, True)
 

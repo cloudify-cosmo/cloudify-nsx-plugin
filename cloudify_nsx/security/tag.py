@@ -55,14 +55,14 @@ def create(**kwargs):
             )
 
     if not resource_id:
-        resource_id, location = nsx_security_tag.add_tag(
+        resource_id = nsx_security_tag.add_tag(
             client_session,
             tag['name'],
             tag['description'],
         )
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("created %s|%s" % (resource_id, location))
+        ctx.logger.info("created %s" % resource_id)
 
 
 @operation

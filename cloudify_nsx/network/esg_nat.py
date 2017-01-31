@@ -70,10 +70,15 @@ def create(**kwargs):
         ctx.logger.info("Used existed")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    resource_id, location = nsx_nat.add_nat_rule(
+    resource_id = nsx_nat.add_nat_rule(
         client_session,
         nat_dict['esg_id'],
         nat_dict['action'],
@@ -94,8 +99,7 @@ def create(**kwargs):
         )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+    ctx.logger.info("created %s " % resource_id)
 
 
 @operation

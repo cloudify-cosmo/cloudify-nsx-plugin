@@ -76,12 +76,11 @@ def create(**kwargs):
             switch_mode = switch_dict.get("mode")
             # nsx does not understand unicode strings
             ctx.logger.info("creating %s" % switch_dict["name"])
-            resource_id, location = nsx_logical_switch.logical_switch_create(
+            resource_id, _ = nsx_logical_switch.logical_switch_create(
                 client_session, switch_dict["transport_zone"],
                 switch_dict["name"], switch_mode
             )
-            ctx.instance.runtime_properties['location'] = location
-            ctx.logger.info("created %s | %s" % (resource_id, location))
+            ctx.logger.info("created %s" % resource_id)
             switch_params = None
 
         ctx.instance.runtime_properties['resource_id'] = resource_id

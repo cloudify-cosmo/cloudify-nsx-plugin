@@ -28,7 +28,7 @@ data_types:
 
 node_types:
 
-  # SecuriteGroup
+  # SecurityGroup
   cloudify.nsx.security_group:
     derived_from: cloudify.nodes.ApplicationServer
     properties:

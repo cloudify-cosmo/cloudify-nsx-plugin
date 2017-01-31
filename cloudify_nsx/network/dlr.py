@@ -30,7 +30,13 @@ def create(**kwargs):
             "required": True
         },
         "dlr_size": {
-            "required": True
+            "default": "compact",
+            "values": [
+                "compact",
+                "large",
+                "quadlarge",
+                "xlarge"
+            ]
         },
         "ha_ls_id": {
             "required": True
@@ -53,8 +59,6 @@ def create(**kwargs):
         'router', kwargs, validation_rules
     )
 
-    router_dict = common.possibly_assign_vm_creation_props(router_dict)
-
     ctx.logger.info("checking %s" % router_dict["name"])
 
     # credentials
@@ -74,7 +78,10 @@ def create(**kwargs):
                 "Router '%s' already exists" % router_dict["name"]
             )
     if not resource_id:
-        resource_id, location = nsx_router.dlr_create(
+        # update properties with vcenter specific values,
+        # required only on create
+        router_dict = common.possibly_assign_vm_creation_props(router_dict)
+        resource_id, _ = nsx_router.dlr_create(
             client_session,
             router_dict['name'],
             router_dict['dlr_pwd'],
@@ -88,8 +95,7 @@ def create(**kwargs):
             router_dict['uplink_subnet'],
             router_dict['uplink_dgw'])
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.instance.runtime_properties['location'] = location
-        ctx.logger.info("created %s | %s" % (resource_id, location))
+        ctx.logger.info("created %s" % resource_id)
 
     uplink_vnic = nsx_dlr.get_uplink_vnic(
         client_session, resource_id, router_dict['uplink_ls_id'])

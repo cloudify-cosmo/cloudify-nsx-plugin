@@ -67,6 +67,7 @@ class SecurityTagTest(unittest.TestCase):
 
     def tearDown(self):
         current_ctx.clear()
+        super(SecurityTagTest, self).tearDown()
 
     def test_securitytag(self):
         """Deploying security tag minimal test"""
