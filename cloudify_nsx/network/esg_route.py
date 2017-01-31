@@ -81,10 +81,8 @@ def create(**kwargs):
             "Can't set route."
         )
 
-    location = route['esg_id'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+    ctx.logger.info("created %s" % resource_id)
 
 
 @operation
@@ -102,14 +100,13 @@ def delete(**kwargs):
 
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_esg.esg_route_del(
+    result = nsx_esg.esg_route_del(
         client_session,
         route['esg_id'],
         route['network'],
         resource_id
     )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
+    if not result:
         raise cfy_exc.NonRecoverableError(
             "Can't delete gateway."
         )

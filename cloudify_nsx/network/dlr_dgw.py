@@ -37,6 +37,11 @@ def create(**kwargs):
         ctx.logger.info("Used existed")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
@@ -52,9 +57,6 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
     use_existing, gateway = common.get_properties('gateway', kwargs)
 
     if use_existing:
@@ -65,6 +67,9 @@ def delete(**kwargs):
     if not resource_id:
         ctx.logger.info("Not fully created, skip")
         return
+
+    # credentials
+    client_session = common.nsx_login(kwargs)
 
     result_raw = nsx_router.dlr_del_dgw(
         client_session,

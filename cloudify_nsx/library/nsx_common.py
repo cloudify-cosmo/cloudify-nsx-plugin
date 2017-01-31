@@ -64,7 +64,8 @@ def _cleanup_if_empty(value):
     return value
 
 
-def validate(check_dict, validate_rules, use_existing):
+def _validate(check_dict, validate_rules, use_existing):
+    """Validate inputs for node creation"""
     result = {}
     for name in validate_rules:
         rule = validate_rules[name]
@@ -103,7 +104,7 @@ def validate(check_dict, validate_rules, use_existing):
             value = value.lower()
 
         if caseinsensitive and values:
-            values = [v.lower() for v in values]
+            values = [str(v).lower() for v in values]
 
         if set_none and not value:
             # empty value
@@ -118,13 +119,14 @@ def validate(check_dict, validate_rules, use_existing):
                         )
                     )
             if sub_checks:
-                value = validate(value, sub_checks, use_existing)
+                value = _validate(value, sub_checks, use_existing)
                 if set_none:
                     value = _cleanup_if_empty(value)
 
         # sory some time we have mistake in value for boolean fields
-        if value_type == 'boolean' and isinstance(value, str):
-            value = value.lower() == 'true'
+        if value_type == 'boolean' and isinstance(value, basestring):
+            value = str(value).lower() == 'true'
+        # for case value==0 and we need check difference with None and False
         elif value_type == 'string' and isinstance(value, int):
             value = str(value)
         result[name] = value
@@ -132,7 +134,7 @@ def validate(check_dict, validate_rules, use_existing):
     return result
 
 
-def __get_properties(name, kwargs):
+def _get_properties(name, kwargs):
     properties_dict = ctx.node.properties.get(name, {})
     properties_dict.update(kwargs.get(name, {}))
     properties_dict.update(ctx.instance.runtime_properties.get(name, {}))
@@ -155,7 +157,7 @@ def __get_properties(name, kwargs):
 
 
 def get_properties(name, kwargs):
-    properties_dict = __get_properties(name, kwargs)
+    properties_dict = _get_properties(name, kwargs)
     use_existing = ctx.node.properties.get(
         'use_external_resource', False
     )
@@ -167,7 +169,7 @@ def get_properties_and_validate(name, kwargs, validate_dict=None):
     if not validate_dict:
         validate_dict = {}
     ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
-    return use_existing, validate(
+    return use_existing, _validate(
         properties_dict, validate_dict, use_existing
     )
 
@@ -180,7 +182,7 @@ def remove_properties(name):
 
 
 def nsx_login(kwargs):
-    nsx_auth = __get_properties('nsx_auth', kwargs)
+    nsx_auth = _get_properties('nsx_auth', kwargs)
 
     ctx.logger.info("NSX login...")
     user = nsx_auth.get('username')

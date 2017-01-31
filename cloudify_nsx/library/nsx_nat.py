@@ -83,7 +83,7 @@ def add_nat_rule(client_session, esg_id, action, originalAddress,
 
     common.check_raw_result(result_raw)
 
-    return result_raw['objectId'], result_raw['location']
+    return result_raw['objectId']
 
 
 def delete_nat_rule(client_session, esg_id, resource_id):

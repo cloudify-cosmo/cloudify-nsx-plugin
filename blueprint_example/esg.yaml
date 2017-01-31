@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
   - ../plugin.yaml
-  - ../../cloudify-vsphere-plugin/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0-m1/plugin.yaml
 
 inputs:
 
@@ -75,13 +75,13 @@ inputs:
 
 node_types:
   connection_configuration:
-     derived_from: cloudify.nodes.Root                                                                    
+     derived_from: cloudify.nodes.Root
      properties:
-       connection_config: {}                                                                              
+       connection_config: {}
 
 node_templates:
   connection_configuration:
-    type: connection_configuration                                                                        
+    type: connection_configuration
     properties:
       connection_config:
         username: { get_input: vcenter_user }

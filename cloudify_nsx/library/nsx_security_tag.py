@@ -56,7 +56,7 @@ def add_tag(client_session, name, description):
 
     common.check_raw_result(result_raw)
 
-    return result_raw['objectId'], result_raw['location']
+    return result_raw['objectId']
 
 
 def delete_tag(client_session, securityid):
