@@ -164,10 +164,8 @@ def get_properties(name, kwargs):
     return use_existing, properties_dict
 
 
-def get_properties_and_validate(name, kwargs, validate_dict=None):
+def get_properties_and_validate(name, kwargs, validate_dict):
     use_existing, properties_dict = get_properties(name, kwargs)
-    if not validate_dict:
-        validate_dict = {}
     ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
     return use_existing, _validate(
         properties_dict, validate_dict, use_existing
@@ -210,7 +208,7 @@ def nsx_login(kwargs):
 
 
 def check_raw_result(result_raw):
-    if result_raw['status'] < 200 and result_raw['status'] >= 300:
+    if result_raw['status'] < 200 or result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
             "We have error with request."

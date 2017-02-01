@@ -298,6 +298,70 @@ class NsxCommonTest(unittest.TestCase):
             43
         )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_get_properties_public(self):
+        """Check nsx_common.get_properties func"""
+        self._regen_ctx()
+        self.assertEqual(
+            common.get_properties('some_name', {'some_name': {
+                'somevalue': True
+            }}),
+            (False, {'somevalue': True})
+        )
+        self._regen_ctx()
+        self.fake_ctx.node.properties['use_external_resource'] = True
+        self.assertEqual(
+            common.get_properties('some_name', {'some_name': {
+                'somevalue': False
+            }}),
+            (True, {'somevalue': False})
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_get_properties_and_validate(self):
+        """Check nsx_common.get_properties_and_validate func"""
+        self._regen_ctx()
+        self.assertEqual(
+            common.get_properties_and_validate('some_name', {'some_name': {
+                'somevalue': True,
+                'not_showed': 'really'
+            }}, {'somevalue': {'type': 'boolean'}}),
+            (False, {'somevalue': True})
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_check_raw_result(self):
+        """Check nsx_common.check_raw_result func"""
+        self._regen_ctx()
+        # common response on successful result
+        common.check_raw_result({'status': 204})
+        # check other posible successful results
+        for i in xrange(200, 299):
+            common.check_raw_result({'status': i})
+
+        with self.assertRaises(cfy_exc.NonRecoverableError):
+            common.check_raw_result({'status': 199})
+
+        with self.assertRaises(cfy_exc.NonRecoverableError):
+            common.check_raw_result({'status': 300})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_remove_properties(self):
+        """Check nsx_common.remove_properties func"""
+        self._regen_ctx()
+        self.fake_ctx.instance.runtime_properties['resource_id'] = '1'
+        self.fake_ctx.instance.runtime_properties['resource'] = '2'
+        self.fake_ctx.instance.runtime_properties['not_resource'] = '3'
+        common.remove_properties('resource')
+        self.assertEqual(
+            self.fake_ctx.instance.runtime_properties,
+            {'not_resource': '3'}
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

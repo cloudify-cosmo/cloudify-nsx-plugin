@@ -70,7 +70,7 @@ class EsgTest(unittest.TestCase):
                                          'password': 'password',
                                          'host': 'host'})
         fake_dlr_esg.update_common_edges.assert_called_with(
-            fake_client,  'some_id', {
+            fake_client, 'some_id', {
                 'nsx_auth': {
                     'username': 'username',
                     'host': 'host',

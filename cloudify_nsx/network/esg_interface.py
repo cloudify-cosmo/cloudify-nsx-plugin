@@ -86,7 +86,7 @@ def create(**kwargs):
 
     resource_id = interface['ifindex']
 
-    result_raw = nsx_esg.esg_cfg_interface(
+    nsx_esg.esg_cfg_interface(
         client_session,
         interface['esg_id'],
         interface['ifindex'],
@@ -102,11 +102,6 @@ def create(**kwargs):
         interface['enable_proxy_arp'],
         interface['secondary_ips']
     )
-
-    if not result_raw:
-        raise cfy_exc.NonRecoverableError(
-            "Can't create interface."
-        )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
@@ -128,15 +123,16 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_esg.esg_clear_interface(
-        client_session,
-        interface['esg_id'],
-        resource_id
-    )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete interface."
+    try:
+        nsx_esg.esg_clear_interface(
+            client_session,
+            interface['esg_id'],
+            resource_id
+        )
+    except Exception as ex:
+        ctx.logger.error("We have issue with remove: %s", str(ex))
+        raise cfy_exc.RecoverableError(
+            message="Retry to delete little later", retry_after=30
         )
 
     ctx.logger.info("delete %s" % resource_id)

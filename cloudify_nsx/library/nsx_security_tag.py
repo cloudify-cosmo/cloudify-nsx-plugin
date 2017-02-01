@@ -64,11 +64,7 @@ def delete_tag(client_session, securityid):
         'securityTagID',
         uri_parameters={'tagId': securityid}
     )
-
-    if result['status'] == 204:
-        return True
-    else:
-        return None
+    common.check_raw_result(result)
 
 
 def add_tag_vm(client_session, tag_id, vm_id):

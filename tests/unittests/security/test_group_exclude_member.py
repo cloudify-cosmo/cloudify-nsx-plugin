@@ -66,5 +66,6 @@ class SecurityGroupExcludeMemberTest(unittest.TestCase):
             }
         )
 
+
 if __name__ == '__main__':
     unittest.main()

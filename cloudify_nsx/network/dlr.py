@@ -121,7 +121,15 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    client_session.delete('nsxEdge', uri_parameters={'edgeId': resource_id})
+    try:
+        client_session.delete('nsxEdge', uri_parameters={
+            'edgeId': resource_id
+        })
+    except Exception as ex:
+        ctx.logger.error("We have issue with remove: %s", str(ex))
+        raise cfy_exc.RecoverableError(
+            message="Retry to delete little later", retry_after=30
+        )
 
     ctx.logger.info("deleted %s" % resource_id)
 

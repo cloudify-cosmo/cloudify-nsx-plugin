@@ -60,18 +60,13 @@ def create(**kwargs):
 
     resource_id = gateway['dgw_ip']
 
-    result_raw = nsx_esg.esg_dgw_set(
+    nsx_esg.esg_dgw_set(
         client_session,
         gateway['esg_id'],
         resource_id,
         gateway['vnic'],
         gateway['mtu'],
         gateway['admin_distance'])
-
-    if not result_raw:
-        raise cfy_exc.NonRecoverableError(
-            "Can't set gateway."
-        )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
@@ -93,14 +88,14 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_esg.esg_dgw_clear(
-        client_session,
-        gateway['esg_id']
-    )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete gateway."
+    try:
+        nsx_esg.esg_dgw_clear(
+            client_session, gateway['esg_id']
+        )
+    except Exception as ex:
+        ctx.logger.error("We have issue with remove: %s", str(ex))
+        raise cfy_exc.RecoverableError(
+            message="Retry to delete little later", retry_after=30
         )
 
     ctx.logger.info("delete %s" % resource_id)

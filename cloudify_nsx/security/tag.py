@@ -81,10 +81,15 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    nsx_security_tag.delete_tag(
-        client_session,
-        resource_id
-    )
+    try:
+        nsx_security_tag.delete_tag(
+            client_session, resource_id
+        )
+    except Exception as ex:
+        ctx.logger.error("We have issue with remove: %s", str(ex))
+        raise cfy_exc.RecoverableError(
+            message="Retry to delete little later", retry_after=30
+        )
 
     ctx.logger.info("delete %s" % resource_id)
 

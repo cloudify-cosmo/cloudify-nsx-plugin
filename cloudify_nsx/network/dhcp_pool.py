@@ -99,11 +99,14 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    if not nsx_dhcp.delete_dhcp_pool(client_session,
-                                     pool_dict['esg_id'],
-                                     resource_id):
-        raise cfy_exc.NonRecoverableError(
-            "Can't drop dhcp pool"
+    try:
+        nsx_dhcp.delete_dhcp_pool(client_session,
+                                  pool_dict['esg_id'],
+                                  resource_id)
+    except Exception as ex:
+        ctx.logger.error("We have issue with remove: %s", str(ex))
+        raise cfy_exc.RecoverableError(
+            message="Retry to delete little later", retry_after=30
         )
 
     ctx.logger.info("deleted %s" % resource_id)
