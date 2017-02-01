@@ -1,0 +1,115 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This Blueprint creates a security_group and a security_policy,
+  then apply security policy on security group
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - ../../../../plugin.yaml
+
+
+inputs:
+  
+# NSX plugin inputs
+  nsx_ip:
+    type: string
+    description: >
+       nsx server ip
+
+  nsx_user:
+    type: string
+    description: >
+       nsx server user
+
+  nsx_password:
+    type: string
+    description: >
+       nsx server user password
+
+  nsx_raml:
+    type: string
+    description: >
+       raml file path
+    default: ""
+
+  policy_name:
+    type: string
+    default: "Bind test policy"
+
+  security_group_name:
+    type: string
+    default: "Bind test group"
+
+  prefix:
+    type: string
+    description: "The prefix allows to install multiple deployments"
+    default: ""
+###############################################################################
+#  DSL section
+###############################################################################
+dsl_definitions:
+  nsx_auth: &nsx_auth
+    username: { get_input: nsx_user }
+    password: { get_input: nsx_password }
+    host: { get_input: nsx_ip }
+    raml: { get_input: nsx_raml }
+
+###############################################################################
+# Node templates section
+###############################################################################
+node_templates:
+  security_policy:
+    type: cloudify.nsx.security_policy
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy:
+              name: { concat: [ { get_input: prefix}, { get_input: policy_name } ] }
+              description: "Policy description"
+              precedence: 6302
+              actionsByCategory:
+                category: firewall
+                action:
+                  '@class': firewallSecurityAction
+                  name: "Reject all"
+                  description: "Reject all description"
+                  category: firewall
+                  action: reject
+                  direction: inbound
+                  isEnabled: "true" # Boolean should be in quotes, type: string
+
+  security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: *nsx_auth
+      group:
+        name: { concat: [ { get_input: prefix}, { get_input: security_group_name } ] }
+        dynamicMemberDefinition:  # https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf "Create Security Group"
+          dynamicSet:
+            - operator: OR
+              dynamicCriteria:
+                - operator: OR
+                  key: "VM.SECURITY_TAG"
+                  value: RED
+                  criteria: contains
+
+  bind:
+    type: cloudify.nsx.security_policy_group_bind
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: security_group
+      - type: cloudify.relationships.contained_in
+        target: security_policy
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy_group_bind:
+              security_policy_id: { get_attribute: [ security_policy, resource_id ] }
+              security_group_id: { get_attribute: [ security_group, resource_id ] }
