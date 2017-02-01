@@ -1,8 +1,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 description: >
-  This Blueprint installs VM via vsphere-plugin and create and set security tag
-  via NSX plugin on an vsphere environment.
+  This Blueprint creates security policy and then update it with endpointSecurityAction class.
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
