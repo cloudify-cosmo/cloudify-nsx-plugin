@@ -128,6 +128,72 @@ class SecurityTagTest(unittest.TestCase):
 
         self.assertTrue(resource_id is None)
 
+    def test_Yet_Another_securitytag(self):
+        """Deploying security tag minimal test"""
+
+        # set blueprint name
+        blueprint = os.path.join(
+            self.blueprints_path,
+            'security_tag/blueprint.yaml'
+        )
+
+        #set inputs name
+        inputs = os.path.join(
+            self.blueprints_path,
+            'security_tag/inputs/inputs.yaml'
+        )
+        # check prexist of security tag
+        resource_id, _ = nsx_security_tag.get_tag(
+            self.client_session,
+            inputs['prefix'] + inputs['name_of_tag']
+        )
+
+        self.assertTrue(resource_id is None)
+
+        # cfy local init
+        self.security_tag_env = local.init_env(
+            blueprint,
+            inputs=inputs,
+            name=self._testMethodName,
+            ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
+
+        # cfy local execute -w install
+        self.security_tag_env.execute(
+            'install',
+            task_retries=50,
+            task_retry_interval=3,
+        )
+
+        # check security tag properties
+        resource_id, info = nsx_security_tag.get_tag(
+            self.client_session,
+            inputs['prefix'] + inputs['name_of_tag']
+        )
+
+        self.assertTrue(resource_id is not None)
+        self.assertTrue(info is not None)
+
+        self.assertEqual(
+            info['name'], self.ext_inputs['node_name_prefix'] + "secret_tag"
+        )
+        self.assertEqual(info['description'], "What can i say?")
+
+        # cfy local execute -w uninstall
+        self.security_tag_env.execute(
+            'uninstall',
+            task_retries=50,
+            task_retry_interval=3,
+        )
+
+        # must be deleted
+        resource_id, _ = nsx_security_tag.get_tag(
+            self.client_session,
+            inputs['prefix'] + inputs['name_of_tag']
+        )
+
+        self.assertTrue(resource_id is None)
+
+
 
 if __name__ == '__main__':
     unittest.main()
