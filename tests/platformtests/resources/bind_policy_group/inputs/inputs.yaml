@@ -6,3 +6,4 @@ nsx_raml: ''
 security_group_name: ""
 # Security group section
 policy_name: ""
+prefix: ""

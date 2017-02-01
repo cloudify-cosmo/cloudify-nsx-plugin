@@ -12,12 +12,8 @@ memory: 1024
 vsphere_centos_agent_install_method: none
 vsphere_agent_user: ''
 vsphere_agent_key: ''
-vsphere_network_name: ''
-vsphere_switch_distributed: true
-use_dhcp: true
-ip: ''
-network: ''
-gateway: ''
+
 
 # Security tag definition
 name_of_tag: ''
+prefix: ''

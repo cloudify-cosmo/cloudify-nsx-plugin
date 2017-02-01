@@ -46,6 +46,10 @@ inputs:
       Master security group name
     default: "master_sec_group"
 
+  prefix:
+    type: string
+    description: "The prefix allows to install multiple deployments"
+    default: ""
 ###############################################################################
 #  DSL section
 ###############################################################################
@@ -66,7 +70,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       group:
-        name: { get_input: nested_group }
+        name: { concat: [ { get_input: prefix}, { get_input: nested_group } ] }
         dynamicMemberDefinition:  # https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf "Create Security Group"
           dynamicSet:
             - operator: OR
@@ -88,6 +92,6 @@ node_templates:
         create:
           inputs:
             group:
-              name: { get_input: master_group }
+              name: { concat: [ { get_input: prefix}, { get_input: master_group } ] }
               member:
                 objectId: { get_attribute: [ nested_security_group, resource_id ] }

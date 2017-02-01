@@ -1,4 +1,6 @@
-nsx_ip: '172.16.167.12'
-nsx_user: 'administrator@vsphere.local'
-nsx_password: 'vCenter01!'
+nsx_ip: ''
+nsx_user: ''
+nsx_password: ''
 nsx_raml: ''
+policy_name: ""
+prefix: ""

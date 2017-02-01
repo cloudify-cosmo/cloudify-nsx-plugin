@@ -73,42 +73,14 @@ inputs:
       "Path to ssh key used for connection to cloudify agent"
     default: ""
 
-  vsphere_network_name:
-    type: string
-    description: >
-      "Name of management network"
-    default: "Network"
-
-  vsphere_switch_distributed:
-    type: boolean
-    description: >
-      If switch is distributed this parameter should be set to true
-    default: true
-
-  use_dhcp:
-    type: boolean
-    description: Set True if dhcp is used
-    default: true
-
-  ip:
-    type: string
-    description: Set IP if use_dhcp is false
-    default: ""
-
-  network:
-    type: string
-    description: Set network and prefix [x.x.x.x/x] if use_dhcp is false
-    default: ""
-
-  gateway:
-    type: string
-    description: Set Gagteway IP if use_dhcp is false
-    default: ""
-
 # Security tag definition
   name_of_tag:
     type: string
     description: Name of Security tag
+
+  prefix:
+    type: string
+    default: ""
 
 ###############################################################################
 #  DSL section
@@ -131,7 +103,6 @@ node_templates:
   vsphere_vm:
     type: cloudify.vsphere.nodes.Server
     properties:
-      use_external_resource: false
       server:
         name: { get_input: vsphere_centos_name }
         template: { get_input: vsphere_centos_image }
@@ -152,7 +123,7 @@ node_templates:
         create:
           inputs:
             tag:
-              name: { get_input: name_of_tag }
+              name: { concat: [ { get_input: prefix}, { get_input: name_of_tag } ] }
               description: Example security tag which will be assigned to example VM
 
   set_tag_to_vm:

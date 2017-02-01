@@ -39,6 +39,10 @@ inputs:
     type: string
     default: "Bind test group"
 
+  prefix:
+    type: string
+    description: "The prefix allows to install multiple deployments"
+    default: ""
 ###############################################################################
 #  DSL section
 ###############################################################################
@@ -62,7 +66,7 @@ node_templates:
         create:
           inputs:
             policy:
-              name: { get_input: policy_name}
+              name: { concat: [ { get_input: prefix}, { get_input: policy_name } ] }
               description: "Policy description"
               precedence: 6302
               actionsByCategory:
@@ -81,7 +85,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       group:
-        name: { get_input: security_group_name }
+        name: { concat: [ { get_input: prefix}, { get_input: security_group_name } ] }
         dynamicMemberDefinition:  # https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf "Create Security Group"
           dynamicSet:
             - operator: OR
