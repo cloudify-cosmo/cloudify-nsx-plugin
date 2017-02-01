@@ -1,0 +1,9 @@
+nsx_ip: '172.16.167.12'
+nsx_user: 'administrator@vsphere.local'
+nsx_password: 'vCenter01!'
+nsx_raml: ''
+# Nested security group section
+nested_group: 'Nested_sec_grp'
+
+# Security group section
+master_group: 'Master_sec_grp'

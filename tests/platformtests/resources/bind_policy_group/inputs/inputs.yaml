@@ -1,0 +1,8 @@
+nsx_ip: '172.16.167.12'
+nsx_user: 'administrator@vsphere.local'
+nsx_password: 'vCenter01!'
+nsx_raml: ''
+# Nested security group section
+security_group_name: "Bind test group"
+# Security group section
+policy_name: "Bind test policy"
