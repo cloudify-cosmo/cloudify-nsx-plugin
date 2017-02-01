@@ -6,7 +6,8 @@ description: >
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-nsx-plugin/master/plugin.yaml
+  - ../../../../plugin.yaml
+
 
 inputs:
 
@@ -33,18 +34,18 @@ inputs:
     default: ""
 
 # Nested security group section
-  nested_group:
+  nested_security_group_name:
     type: string
     description: >
       Nested security group name
     default: "nested_sec_group"
 
 # Security group section
-  master_group:
+  security_group_name :
     type: string
     description: >
       Master security group name
-    default: "master_sec_group"
+    default: "sec_group"
 
   prefix:
     type: string
@@ -70,7 +71,7 @@ node_templates:
     properties:
       nsx_auth: *nsx_auth
       group:
-        name: { concat: [ { get_input: prefix}, { get_input: nested_group } ] }
+        name: { concat: [ { get_input: prefix}, { get_input: nested_security_group_name } ] }
         dynamicMemberDefinition:  # https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf "Create Security Group"
           dynamicSet:
             - operator: OR
@@ -92,6 +93,6 @@ node_templates:
         create:
           inputs:
             group:
-              name: { concat: [ { get_input: prefix}, { get_input: master_group } ] }
+              name: { concat: [ { get_input: prefix}, { get_input: security_group_name } ] }
               member:
                 objectId: { get_attribute: [ nested_security_group, resource_id ] }

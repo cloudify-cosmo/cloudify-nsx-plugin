@@ -6,9 +6,11 @@ description: >
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-nsx-plugin/master/plugin.yaml
+  - ../../../../plugin.yaml
+
 
 inputs:
+  
 # NSX plugin inputs
   nsx_ip:
     type: string
