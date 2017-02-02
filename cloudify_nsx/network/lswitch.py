@@ -16,6 +16,7 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import cloudify_nsx.library.nsx_common as common
 import pynsxv.library.nsx_logical_switch as nsx_logical_switch
+import cloudify_nsx.library.nsx_lswitch as nsx_lswitch
 from cloudify import exceptions as cfy_exc
 
 
@@ -88,8 +89,8 @@ def create(**kwargs):
     if not ctx.instance.runtime_properties.get('resource_dvportgroup_id'):
         # read additional info about switch
         if not switch_params:
-            switch_params = common.get_logical_switch(client_session,
-                                                      resource_id)
+            switch_params = nsx_lswitch.get_logical_switch(client_session,
+                                                           resource_id)
 
         dpg_id = switch_params.get(
             'vdsContextWithBacking', {}
@@ -123,14 +124,8 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    def del_logical_switch(client_session, resource_id):
-        raw_result = client_session.delete(
-            'logicalSwitch', uri_parameters={'virtualWireID': resource_id}
-        )
-        common.check_raw_result(raw_result)
-
     common.attempt_with_rerun(
-        del_logical_switch,
+        nsx_lswitch.del_logical_switch,
         client_session=client_session,
         resource_id=resource_id
     )

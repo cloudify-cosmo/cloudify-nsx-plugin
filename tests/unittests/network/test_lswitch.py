@@ -57,7 +57,7 @@ class LswitchTest(unittest.TestCase):
             mock.MagicMock(return_value=fake_client)
         ):
             with mock.patch(
-                'cloudify_nsx.library.nsx_common.get_logical_switch',
+                'cloudify_nsx.library.nsx_lswitch.get_logical_switch',
                 fake_get_logical_switch
             ):
                 lswitch.create(ctx=self.fake_ctx,

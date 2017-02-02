@@ -236,22 +236,6 @@ def check_raw_result(result_raw):
         )
 
 
-def get_logical_switch(client_session, logical_switch_id):
-    raw_result = client_session.read('logicalSwitch', uri_parameters={
-        'virtualWireID': logical_switch_id
-    })
-    check_raw_result(raw_result)
-    return raw_result['body']['virtualWire']
-
-
-def get_edgegateway(client_session, edgeId):
-    raw_result = client_session.read('nsxEdge', uri_parameters={
-        'edgeId': edgeId
-    })
-    check_raw_result(raw_result)
-    return raw_result['body']['edge']
-
-
 def all_relationships_are_present(relationships,
                                   expected_relationships):
     relationships = [relationship.type for relationship in relationships]

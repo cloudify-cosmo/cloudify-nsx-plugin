@@ -67,7 +67,7 @@ def create(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if use_existing and resource_id:
-        name = common.get_edgegateway(client_session, resource_id)['name']
+        name = nsx_dlr.get_edgegateway(client_session, resource_id)['name']
         edge_dict['name'] = name
         ctx.instance.runtime_properties['edge']['name'] = name
 

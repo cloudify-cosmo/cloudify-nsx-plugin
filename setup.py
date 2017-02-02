@@ -15,7 +15,7 @@ from setuptools import setup
 
 setup(
     name='cloudify-nsx-plugin',
-    version='3.4a1',
+    version='1.0',
     description='support vmware nsx',
     author='Denis Pauk',
     author_email='pauk.denis@gmail.com',

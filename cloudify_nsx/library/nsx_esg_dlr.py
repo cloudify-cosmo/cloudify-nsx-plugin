@@ -17,6 +17,14 @@ from cloudify import exceptions as cfy_exc
 from cloudify import ctx
 
 
+def get_edgegateway(client_session, edgeId):
+    raw_result = client_session.read('nsxEdge', uri_parameters={
+        'edgeId': edgeId
+    })
+    common.check_raw_result(raw_result)
+    return raw_result['body']['edge']
+
+
 def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
                       interface_subnet, name=None, vnic=None):
     """
