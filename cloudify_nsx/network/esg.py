@@ -67,7 +67,7 @@ def create(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if use_existing and resource_id:
-        name = common.get_edgegateway(client_session, resource_id)['name']
+        name = nsx_dlr.get_edgegateway(client_session, resource_id)['name']
         edge_dict['name'] = name
         ctx.instance.runtime_properties['edge']['name'] = name
 
@@ -124,9 +124,11 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    ctx.logger.info("checking %s" % resource_id)
-
-    client_session.delete('nsxEdge', uri_parameters={'edgeId': resource_id})
+    common.attempt_with_rerun(
+        nsx_dlr.del_edge,
+        client_session=client_session,
+        resource_id=resource_id
+    )
 
     ctx.logger.info("delete %s" % resource_id)
 

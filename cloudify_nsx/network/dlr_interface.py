@@ -89,13 +89,20 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_router.dlr_del_interface(
-        client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
-        resource_id
-    )
+    def dlr_del_interface(client_session, dlr_id, resource_id):
+        result_raw = nsx_router.dlr_del_interface(
+            client_session,
+            dlr_id,
+            resource_id
+        )
+        common.check_raw_result(result_raw)
 
-    common.check_raw_result(result_raw)
+    common.attempt_with_rerun(
+        dlr_del_interface,
+        client_session=client_session,
+        dlr_id=ctx.instance.runtime_properties['resource_dlr_id'],
+        resource_id=resource_id
+    )
 
     ctx.logger.info("delete %s" % resource_id)
 

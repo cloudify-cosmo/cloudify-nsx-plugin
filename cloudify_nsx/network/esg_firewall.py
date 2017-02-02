@@ -129,16 +129,12 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_firewall.delete_firewall_rule(
-        client_session,
-        nat_dict['esg_id'],
-        resource_id
+    common.attempt_with_rerun(
+        nsx_firewall.delete_firewall_rule,
+        client_session=client_session,
+        esg_id=nat_dict['esg_id'],
+        resource_id=resource_id
     )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete interface."
-        )
 
     ctx.logger.info("delete %s" % resource_id)
 

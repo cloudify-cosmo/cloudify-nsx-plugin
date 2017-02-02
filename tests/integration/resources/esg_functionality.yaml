@@ -2,7 +2,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - ../plugin.yaml
+  - ../../../plugin.yaml
   - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0-m1/plugin.yaml
 
 inputs:
@@ -73,6 +73,11 @@ inputs:
        vcenter datacenter
     default: Datacenter
 
+  vcenter_resource_pool:
+    description: >
+      Resource pool name
+    default: Resources
+
 node_types:
   connection_configuration:
      derived_from: cloudify.nodes.Root
@@ -89,7 +94,7 @@ node_templates:
         host: { get_input: vcenter_ip }
         port: 443
         datacenter_name: { get_input: vcenter_datacenter }
-        resource_pool_name: Resources
+        resource_pool_name: { get_input: vcenter_resource_pool }
         auto_placement: true
 
   datacenter:

@@ -2,7 +2,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - ../plugin.yaml
+  - ../../../plugin.yaml
   - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0-m1/plugin.yaml
 
 inputs:
@@ -73,6 +73,16 @@ inputs:
        vcenter datacenter
     default: Datacenter
 
+  vcenter_resource_pool:
+    description: >
+      Resource pool name
+    default: Resources
+
+  template_name:
+    description: >
+      Template to clone VMs from
+    default: CentOS-7.2-x86_64-1511-tmpl
+
 node_types:
   connection_configuration:
      derived_from: cloudify.nodes.Root
@@ -89,7 +99,7 @@ node_templates:
         host: { get_input: vcenter_ip }
         port: 443
         datacenter_name: { get_input: vcenter_datacenter }
-        resource_pool_name: Resources
+        resource_pool_name: { get_input: vcenter_resource_pool }
         auto_placement: true
 
   datacenter:
@@ -127,6 +137,16 @@ node_templates:
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
 
+  slave_lswith:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: *nsx_auth
+      switch:
+        name: {concat:[{get_input: node_name_prefix}, slave_swith]}
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
   nsx_dlr:
     type: cloudify.nsx.dlr
     properties:
@@ -157,10 +177,10 @@ node_templates:
           defaultRoute:
             # some address, will be replaced by default gateway
             gatewayAddress: 192.168.1.43
-      bgp:
+      ospf:
         enabled: true
-        localAS: 64520
-        redistribution: true
+        protocolAddress: 192.168.1.44
+        forwardingAddress: 192.168.1.11
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -181,79 +201,123 @@ node_templates:
       - type: cloudify.nsx.relationships.deployed_on_cluster
         target: cluster
 
-  bgp_neighbour:
-    type: cloudify.nsx.dlrBGPNeighbour
+  interface:
+    type: cloudify.nsx.dlr_interface
     properties:
       nsx_auth: *nsx_auth
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            neighbour:
+            interface:
               dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-              ipAddress: 192.168.2.1
-              remoteAS: 64521
-              protocolAddress: 192.168.1.20
-              forwardingAddress: 192.168.1.11
+              interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
+              interface_ip: 192.168.2.11
+              interface_subnet: 255.255.255.0
+              name: {concat:[{get_input: node_name_prefix}, router_interface]}
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+      - type: cloudify.relationships.connected_to
+        target: slave_lswith
+
+  ospf_areas:
+    type: cloudify.nsx.ospf_areas
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            area:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              areaId: 1000
+              type: nssa
+              authentication:
+                type: none
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+      - type: cloudify.relationships.connected_to
+        target: interface
+
+  ospf_interface:
+    type: cloudify.nsx.ospf_interfaces
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              vnic: { get_attribute: [ nsx_dlr, router, uplink_vnic ] }
+              areaId: { get_attribute: [ ospf_areas, area, areaId ] }
+              helloInterval: 10
+              priority: 128
+              cost: 1
+              deadInterval: 40
+              mtuIgnore: false
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: ospf_areas
+      - type: cloudify.relationships.connected_to
+        target: interface
+      - type: cloudify.relationships.contained_in
+        target: nsx_dlr
+
+  dlr_static_gateway:
+    type: cloudify.nsx.dlr_dgw
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            gateway:
+              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
+              address: 192.168.1.12
     relationships:
       - type: cloudify.relationships.contained_in
         target: nsx_dlr
 
-  bgp_neighbour_filter:
-    type: cloudify.nsx.esgBGPNeighbourFilter
+  dhcp_relay:
+    type: cloudify.nsx.dlr_dhcp_relay
     properties:
       nsx_auth: *nsx_auth
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            filter:
-              neighbour_id: { get_attribute: [ bgp_neighbour, resource_id ] }
-              action: deny
-              ipPrefixGe: 30
-              ipPrefixLe': 32
-              direction: in
-              network: 192.169.1.0/24
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: bgp_neighbour
-
-  dlr_ip_prefix:
-    type: cloudify.nsx.dlr_routing_ip_prefix
-    properties:
-      nsx_auth: *nsx_auth
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          inputs:
-            prefix:
+            relay:
               dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-              name: {concat:[{get_input: node_name_prefix}, routing_prefix]}
-              ipAddress: 10.112.196.160/24
+              relayServer:
+                ipAddress: 8.8.8.8
+              relayAgents:
+                relayAgent:
+                  vnicIndex: { get_attribute: [ interface, resource_id ] }
+                  giAddress: { get_attribute: [ interface, interface, interface_ip ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: nsx_dlr
+      - type: cloudify.relationships.connected_to
+        target: interface
 
-  dlr_bgp_redistribute:
-    type: cloudify.nsx.routing_redistribution_rule
+  testserver:
+    type: cloudify.vsphere.nodes.Server
     properties:
-      nsx_auth: *nsx_auth
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          inputs:
-            rule:
-              dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-              prefixName: { get_attribute: [ dlr_ip_prefix, prefix, name ] }
-              type: bgp
-              from:
-                ospf: true
-                static: true
-              action: deny
+      install_agent: false
+      server:
+        name: {concat:[{get_input: node_name_prefix}, connecttonsxnet]}
+        template: { get_input: template_name }
+        cpus: 1
+        memory: 2048
+      connection_config: { get_property: [connection_configuration, connection_config] }
+      networking:
+        connect_networks:
+          - name: slave_lswith
+            from_relationship: true
+            switch_distributed: true
     relationships:
-      - type: cloudify.relationships.contained_in
-        target: nsx_dlr
-      - type: cloudify.relationships.depends_on
-        target: dlr_ip_prefix
-      - type: cloudify.relationships.depends_on
-        target: bgp_neighbour
+      - target: slave_lswith
+        type: cloudify.relationships.connected_to

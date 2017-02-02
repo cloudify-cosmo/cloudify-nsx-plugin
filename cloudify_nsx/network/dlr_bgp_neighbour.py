@@ -23,8 +23,6 @@ def _create(kwargs, validation_rules):
         'neighbour', kwargs, validation_rules
     )
 
-    print use_existing, neighbour
-
     if use_existing:
         ctx.logger.info("Used existed, no changes made")
         return
@@ -118,9 +116,10 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.del_bgp_neighbour(
-        client_session,
-        resource_id
+    common.attempt_with_rerun(
+        cfy_dlr.del_bgp_neighbour,
+        client_session=client_session,
+        resource_id=resource_id
     )
 
     ctx.logger.info("delete %s" % resource_id)

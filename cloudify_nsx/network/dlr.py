@@ -121,7 +121,11 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    client_session.delete('nsxEdge', uri_parameters={'edgeId': resource_id})
+    common.attempt_with_rerun(
+        nsx_dlr.del_edge,
+        client_session=client_session,
+        resource_id=resource_id
+    )
 
     ctx.logger.info("deleted %s" % resource_id)
 

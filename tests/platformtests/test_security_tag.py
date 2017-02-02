@@ -18,6 +18,7 @@ import os
 
 # Third party imports
 import unittest
+import pytest
 import mock
 
 # Cloudify imports
@@ -33,12 +34,22 @@ class SecurityTagTest(unittest.TestCase):
 
     def setUp(self):
         super(SecurityTagTest, self).setUp()
+        self.security_tag_env = None
         self.ext_inputs = {
-            'node_name_prefix': os.environ.get('NODE_NAME_PREFIX'),
+            # prefix for run
+            'node_name_prefix': os.environ.get('NODE_NAME_PREFIX', ""),
+            # nsx inputs
             'nsx_ip': os.environ.get('NSX_IP'),
             'nsx_user': os.environ.get('NSX_USER'),
             'nsx_password': os.environ.get('NSX_PASSWORD'),
         }
+
+        if (
+            not self.ext_inputs['nsx_ip'] or
+            not self.ext_inputs['nsx_ip'] or
+            not self.ext_inputs['nsx_password']
+        ):
+                self.skipTest("You dont have credentials for nsx")
 
         blueprints_path = os.path.split(os.path.abspath(__file__))[0]
         self.blueprints_path = os.path.join(
@@ -46,15 +57,7 @@ class SecurityTagTest(unittest.TestCase):
             'resources'
         )
 
-        self.fake_ctx = cfy_mocks.MockCloudifyContext()
-        instance = mock.Mock()
-        instance.runtime_properties = {}
-        self.fake_ctx._instance = instance
-        node = mock.Mock()
-        self.fake_ctx._node = node
-        node.properties = {}
-        node.runtime_properties = {}
-        current_ctx.set(self.fake_ctx)
+        self._regen_ctx()
 
         # credentials
         self.client_session = common.nsx_login({
@@ -65,10 +68,31 @@ class SecurityTagTest(unittest.TestCase):
             }
         })
 
+    def _regen_ctx(self):
+        self.fake_ctx = cfy_mocks.MockCloudifyContext()
+        instance = mock.Mock()
+        instance.runtime_properties = {}
+        self.fake_ctx._instance = instance
+        node = mock.Mock()
+        self.fake_ctx._node = node
+        node.properties = {}
+        node.runtime_properties = {}
+        current_ctx.set(self.fake_ctx)
+
     def tearDown(self):
         current_ctx.clear()
+        if self.security_tag_env:
+            try:
+                self.security_tag_env.execute(
+                    'uninstall',
+                    task_retries=50,
+                    task_retry_interval=3,
+                )
+            except Exception as ex:
+                print str(ex)
         super(SecurityTagTest, self).tearDown()
 
+    @pytest.mark.external
     def test_securitytag(self):
         """Deploying security tag minimal test"""
 
@@ -128,6 +152,8 @@ class SecurityTagTest(unittest.TestCase):
         )
 
         self.assertTrue(resource_id is None)
+
+        self.security_tag_env = None
 
 
 if __name__ == '__main__':

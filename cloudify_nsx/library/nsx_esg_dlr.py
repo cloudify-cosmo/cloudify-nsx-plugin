@@ -14,6 +14,15 @@
 import nsx_common as common
 import nsx_nat as nsx_nat
 from cloudify import exceptions as cfy_exc
+from cloudify import ctx
+
+
+def get_edgegateway(client_session, edgeId):
+    raw_result = client_session.read('nsxEdge', uri_parameters={
+        'edgeId': edgeId
+    })
+    common.check_raw_result(raw_result)
+    return raw_result['body']['edge']
 
 
 def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
@@ -75,10 +84,7 @@ def esg_fw_default_set(client_session, esg_id, def_action,
                                        uri_parameters={'edgeId': esg_id},
                                        request_body_dict=def_policy_body)
 
-    if cfg_result['status'] == 204:
-        return True
-    else:
-        return False
+    common.check_raw_result(cfg_result)
 
 
 def get_uplink_vnic(client_session, esg_id, uplink_ls_id):
@@ -167,16 +173,11 @@ def dhcp_server(client_session, esg_id, enabled=None, syslog_enabled=None,
             new_dhcp_config['dhcp']['logging']['logLevel'] = syslog_level
             change_needed = True
 
-    if not change_needed:
-        return True
-    else:
+    if change_needed:
         result = client_session.update('dhcp',
                                        uri_parameters={'edgeId': esg_id},
                                        request_body_dict=new_dhcp_config)
-        if result['status'] == 204:
-            return True
-        else:
-            return False
+        common.check_raw_result(result)
 
 
 def update_dhcp_relay(client_session, esg_id, relayServer=None,
@@ -195,6 +196,13 @@ def update_dhcp_relay(client_session, esg_id, relayServer=None,
         request_body_dict=current_relay_config
     )
 
+    common.check_raw_result(raw_result)
+
+
+def del_dhcp_relay(client_session, resource_id):
+    raw_result = client_session.delete('dhcpRelay', uri_parameters={
+        'edgeId': resource_id
+    })
     common.check_raw_result(raw_result)
 
 
@@ -369,9 +377,16 @@ def add_bgp_neighbour(client_session, esg_id, use_existing, ipAddress,
     )
 
 
-def del_bgp_neighbour(client_session, neighbour_id):
+def del_edge(client_session, resource_id):
+    raw_result = client_session.delete('nsxEdge', uri_parameters={
+        'edgeId': resource_id
+    })
+    common.check_raw_result(raw_result)
 
-    ids = neighbour_id.split("|")
+
+def del_bgp_neighbour(client_session, resource_id):
+
+    ids = resource_id.split("|")
 
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
@@ -930,13 +945,10 @@ def esg_cfg_interface(client_session, esg_id, ifindex, ipaddr=None,
     cfg_result = client_session.update(
         'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id},
         request_body_dict=vnic_config)
-    if cfg_result['status'] == 204:
-        return True
-    else:
-        return False
+    common.check_raw_result(cfg_result)
 
 
-def esg_clear_interface(client_session, esg_id, ifindex):
+def esg_clear_interface(client_session, esg_id, resource_id):
     """
     This function resets the vnic configuration of an ESG to its default
       state
@@ -946,12 +958,12 @@ def esg_clear_interface(client_session, esg_id, ifindex):
     :return: Returns True on successful configuration of the Interface
     """
     vnic_config = client_session.read(
-        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id}
+        'vnic', uri_parameters={'index': resource_id, 'edgeId': esg_id}
     )['body']
 
     vnic_config['vnic']['mtu'] = '1500'
     vnic_config['vnic']['type'] = 'internal'
-    vnic_config['vnic']['name'] = 'vnic{}'.format(ifindex)
+    vnic_config['vnic']['name'] = 'vnic{}'.format(resource_id)
     vnic_config['vnic']['addressGroups'] = None
     vnic_config['vnic']['portgroupId'] = None
     vnic_config['vnic']['portgroupName'] = None
@@ -960,12 +972,9 @@ def esg_clear_interface(client_session, esg_id, ifindex):
     vnic_config['vnic']['isConnected'] = 'false'
 
     cfg_result = client_session.update(
-        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id},
+        'vnic', uri_parameters={'index': resource_id, 'edgeId': esg_id},
         request_body_dict=vnic_config)
-    if cfg_result['status'] == 204:
-        return True
-    else:
-        return False
+    common.check_raw_result(cfg_result)
 
 
 def remove_properties_edges():
@@ -995,15 +1004,12 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
         'firewall', kwargs, validation_rules_firewall
     )
 
-    if not esg_fw_default_set(
+    esg_fw_default_set(
         client_session,
         resource_id,
         firewall['action'],
         firewall['logging']
-    ):
-        raise cfy_exc.NonRecoverableError(
-            "Can't change firewall rules"
-        )
+    )
 
     validation_rules_dhcp = {
         "enabled": {
@@ -1034,16 +1040,13 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
         'dhcp', kwargs, validation_rules_dhcp
     )
 
-    if not dhcp_server(
+    dhcp_server(
         client_session,
         resource_id,
         dhcp['enabled'],
         dhcp['syslog_enabled'],
         dhcp['syslog_level']
-    ):
-        raise cfy_exc.NonRecoverableError(
-            "Can't change dhcp rules"
-        )
+    )
 
     validation_rules_routing = {
         "enabled": {
@@ -1215,14 +1218,11 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
             'nat', kwargs, validation_rules_nat
         )
 
-        if not nsx_nat.nat_service(
+        nsx_nat.nat_service(
             client_session,
             resource_id,
             nat['enabled']
-        ):
-            raise cfy_exc.NonRecoverableError(
-                "Can't change nat rules"
-            )
+        )
 
 
 def add_routing_prefix(client_session, use_existing, esg_id, name, ipAddress):
@@ -1510,10 +1510,7 @@ def esg_dgw_clear(client_session, esg_id):
         'routingConfigStatic', uri_parameters={'edgeId': esg_id},
         request_body_dict=rtg_cfg
     )
-    if cfg_result['status'] == 204:
-        return True
-    else:
-        return False
+    common.check_raw_result(cfg_result)
 
 
 def esg_dgw_set(client_session, esg_id, dgw_ip, vnic, mtu=None,
@@ -1547,10 +1544,7 @@ def esg_dgw_set(client_session, esg_id, dgw_ip, vnic, mtu=None,
         'routingConfigStatic', uri_parameters={'edgeId': esg_id},
         request_body_dict=rtg_cfg
     )
-    if cfg_result['status'] == 204:
-        return True
-    else:
-        return False
+    common.check_raw_result(cfg_result)
 
 
 def esg_route_add(client_session, esg_id, network, next_hop, vnic=None,
@@ -1597,10 +1591,7 @@ def esg_route_add(client_session, esg_id, network, next_hop, vnic=None,
         request_body_dict=rtg_cfg
     )
 
-    if cfg_result['status'] == 204:
-        return True
-    else:
-        return False
+    common.check_raw_result(cfg_result)
 
 
 def esg_route_del(client_session, esg_id, network, next_hop):
@@ -1622,7 +1613,8 @@ def esg_route_del(client_session, esg_id, network, next_hop):
             rtg_cfg['staticRouting']['staticRoutes']['route']
         )
     else:
-        return False
+        ctx.logger.info("No static routes")
+        return
 
     routes_filtered = [
         route for route in routes if not (
@@ -1630,17 +1622,19 @@ def esg_route_del(client_session, esg_id, network, next_hop):
         )
     ]
     if len(routes_filtered) == len(routes):
-        return False
+        ctx.logger.info(
+            "Wrong number of routes, i have not found any for delete"
+        )
+        return
+
     rtg_cfg['staticRouting']['staticRoutes'] = {'route': routes_filtered}
 
     cfg_result = client_session.update(
         'routingConfigStatic', uri_parameters={'edgeId': esg_id},
         request_body_dict=rtg_cfg
     )
-    if cfg_result['status'] == 204:
-        return True
-    else:
-        return False
+
+    common.check_raw_result(cfg_result)
 
 
 def add_dhcp_pool(client_session, esg_id, ip_range, default_gateway=None,
@@ -1693,10 +1687,9 @@ def add_dhcp_pool(client_session, esg_id, ip_range, default_gateway=None,
         request_body_dict={'ipPool': dhcp_pool_dict}
     )
 
-    if result['status'] != 204:
-        return None
-    else:
-        return result['objectId']
+    common.check_raw_result(result)
+
+    return result['objectId']
 
 
 def delete_dhcp_pool(client_session, esg_id, pool_id):
@@ -1717,10 +1710,7 @@ def delete_dhcp_pool(client_session, esg_id, pool_id):
     result = client_session.delete(
         'dhcpPoolID', uri_parameters={'edgeId': esg_id, 'poolID': pool_id})
 
-    if result['status'] == 204:
-        return True
-    else:
-        return None
+    common.check_raw_result(result)
 
 
 def add_mac_binding(client_session, esg_id, mac, hostname, ip,
@@ -1775,10 +1765,8 @@ def add_mac_binding(client_session, esg_id, mac, hostname, ip,
         'dhcpStaticBinding', uri_parameters={'edgeId': esg_id},
         request_body_dict={'staticBinding': binding_dict}
     )
-    if result['status'] != 204:
-        return None
-    else:
-        return result['objectId']
+    common.check_raw_result(result)
+    return result['objectId']
 
 
 def add_vm_binding(client_session, esg_id, vm_id, vnic_id, hostname, ip,
@@ -1837,13 +1825,11 @@ def add_vm_binding(client_session, esg_id, vm_id, vnic_id, hostname, ip,
         'dhcpStaticBinding', uri_parameters={'edgeId': esg_id},
         request_body_dict={'staticBinding': binding_dict}
     )
-    if result['status'] != 204:
-        return None
-    else:
-        return result['objectId']
+    common.check_raw_result(result)
+    return result['objectId']
 
 
-def delete_dhcp_binding(client_session, esg_id, binding_id):
+def delete_dhcp_binding(client_session, esg_id, resource_id):
     """
     This function deletes a DHCP binding from an edge DHCP Server
 
@@ -1860,10 +1846,7 @@ def delete_dhcp_binding(client_session, esg_id, binding_id):
 
     result = client_session.delete(
         'dhcpStaticBindingID',
-        uri_parameters={'edgeId': esg_id, 'bindingID': binding_id}
+        uri_parameters={'edgeId': esg_id, 'bindingID': resource_id}
     )
 
-    if result['status'] == 204:
-        return True
-    else:
-        return None
+    common.check_raw_result(result)

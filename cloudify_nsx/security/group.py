@@ -96,9 +96,10 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    nsx_security_group.del_group(
-        client_session,
-        resource_id
+    common.attempt_with_rerun(
+        nsx_security_group.del_group,
+        client_session=client_session,
+        resource_id=resource_id
     )
 
     ctx.logger.info("delete %s" % resource_id)

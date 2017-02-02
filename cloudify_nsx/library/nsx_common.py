@@ -16,6 +16,7 @@ from cloudify import ctx
 from pkg_resources import resource_filename
 from nsxramlclient.client import NsxClient
 from cloudify import exceptions as cfy_exc
+import time
 
 
 def _cleanup_properties(value):
@@ -164,10 +165,8 @@ def get_properties(name, kwargs):
     return use_existing, properties_dict
 
 
-def get_properties_and_validate(name, kwargs, validate_dict=None):
+def get_properties_and_validate(name, kwargs, validate_dict):
     use_existing, properties_dict = get_properties(name, kwargs)
-    if not validate_dict:
-        validate_dict = {}
     ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
     return use_existing, _validate(
         properties_dict, validate_dict, use_existing
@@ -179,6 +178,25 @@ def remove_properties(name):
         del ctx.instance.runtime_properties['resource_id']
     if name in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties[name]
+
+
+def attempt_with_rerun(func, **kwargs):
+    """Rerun func several times, useful after dlr/esg delete"""
+    i = 10
+    while i >= 0:
+        try:
+            func(**kwargs)
+            return
+        except cfy_exc.RecoverableError as ex:
+            ctx.logger.error("%s: %s attempts left: Message: %s " % (
+                func.__name__, i, str(ex)
+            ))
+            if not i:
+                raise cfy_exc.RecoverableError(
+                    message="Retry %s little later" % func.__name__
+                )
+        time.sleep(30)
+        i -= 1
 
 
 def nsx_login(kwargs):
@@ -210,27 +228,12 @@ def nsx_login(kwargs):
 
 
 def check_raw_result(result_raw):
-    if result_raw['status'] < 200 and result_raw['status'] >= 300:
+    """check that we have 'success' http status"""
+    if result_raw['status'] < 200 or result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
             "We have error with request."
         )
-
-
-def get_logical_switch(client_session, logical_switch_id):
-    raw_result = client_session.read('logicalSwitch', uri_parameters={
-        'virtualWireID': logical_switch_id
-    })
-    check_raw_result(raw_result)
-    return raw_result['body']['virtualWire']
-
-
-def get_edgegateway(client_session, edgeId):
-    raw_result = client_session.read('nsxEdge', uri_parameters={
-        'edgeId': edgeId
-    })
-    check_raw_result(raw_result)
-    return raw_result['body']['edge']
 
 
 def all_relationships_are_present(relationships,

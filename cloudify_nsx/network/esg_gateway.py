@@ -16,7 +16,6 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import cloudify_nsx.library.nsx_esg_dlr as nsx_esg
 import cloudify_nsx.library.nsx_common as common
-from cloudify import exceptions as cfy_exc
 
 
 @operation
@@ -60,18 +59,13 @@ def create(**kwargs):
 
     resource_id = gateway['dgw_ip']
 
-    result_raw = nsx_esg.esg_dgw_set(
+    nsx_esg.esg_dgw_set(
         client_session,
         gateway['esg_id'],
         resource_id,
         gateway['vnic'],
         gateway['mtu'],
         gateway['admin_distance'])
-
-    if not result_raw:
-        raise cfy_exc.NonRecoverableError(
-            "Can't set gateway."
-        )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
@@ -93,15 +87,11 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_esg.esg_dgw_clear(
-        client_session,
-        gateway['esg_id']
+    common.attempt_with_rerun(
+        nsx_esg.esg_dgw_clear,
+        client_session=client_session,
+        esg_id=gateway['esg_id']
     )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete gateway."
-        )
 
     ctx.logger.info("delete %s" % resource_id)
 
