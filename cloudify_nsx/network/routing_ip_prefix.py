@@ -14,7 +14,6 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-from cloudify import exceptions as cfy_exc
 import cloudify_nsx.library.nsx_esg_dlr as cfy_dlr
 import cloudify_nsx.library.nsx_common as common
 
@@ -72,13 +71,11 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    try:
-        cfy_dlr.del_routing_prefix(client_session, resource_id)
-    except Exception as ex:
-        ctx.logger.error("We have issue with remove: %s", str(ex))
-        raise cfy_exc.RecoverableError(
-            message="Retry to delete little later", retry_after=30
-        )
+    common.attempt_with_rerun(
+        cfy_dlr.del_routing_prefix,
+        client_session=client_session,
+        resource_id=resource_id
+    )
 
     ctx.logger.info("deleted %s" % resource_id)
 

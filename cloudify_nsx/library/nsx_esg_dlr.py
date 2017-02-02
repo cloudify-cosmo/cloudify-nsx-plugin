@@ -191,6 +191,13 @@ def update_dhcp_relay(client_session, esg_id, relayServer=None,
     common.check_raw_result(raw_result)
 
 
+def del_dhcp_relay(client_session, resource_id):
+    raw_result = client_session.delete('dhcpRelay', uri_parameters={
+        'edgeId': resource_id
+    })
+    common.check_raw_result(raw_result)
+
+
 def routing_global_config(client_session, esg_id, enabled,
                           routingGlobalConfig=None, staticRouting=None):
 
@@ -362,9 +369,16 @@ def add_bgp_neighbour(client_session, esg_id, use_existing, ipAddress,
     )
 
 
-def del_bgp_neighbour(client_session, neighbour_id):
+def del_edge(client_session, resource_id):
+    raw_result = client_session.delete('nsxEdge', uri_parameters={
+        'edgeId': resource_id
+    })
+    common.check_raw_result(raw_result)
 
-    ids = neighbour_id.split("|")
+
+def del_bgp_neighbour(client_session, resource_id):
+
+    ids = resource_id.split("|")
 
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
@@ -926,7 +940,7 @@ def esg_cfg_interface(client_session, esg_id, ifindex, ipaddr=None,
     common.check_raw_result(cfg_result)
 
 
-def esg_clear_interface(client_session, esg_id, ifindex):
+def esg_clear_interface(client_session, esg_id, resource_id):
     """
     This function resets the vnic configuration of an ESG to its default
       state
@@ -936,12 +950,12 @@ def esg_clear_interface(client_session, esg_id, ifindex):
     :return: Returns True on successful configuration of the Interface
     """
     vnic_config = client_session.read(
-        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id}
+        'vnic', uri_parameters={'index': resource_id, 'edgeId': esg_id}
     )['body']
 
     vnic_config['vnic']['mtu'] = '1500'
     vnic_config['vnic']['type'] = 'internal'
-    vnic_config['vnic']['name'] = 'vnic{}'.format(ifindex)
+    vnic_config['vnic']['name'] = 'vnic{}'.format(resource_id)
     vnic_config['vnic']['addressGroups'] = None
     vnic_config['vnic']['portgroupId'] = None
     vnic_config['vnic']['portgroupName'] = None
@@ -950,7 +964,7 @@ def esg_clear_interface(client_session, esg_id, ifindex):
     vnic_config['vnic']['isConnected'] = 'false'
 
     cfg_result = client_session.update(
-        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id},
+        'vnic', uri_parameters={'index': resource_id, 'edgeId': esg_id},
         request_body_dict=vnic_config)
     common.check_raw_result(cfg_result)
 
@@ -1807,7 +1821,7 @@ def add_vm_binding(client_session, esg_id, vm_id, vnic_id, hostname, ip,
     return result['objectId']
 
 
-def delete_dhcp_binding(client_session, esg_id, binding_id):
+def delete_dhcp_binding(client_session, esg_id, resource_id):
     """
     This function deletes a DHCP binding from an edge DHCP Server
 
@@ -1824,7 +1838,7 @@ def delete_dhcp_binding(client_session, esg_id, binding_id):
 
     result = client_session.delete(
         'dhcpStaticBindingID',
-        uri_parameters={'edgeId': esg_id, 'bindingID': binding_id}
+        uri_parameters={'edgeId': esg_id, 'bindingID': resource_id}
     )
 
     common.check_raw_result(result)

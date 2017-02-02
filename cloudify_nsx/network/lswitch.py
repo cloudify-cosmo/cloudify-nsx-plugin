@@ -123,15 +123,17 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    try:
-        client_session.delete(
+    def del_logical_switch(client_session, resource_id):
+        raw_result = client_session.delete(
             'logicalSwitch', uri_parameters={'virtualWireID': resource_id}
         )
-    except Exception as ex:
-        ctx.logger.error("We have issue with remove: %s", str(ex))
-        raise cfy_exc.RecoverableError(
-            message="Retry to delete little later", retry_after=30
-        )
+        common.check_raw_result(raw_result)
+
+    common.attempt_with_rerun(
+        del_logical_switch,
+        client_session=client_session,
+        resource_id=resource_id
+    )
 
     ctx.logger.info("deleted %s" % resource_id)
 

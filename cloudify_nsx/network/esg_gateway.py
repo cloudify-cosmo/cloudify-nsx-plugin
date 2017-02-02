@@ -16,7 +16,6 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import cloudify_nsx.library.nsx_esg_dlr as nsx_esg
 import cloudify_nsx.library.nsx_common as common
-from cloudify import exceptions as cfy_exc
 
 
 @operation
@@ -88,15 +87,11 @@ def delete(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    try:
-        nsx_esg.esg_dgw_clear(
-            client_session, gateway['esg_id']
-        )
-    except Exception as ex:
-        ctx.logger.error("We have issue with remove: %s", str(ex))
-        raise cfy_exc.RecoverableError(
-            message="Retry to delete little later", retry_after=30
-        )
+    common.attempt_with_rerun(
+        nsx_esg.esg_dgw_clear,
+        client_session=client_session,
+        esg_id=gateway['esg_id']
+    )
 
     ctx.logger.info("delete %s" % resource_id)
 

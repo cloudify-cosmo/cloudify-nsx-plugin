@@ -68,8 +68,8 @@ class ComulativeTest(unittest.TestCase):
             try:
                 self.comulative_env.execute(
                     'uninstall',
-                    task_retries=50,
-                    task_retry_interval=3,
+                    task_retries=5,
+                    task_retry_interval=30,
                 )
             except Exception as ex:
                 print str(ex)
@@ -92,15 +92,15 @@ class ComulativeTest(unittest.TestCase):
         # cfy local execute -w install
         self.comulative_env.execute(
             'install',
-            task_retries=50,
-            task_retry_interval=3,
+            task_retries=5,
+            task_retry_interval=30,
         )
 
         # cfy local execute -w uninstall
         self.comulative_env.execute(
             'uninstall',
-            task_retries=50,
-            task_retry_interval=3,
+            task_retries=5,
+            task_retry_interval=30,
         )
 
         self.comulative_env = None

@@ -16,6 +16,7 @@ from cloudify import ctx
 from pkg_resources import resource_filename
 from nsxramlclient.client import NsxClient
 from cloudify import exceptions as cfy_exc
+import time
 
 
 def _cleanup_properties(value):
@@ -179,6 +180,25 @@ def remove_properties(name):
         del ctx.instance.runtime_properties[name]
 
 
+def attempt_with_rerun(func, **kwargs):
+    """Rerun func several times, useful after dlr/esg delete"""
+    i = 10
+    while i >= 0:
+        try:
+            func(**kwargs)
+            return
+        except cfy_exc.RecoverableError as ex:
+            ctx.logger.error("%s: %s attempts left: Message: %s " % (
+                func.__name__, i, str(ex)
+            ))
+            if not i:
+                raise cfy_exc.RecoverableError(
+                    message="Retry %s little later" % func.__name__
+                )
+        time.sleep(30)
+        i -= 1
+
+
 def nsx_login(kwargs):
     nsx_auth = _get_properties('nsx_auth', kwargs)
 
@@ -208,6 +228,7 @@ def nsx_login(kwargs):
 
 
 def check_raw_result(result_raw):
+    """check that we have 'success' http status"""
     if result_raw['status'] < 200 or result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
