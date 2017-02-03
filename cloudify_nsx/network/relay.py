@@ -62,11 +62,13 @@ def delete(**kwargs):
     )
 
     if use_existing:
+        common.remove_properties('relay')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('relay')
         ctx.logger.info("Not fully created, skip")
         return
 

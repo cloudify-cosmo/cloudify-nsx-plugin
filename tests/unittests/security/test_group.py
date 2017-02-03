@@ -48,14 +48,6 @@ class SecurityGroupTest(unittest.TestCase):
         group.create(ctx=self.fake_ctx,
                      group={"name": "name"})
 
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check delete for security group"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        group.delete(ctx=self.fake_ctx,
-                     group={"name": "name"})
-
 
 if __name__ == '__main__':
     unittest.main()

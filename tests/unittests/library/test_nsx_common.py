@@ -356,11 +356,124 @@ class NsxCommonTest(unittest.TestCase):
         self.fake_ctx.instance.runtime_properties['resource_id'] = '1'
         self.fake_ctx.instance.runtime_properties['resource'] = '2'
         self.fake_ctx.instance.runtime_properties['not_resource'] = '3'
+        self.fake_ctx.instance.runtime_properties['nsx_auth'] = '4'
         common.remove_properties('resource')
         self.assertEqual(
             self.fake_ctx.instance.runtime_properties,
             {'not_resource': '3'}
         )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_attempt_with_rerun(self):
+        """Check nsx_common.attempt_with_rerun func"""
+        self._regen_ctx()
+
+        def func_error(need_error):
+            if need_error:
+                raise need_error
+
+        common.attempt_with_rerun(func_error, need_error=False)
+
+        fake_sleep = mock.MagicMock()
+        with mock.patch(
+            'time.sleep',
+            fake_sleep
+        ):
+            with self.assertRaises(cfy_exc.NonRecoverableError):
+                common.attempt_with_rerun(
+                    func_error, need_error=cfy_exc.NonRecoverableError
+                )
+            fake_sleep.assert_not_called()
+
+            with self.assertRaises(cfy_exc.RecoverableError):
+                common.attempt_with_rerun(
+                    func_error, need_error=cfy_exc.RecoverableError
+                )
+            fake_sleep.assert_called_with(30)
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_login(self):
+        """Check nsx_common.attempt_with_rerun func"""
+        self._regen_ctx()
+
+        fake_client = mock.MagicMock()
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            # no credentials
+            with self.assertRaises(cfy_exc.NonRecoverableError):
+                common.nsx_login({})
+            fake_client.assert_not_called()
+
+        self._regen_ctx()
+        fake_client = mock.MagicMock(return_value='Called')
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            # instance ip
+            self.fake_ctx.instance.host_ip = "instance_ip"
+            self.assertEqual(
+                common.nsx_login({
+                    'nsx_auth': {
+                        'username': 'username',
+                        'password': 'password',
+                        'raml': 'raml'
+                    }
+                }), 'Called'
+            )
+            fake_client.assert_called_with(
+                'raml', 'instance_ip', 'username', 'password'
+            )
+
+        self._regen_ctx()
+        fake_client = mock.MagicMock(return_value='Called')
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            # with ip from params
+            self.assertEqual(
+                common.nsx_login({
+                    'nsx_auth': {
+                        'username': 'username',
+                        'password': 'password',
+                        'raml': 'raml',
+                        'host': 'ip'
+                    }
+                }), 'Called'
+            )
+            fake_client.assert_called_with(
+                'raml', 'ip', 'username', 'password'
+            )
+
+        self._regen_ctx()
+        fake_client = mock.MagicMock(return_value='Called')
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            with mock.patch(
+                'cloudify_nsx.library.nsx_common.resource_filename',
+                mock.MagicMock(return_value='other_raml')
+            ):
+                # without raml
+                self.assertEqual(
+                    common.nsx_login({
+                        'nsx_auth': {
+                            'username': 'username',
+                            'password': 'password',
+                            'host': 'ip'
+                        }
+                    }), 'Called'
+                )
+
+            fake_client.assert_called_with(
+                'other_raml/nsxvapi.raml', 'ip', 'username', 'password'
+            )
 
 
 if __name__ == '__main__':

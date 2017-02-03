@@ -122,11 +122,13 @@ def delete(**kwargs):
     use_existing, bind_dict = common.get_properties('bind', kwargs)
 
     if use_existing:
+        common.remove_properties('bind')
         ctx.logger.info("Used pre existed!")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('bind')
         ctx.logger.info("We dont have resource_id")
         return
 

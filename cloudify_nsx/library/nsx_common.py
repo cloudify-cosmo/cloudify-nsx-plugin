@@ -176,6 +176,8 @@ def get_properties_and_validate(name, kwargs, validate_dict):
 def remove_properties(name):
     if 'resource_id' in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties['resource_id']
+    if 'nsx_auth' in ctx.instance.runtime_properties:
+        del ctx.instance.runtime_properties['nsx_auth']
     if name in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties[name]
 

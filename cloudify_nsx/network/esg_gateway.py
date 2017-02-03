@@ -76,11 +76,13 @@ def delete(**kwargs):
     use_existing, gateway = common.get_properties('gateway', kwargs)
 
     if use_existing:
+        common.remove_properties('gateway')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('gateway')
         ctx.logger.info("Not fully created, skip")
         return
 

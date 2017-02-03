@@ -194,7 +194,7 @@ def del_group_exclude_member(client_session, resource_id):
             excludeMembers.remove(member)
             break
 
-    security_group['securitygroup']['member'] = excludeMembers
+    security_group['securitygroup']['excludeMember'] = excludeMembers
 
     raw_result = client_session.update(
         'secGroupObject', uri_parameters={'objectId': security_group_id},

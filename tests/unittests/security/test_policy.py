@@ -54,20 +54,6 @@ class SecurityPolicyTest(unittest.TestCase):
             }
         )
 
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check delete for security policy"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        policy.delete(
-            ctx=self.fake_ctx,
-            policy={
-                "name": "name",
-                "description": "description",
-                "precedence": "precedence"
-            }
-        )
-
 
 if __name__ == '__main__':
     unittest.main()
