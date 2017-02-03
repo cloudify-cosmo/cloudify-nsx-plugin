@@ -53,19 +53,6 @@ class SecurityGroupMemberTest(unittest.TestCase):
             }
         )
 
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check remove member from include list in security group"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        group_member.delete(
-            ctx=self.fake_ctx,
-            group_member={
-                "objectId": "objectId",
-                "security_group_id": "security_group_id"
-            }
-        )
-
 
 if __name__ == '__main__':
     unittest.main()

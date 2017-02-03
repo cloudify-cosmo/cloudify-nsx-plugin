@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import mock
 import pytest
+import mock
 import cloudify_nsx.security.tag as tag
 from cloudify import mocks as cfy_mocks
 from cloudify.state import current_ctx
@@ -24,6 +24,10 @@ class SecurityTagTest(unittest.TestCase):
     def setUp(self):
         super(SecurityTagTest, self).setUp()
         self._regen_ctx()
+
+    def tearDown(self):
+        current_ctx.clear()
+        super(SecurityTagTest, self).tearDown()
 
     def _regen_ctx(self):
         self.fake_ctx = cfy_mocks.MockCloudifyContext()
@@ -36,24 +40,12 @@ class SecurityTagTest(unittest.TestCase):
         node.runtime_properties = {}
         current_ctx.set(self.fake_ctx)
 
-    def tearDown(self):
-        current_ctx.clear()
-        super(SecurityTagTest, self).tearDown()
-
     @pytest.mark.internal
     @pytest.mark.unit
     def test_install(self):
         """Check create security tag"""
         self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
         tag.create(ctx=self.fake_ctx,
-                   tag={"name": "name", "description": "description"})
-
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check delete security tag"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        tag.delete(ctx=self.fake_ctx,
                    tag={"name": "name", "description": "description"})
 
 

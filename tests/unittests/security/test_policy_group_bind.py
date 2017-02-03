@@ -53,19 +53,6 @@ class SecurityPolicyGroupBindTest(unittest.TestCase):
             }
         )
 
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check unbind security group from security policy"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        policy_group_bind.delete(
-            ctx=self.fake_ctx,
-            policy_group_bind={
-                "security_policy_id": "security_policy_id",
-                "security_group_id": "security_group_id"
-            }
-        )
-
 
 if __name__ == '__main__':
     unittest.main()

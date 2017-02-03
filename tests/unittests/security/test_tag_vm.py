@@ -48,14 +48,6 @@ class SecurityTagVMBindTest(unittest.TestCase):
         tag_vm.create(ctx=self.fake_ctx,
                       vm_tag={"vm_id": "vm_id", "tag_id": "tag_id"})
 
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check unbind security tag from vm"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        tag_vm.delete(ctx=self.fake_ctx,
-                      vm_tag={"vm_id": "vm_id", "tag_id": "tag_id"})
-
 
 if __name__ == '__main__':
     unittest.main()

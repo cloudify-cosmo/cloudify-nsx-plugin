@@ -54,20 +54,6 @@ class SecurityPolicySectionTest(unittest.TestCase):
             }
         )
 
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check cleanup security policy section"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        policy_section.delete(
-            ctx=self.fake_ctx,
-            policy_section={
-                "category": "category",
-                "action": "action",
-                "security_policy_id": "security_policy_id"
-            }
-        )
-
 
 if __name__ == '__main__':
     unittest.main()

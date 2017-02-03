@@ -54,9 +54,19 @@ class OspfInterfaceTest(unittest.TestCase):
     @pytest.mark.unit
     def test_uninstall(self):
         """Check delete ospf interface"""
+        # not fully created
         self.fake_ctx.instance.runtime_properties['resource_id'] = None
         ospf_interface.delete(ctx=self.fake_ctx,
                               interface={})
+        self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
+
+        # check use existed
+        self._regen_ctx()
+        self.fake_ctx.instance.runtime_properties['resource_id'] = 'some_id'
+        self.fake_ctx.node.properties['use_external_resource'] = True
+        ospf_interface.delete(ctx=self.fake_ctx,
+                              interface={})
+        self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
 
 if __name__ == '__main__':

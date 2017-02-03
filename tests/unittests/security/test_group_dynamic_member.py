@@ -53,19 +53,5 @@ class SecurityGroupDynamicMemberTest(unittest.TestCase):
             }
         )
 
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check cleanup dynamic member in security group"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        group_dynamic_member.delete(
-            ctx=self.fake_ctx,
-            dynamic_member={
-                "dynamic_set": "dynamic_set",
-                "security_group_id": "security_group_id"
-            }
-        )
-
-
 if __name__ == '__main__':
     unittest.main()

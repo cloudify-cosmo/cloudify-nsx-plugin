@@ -100,11 +100,13 @@ def delete(**kwargs):
     use_existing, group = common.get_properties('policy', kwargs)
 
     if use_existing:
+        common.remove_properties('policy')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('policy')
         ctx.logger.info("Not fully created, skip")
         return
 

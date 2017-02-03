@@ -87,6 +87,30 @@ def esg_fw_default_set(client_session, esg_id, def_action,
     common.check_raw_result(cfg_result)
 
 
+def dlr_del_interface(client_session, dlr_id, resource_id):
+    """
+    This function deletes an interface gw to one dlr
+    :param dlr_id: dlr uuid
+    :param resource_id: dlr interface id
+    """
+    result_raw = client_session.delete(
+        'interfaces', uri_parameters={'edgeId': dlr_id},
+        query_parameters_dict={
+            'index': resource_id
+        })
+    common.check_raw_result(result_raw)
+
+
+def dlr_del_dgw(client_session, resource_id):
+    """
+    This function deletes a default gw to one dlr
+    :param dlr_id: dlr uuid
+    """
+    result_raw = client_session.delete('routingConfig',
+                                       uri_parameters={'edgeId': resource_id})
+    common.check_raw_result(result_raw)
+
+
 def get_uplink_vnic(client_session, esg_id, uplink_ls_id):
     """Search uplink vnic"""
     raw_result = client_session.read(

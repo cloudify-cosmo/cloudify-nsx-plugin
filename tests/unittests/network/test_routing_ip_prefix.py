@@ -58,9 +58,19 @@ class RoutingIpPrefixTest(unittest.TestCase):
     @pytest.mark.unit
     def test_uninstall(self):
         """Check delete routing ip prefix"""
+        # not fully created
         self.fake_ctx.instance.runtime_properties['resource_id'] = None
         routing_ip_prefix.delete(ctx=self.fake_ctx,
                                  prefix={})
+        self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
+
+        # check use existed
+        self._regen_ctx()
+        self.fake_ctx.instance.runtime_properties['resource_id'] = 'some_id'
+        self.fake_ctx.node.properties['use_external_resource'] = True
+        routing_ip_prefix.delete(ctx=self.fake_ctx,
+                                 prefix={})
+        self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
 
 if __name__ == '__main__':

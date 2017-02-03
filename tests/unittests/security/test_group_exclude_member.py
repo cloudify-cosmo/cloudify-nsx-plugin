@@ -14,9 +14,9 @@
 import unittest
 import mock
 import pytest
-import cloudify_nsx.security.group_exclude_member as group_exclude_member
 from cloudify import mocks as cfy_mocks
 from cloudify.state import current_ctx
+import cloudify_nsx.security.group_exclude_member as group_exclude_member
 
 
 class SecurityGroupExcludeMemberTest(unittest.TestCase):
@@ -46,19 +46,6 @@ class SecurityGroupExcludeMemberTest(unittest.TestCase):
         """Check insert member to exclude list in security group"""
         self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
         group_exclude_member.create(
-            ctx=self.fake_ctx,
-            group_exclude_member={
-                "objectId": "objectId",
-                "security_group_id": "security_group_id"
-            }
-        )
-
-    @pytest.mark.internal
-    @pytest.mark.unit
-    def test_uninstall(self):
-        """Check remove member from exclude list in security group"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = None
-        group_exclude_member.delete(
             ctx=self.fake_ctx,
             group_exclude_member={
                 "objectId": "objectId",

@@ -113,11 +113,15 @@ def delete(**kwargs):
     use_existing, switch_dict = common.get_properties('switch', kwargs)
 
     if use_existing:
+        common.remove_properties('switch')
+        common.remove_properties('resource_dvportgroup_id')
         ctx.logger.info("Used pre existed!")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('switch')
+        common.remove_properties('resource_dvportgroup_id')
         ctx.logger.info("We dont have resource_id")
         return
 

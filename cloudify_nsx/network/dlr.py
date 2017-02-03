@@ -110,11 +110,13 @@ def delete(**kwargs):
     use_existing, router_dict = common.get_properties('router', kwargs)
 
     if use_existing:
+        nsx_dlr.remove_properties_edges()
         ctx.logger.info("Used pre existed!")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        nsx_dlr.remove_properties_edges()
         ctx.logger.info("We dont have resource_id")
         return
 
