@@ -36,7 +36,7 @@ class SecurityTagTest(unittest.TestCase):
     def setUp(self):
         super(SecurityTagTest, self).setUp()
         self.ext_inputs = {
-            'node_name_prefix': os.environ.get('PREFIX'),
+            'node_name_prefix': os.environ.get('NODE_NAME_PREFIX'),
             'nsx_ip': os.environ.get('NSX_IP'),
             'nsx_user': os.environ.get('NSX_USER'),
             'nsx_password': os.environ.get('NSX_PASSWORD'),
