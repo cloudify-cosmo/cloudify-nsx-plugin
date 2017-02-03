@@ -99,6 +99,7 @@ inputs:
   name_of_tag:
     type: string
     description: Name of Security tag
+    default: "RED"
 
   prefix:
     type: string
