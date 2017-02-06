@@ -38,12 +38,15 @@ class BaseTest(unittest.TestCase):
         return kwargs
 
     def _common_uninstall_external_and_unintialized(
-        self, resource_id, func_call, func_kwargs
+        self, resource_id, func_call, func_kwargs, additional_params=None
     ):
         """common function with any call from clint_session"""
         # not fully created
         kwargs = self._kwargs_regen(func_kwargs)
         self.fake_ctx.instance.runtime_properties['resource_id'] = None
+        if additional_params:
+            for i in additional_params:
+                self.fake_ctx.instance.runtime_properties[i] = i
         func_call(**kwargs)
         self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
@@ -51,12 +54,19 @@ class BaseTest(unittest.TestCase):
         kwargs = self._kwargs_regen(func_kwargs)
         self.fake_ctx.instance.runtime_properties['resource_id'] = resource_id
         self.fake_ctx.node.properties['use_external_resource'] = True
+        if additional_params:
+            for i in additional_params:
+                self.fake_ctx.instance.runtime_properties[i] = i
         func_call(**kwargs)
         self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
+
         # delete check with exeption
         fake_client, fake_client_result, kwargs = self._kwargs_regen_client(
             resource_id, func_kwargs
         )
+        if additional_params:
+            for i in additional_params:
+                self.fake_ctx.instance.runtime_properties[i] = i
         with mock.patch(
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
@@ -78,6 +88,9 @@ class BaseTest(unittest.TestCase):
                     'raml': 'raml'
                 }
             )
+            if additional_params:
+                for i in additional_params:
+                    self.assertEqual(runtime.get(i), i)
 
     def _kwargs_regen_client(self, resource_id, func_kwargs):
         kwargs = self._kwargs_regen(func_kwargs)
@@ -104,11 +117,12 @@ class BaseTest(unittest.TestCase):
         return fake_client, fake_client_result, kwargs
 
     def _common_uninstall_delete(
-        self, resource_id, func_call, func_kwargs, delete_args, delete_kwargs
+        self, resource_id, func_call, func_kwargs, delete_args, delete_kwargs,
+        additional_params=None
     ):
         """for functions when we only run delete directly"""
         self._common_uninstall_external_and_unintialized(
-            resource_id, func_call, func_kwargs
+            resource_id, func_call, func_kwargs, additional_params=additional_params
         )
 
         # delete without exeption
@@ -130,11 +144,12 @@ class BaseTest(unittest.TestCase):
 
     def _common_uninstall_read_update(
         self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
-        read_responce, update_args, update_kwargs
+        read_responce, update_args, update_kwargs, additional_params=None
     ):
         """delete when read/update enought"""
         self._common_uninstall_external_and_unintialized(
-            resource_id, func_call, func_kwargs
+            resource_id, func_call, func_kwargs,
+            additional_params=additional_params
         )
 
         # delete without exeption
