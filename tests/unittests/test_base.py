@@ -161,6 +161,5 @@ class BaseTest(unittest.TestCase):
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
 
-
 if __name__ == '__main__':
     unittest.main()
