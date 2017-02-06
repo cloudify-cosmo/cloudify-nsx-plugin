@@ -1,0 +1,8 @@
+nsx_ip: ''
+nsx_user: ''
+nsx_password: ''
+nsx_raml: ''
+# Nested security group section
+security_group_name: ""
+# Security group section
+policy_name: ""
