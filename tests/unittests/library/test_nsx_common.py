@@ -475,6 +475,105 @@ class NsxCommonTest(unittest.TestCase):
                 'other_raml/nsxvapi.raml', 'ip', 'username', 'password'
             )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_delete_object(self):
+        """Check nsx_common.attempt_with_rerun func"""
+        self._regen_ctx()
+
+        # not fully created
+        fake_client = mock.MagicMock()
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            self.fake_ctx.instance.runtime_properties['resource_id'] = None
+            self.fake_ctx.instance.runtime_properties['d'] = None
+            self.fake_ctx.instance.runtime_properties['m'] = None
+            common.delete_object(None, 'a', {'a': {'b': 'c'}}, ['d', 'm'])
+            self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
+
+        # check use existed
+        self._regen_ctx()
+        fake_client = mock.MagicMock()
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            self.fake_ctx.instance.runtime_properties['resource_id'] = '!'
+            self.fake_ctx.node.properties['use_external_resource'] = True
+            self.fake_ctx.instance.runtime_properties['d'] = 'f'
+            self.fake_ctx.instance.runtime_properties['m'] = 'g'
+            common.delete_object(None, 'a', {'a': {'b': 'c'}}, ['d', 'm'])
+            self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
+
+        # call with exception
+        self._regen_ctx()
+        self.fake_ctx.instance.runtime_properties['resource_id'] = 'r_id'
+        kwargs = {
+            'a': {'b': 'c'},
+            'nsx_auth': {
+                'username': 'username',
+                'password': 'password',
+                'host': 'host',
+                'raml': 'raml'
+            }
+        }
+        fake_client = mock.MagicMock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+
+            with self.assertRaises(cfy_exc.NonRecoverableError):
+                common.delete_object(None, 'a', kwargs, ['d', 'm'])
+
+            fake_client.assert_called_with(
+                'raml', 'host', 'username', 'password'
+            )
+            runtime = self.fake_ctx.instance.runtime_properties
+            self.assertEqual(runtime['resource_id'], 'r_id')
+            self.assertEqual(
+                runtime['nsx_auth'], {
+                    'username': 'username',
+                    'password': 'password',
+                    'host': 'host',
+                    'raml': 'raml'
+                }
+            )
+
+        # good case
+        self._regen_ctx()
+        self.fake_ctx.instance.runtime_properties['resource_id'] = 'r_id'
+        kwargs = {
+            'a': {'b': 'c'},
+            'nsx_auth': {
+                'username': 'username',
+                'password': 'password',
+                'host': 'host',
+                'raml': 'raml'
+            }
+        }
+        fake_client_result = mock.MagicMock()
+        fake_client = mock.MagicMock(
+            return_value=fake_client_result
+        )
+        fake_func_for_call = mock.MagicMock()
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            common.delete_object(fake_func_for_call, 'a', kwargs, ['d', 'm'])
+            fake_client.assert_called_with(
+                'raml', 'host', 'username', 'password'
+            )
+            fake_func_for_call.assert_called_with(
+                client_session=fake_client_result, resource_id='r_id'
+            )
+            self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
+
 
 if __name__ == '__main__':
     unittest.main()

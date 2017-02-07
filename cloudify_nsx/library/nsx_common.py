@@ -182,6 +182,44 @@ def remove_properties(name):
         del ctx.instance.runtime_properties[name]
 
 
+def delete_object(func_call, element_struct, kwargs, clements_to_clean=None):
+    """Common code for delete object with client/resource_id params"""
+    use_existing, _ = get_properties(element_struct, kwargs)
+
+    if use_existing:
+        remove_properties(element_struct)
+        if clements_to_clean:
+            for name in clements_to_clean:
+                remove_properties(name)
+        ctx.logger.info("Used existed")
+        return
+
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if not resource_id:
+        remove_properties(element_struct)
+        if clements_to_clean:
+            for name in clements_to_clean:
+                remove_properties(name)
+        ctx.logger.info("Not fully created, skip")
+        return
+
+    # credentials
+    client_session = nsx_login(kwargs)
+
+    attempt_with_rerun(
+        func_call,
+        client_session=client_session,
+        resource_id=resource_id
+    )
+
+    ctx.logger.info("delete %s" % resource_id)
+
+    remove_properties(element_struct)
+    if clements_to_clean:
+        for name in clements_to_clean:
+            remove_properties(name)
+
+
 def attempt_with_rerun(func, **kwargs):
     """Rerun func several times, useful after dlr/esg delete"""
     i = 10

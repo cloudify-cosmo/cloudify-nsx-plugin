@@ -1,0 +1,105 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This Blueprint creates security policy and then update it with endpointSecurityAction class.
+
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - ../../../plugin.yaml
+
+
+inputs:
+
+# NSX plugin inputs
+  nsx_ip:
+    type: string
+    description: >
+       nsx server ip
+
+  nsx_user:
+    type: string
+    description: >
+       nsx server user
+
+  nsx_password:
+    type: string
+    description: >
+       nsx server user password
+
+  nsx_raml:
+    type: string
+    description: >
+       raml file path
+    default: ""
+
+  policy_name:
+    type: string
+    default: "Test policy1"
+
+  node_name_prefix:
+    type: string
+    description: >
+       Node name prefix
+    default: platform_test_
+
+###############################################################################
+#  DSL section
+###############################################################################
+dsl_definitions:
+  nsx_auth: &nsx_auth
+    username: { get_input: nsx_user }
+    password: { get_input: nsx_password }
+    host: { get_input: nsx_ip }
+    raml: { get_input: nsx_raml }
+
+###############################################################################
+# Node templates section
+###############################################################################
+node_templates:
+  security_policy:
+    type: cloudify.nsx.security_policy
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy:
+              name: { concat: [ { get_input: node_name_prefix }, { get_input: policy_name} ] }
+              description: "Policy description"
+              precedence: 6301
+              actionsByCategory:
+                category: firewall
+                action:
+                  '@class': firewallSecurityAction
+                  name: "Reject all"
+                  description: "Reject all description"
+                  category: firewall
+                  action: reject
+                  direction: inbound
+                  isEnabled: "true" # Boolean should be in quotes, type: string
+
+
+  update_security_policy:
+    type: cloudify.nsx.security_policy_section
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: security_policy
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy_section:
+              security_policy_id: { get_attribute: [ security_policy, resource_id ] }
+              category: endpoint
+              action:
+                '@class': endpointSecurityAction
+                name: "intro_service"
+                description: "Intro description"
+                category: endpoint
+                actionType: ANTI_VIRUS
+                isEnabled: "true"
+                isActionEnforced: "false"

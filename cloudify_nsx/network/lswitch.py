@@ -86,7 +86,7 @@ def create(**kwargs):
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
 
-    if not ctx.instance.runtime_properties.get('resource_dvportgroup_id'):
+    if not ctx.instance.runtime_properties.get('vsphere_network_id'):
         # read additional info about switch
         if not switch_params:
             switch_params = nsx_lswitch.get_logical_switch(client_session,
@@ -114,14 +114,14 @@ def delete(**kwargs):
 
     if use_existing:
         common.remove_properties('switch')
-        common.remove_properties('resource_dvportgroup_id')
+        common.remove_properties('vsphere_network_id')
         ctx.logger.info("Used pre existed!")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
         common.remove_properties('switch')
-        common.remove_properties('resource_dvportgroup_id')
+        common.remove_properties('vsphere_network_id')
         ctx.logger.info("We dont have resource_id")
         return
 
@@ -137,4 +137,4 @@ def delete(**kwargs):
     ctx.logger.info("deleted %s" % resource_id)
 
     common.remove_properties('switch')
-    common.remove_properties('resource_dvportgroup_id')
+    common.remove_properties('vsphere_network_id')

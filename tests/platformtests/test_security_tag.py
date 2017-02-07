@@ -95,8 +95,8 @@ class SecurityTagTest(unittest.TestCase):
         super(SecurityTagTest, self).tearDown()
 
     @pytest.mark.external
-    def test_securitytag(self):
-        """Deploying security tag minimal test"""
+    def test_security_tag(self):
+        """Platform check: security tag"""
 
         # set blueprint name
         blueprint = os.path.join(
@@ -157,41 +157,54 @@ class SecurityTagTest(unittest.TestCase):
 
         self.security_tag_env = None
 
-
-    def test_yet_another_security_tag(self):
-        """Yet another deploying security tag minimal test"""
+    @pytest.mark.external
+    def test_security_tag_vm_bind(self):
+        """Platform check: bind security tag to vm"""
+        inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
 
         # Define inputs related to this function
-        local_inputs = {
-            'nsx_ip': os.environ.get('NSX_IP'),
-            'nsx_user': os.environ.get('NSX_USER'),
-            'nsx_password': os.environ.get('NSX_PASSWORD'),
-            'vsphere_username': str(os.environ.get('VSPHERE_USERNAME')),
-            'vsphere_password': str(os.environ.get('VSPHERE_PASSWORD')),
-            'vsphere_host': str(os.environ.get('VSPHERE_HOST')),
-            'vsphere_port': str(os.environ.get('VSPHERE_PORT')),
-            'vsphere_datacenter_name': str(os.environ.get('VSPHERE_DATACENTER_NAME')),
-            'vsphere_resource_pool_name': str(os.environ.get('VSPHERE_RESOURCE_POOL_NAME')),
-            'vsphere_auto_placement': str(os.environ.get('VSPHERE_AUTO_PLACEMENT')),
-            'vsphere_centos_name': str(os.environ.get('VSPHERE_CENTOS_NAME')),
-            'vsphere_centos_image': str(os.environ.get('VSPHERE_CENTOS_IMAGE')),
-            'vsphere_centos_agent_install_method': str(os.environ.get('VSPHERE_CENTOS_AGENT_INSTALL_METHOD')),
-            'vsphere_agent_user': str(os.environ.get('VSPHERE_AGENT_USER')),
-            'vsphere_agent_key': str(os.environ.get('VSPHERE_AGENT_KEY')),
-            'name_of_tag': str(os.environ.get('NAME_OF_TAG')),
-            'prefix': str(os.environ.get('PREFIX')),
-        }
+        inputs.update({
+            'name_of_tag': str(os.environ.get('NAME_OF_TAG', 'tag_name')),
+            # vcenter inputs
+            'vcenter_ip': os.environ.get('VCENTER_IP'),
+            'vcenter_user': os.environ.get('VCENTER_USER'),
+            'vcenter_password': os.environ.get('VCENTER_PASSWORD'),
+        })
+
+        # update custom params
+        if os.environ.get('VCENTER_PORT'):
+            inputs['vcenter_port'] = str(os.environ.get(
+                'VCENTER_PORT'
+            ))
+        # update custom params
+        if os.environ.get('VCENTER_DATACENTER'):
+            inputs['vcenter_datacenter'] = os.environ.get(
+                'VCENTER_DATACENTER'
+            )
+        if os.environ.get('VCENTER_RESOURCE_POOL'):
+            inputs['vcenter_resource_pool'] = os.environ.get(
+                'VCENTER_RESOURCE_POOL'
+            )
+        if os.environ.get('VCENTER_TEMPLATE'):
+            inputs['template_name'] = os.environ.get('VCENTER_TEMPLATE')
+
+        if (
+            not inputs['vcenter_ip'] or
+            not inputs['vcenter_ip'] or
+            not inputs['vcenter_password']
+        ):
+                self.skipTest("You dont have credentials for vcenter")
 
         # set blueprint name
         blueprint = os.path.join(
             self.blueprints_path,
-            'security_tag/blueprint.yaml'
+            'security_tag_vm.yaml'
         )
 
         # check prexist of security tag
         resource_id, _ = nsx_security_tag.get_tag(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['name_of_tag']
+            inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
         self.assertTrue(resource_id is None)
@@ -199,7 +212,7 @@ class SecurityTagTest(unittest.TestCase):
         # cfy local init
         self.security_tag_env = local.init_env(
             blueprint,
-            inputs=local_inputs,
+            inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
@@ -213,16 +226,20 @@ class SecurityTagTest(unittest.TestCase):
         # check security tag properties
         resource_id, info = nsx_security_tag.get_tag(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['name_of_tag']
+            inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
         self.assertTrue(resource_id is not None)
         self.assertTrue(info is not None)
 
         self.assertEqual(
-            info['name'], local_inputs['prefix'] + local_inputs['name_of_tag']
+            info['name'],
+            inputs['node_name_prefix'] + inputs['name_of_tag']
         )
-        self.assertEqual(info['description'], "Example security tag which will be assigned to example VM")
+        self.assertEqual(
+            info['description'],
+            "Example security tag which will be assigned to example VM"
+        )
 
         # cfy local execute -w uninstall
         self.security_tag_env.execute(
@@ -234,36 +251,35 @@ class SecurityTagTest(unittest.TestCase):
         # must be deleted
         resource_id, _ = nsx_security_tag.get_tag(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['name_of_tag']
+            inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
         self.assertTrue(resource_id is None)
 
-
+    @pytest.mark.external
     def test_security_group(self):
-        """Deploying security group minimal test"""
+        """Platform check: security group"""
+        inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
 
         # Define inputs related to this function
-        local_inputs = {
-            'nsx_ip': os.environ.get('NSX_IP'),
-            'nsx_user': os.environ.get('NSX_USER'),
-            'nsx_password': os.environ.get('NSX_PASSWORD'),
-            'security_group_name': os.environ.get('SECURITY_GROUP_NAME'),
-            'nested_security_group_name': os.environ.get('NESTED_SECURITY_GROUP_NAME'),
-            'prefix': str(os.environ.get('PREFIX')),
-        }
+        inputs['security_group_name'] = os.environ.get(
+            'SECURITY_GROUP_NAME', "security_group_name"
+        )
+        inputs['nested_security_group_name'] = os.environ.get(
+            'NESTED_SECURITY_GROUP_NAME', "nested_security_group_name"
+        )
 
         # set blueprint name
         blueprint = os.path.join(
             self.blueprints_path,
-            'security_groups/blueprint.yaml'
+            'security_groups.yaml'
         )
 
         # check prexist of security groups
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['security_group_name']
+            inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
         self.assertTrue(resource_id is None)
@@ -271,7 +287,7 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['nested_security_group_name']
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
         self.assertTrue(resource_id is None)
@@ -279,7 +295,7 @@ class SecurityTagTest(unittest.TestCase):
         # cfy local init
         self.security_group_env = local.init_env(
             blueprint,
-            inputs=local_inputs,
+            inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
@@ -294,7 +310,7 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['security_group_name']
+            inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
         self.assertTrue(resource_id is not None)
@@ -302,7 +318,7 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['nested_security_group_name']
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
         self.assertTrue(resource_id is not None)
@@ -318,7 +334,7 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['security_group_name']
+            inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
         self.assertTrue(resource_id is None)
@@ -326,33 +342,31 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['nested_security_group_name']
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
         self.assertTrue(resource_id is None)
 
+    @pytest.mark.external
     def test_security_policy(self):
-        """Deploying security policy minimal test"""
+        """Platform check: security policy"""
+        inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
 
         # Define inputs related to this function
-        local_inputs = {
-            'nsx_ip': os.environ.get('NSX_IP'),
-            'nsx_user': os.environ.get('NSX_USER'),
-            'nsx_password': os.environ.get('NSX_PASSWORD'),
-            'policy_name': os.environ.get('POLICY_NAME'),
-            'prefix': str(os.environ.get('PREFIX')),
-        }
+        inputs['policy_name'] = os.environ.get(
+            'POLICY_NAME', 'policy_name'
+        )
 
         # set blueprint name
         blueprint = os.path.join(
             self.blueprints_path,
-            'security_policy/blueprint.yaml'
+            'security_policy.yaml'
         )
 
         # check prexist of security policy
         resource_id, policy = nsx_security_policy.get_policy(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['policy_name']
+            inputs['node_name_prefix'] + inputs['policy_name']
         )
 
         self.assertTrue(resource_id is None)
@@ -360,7 +374,7 @@ class SecurityTagTest(unittest.TestCase):
         # cfy local init
         self.security_group_env = local.init_env(
             blueprint,
-            inputs=local_inputs,
+            inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
@@ -374,7 +388,7 @@ class SecurityTagTest(unittest.TestCase):
         # check security policy properties
         resource_id, policy = nsx_security_policy.get_policy(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['policy_name']
+            inputs['node_name_prefix'] + inputs['policy_name']
         )
 
         self.assertTrue(resource_id is not None)
@@ -390,35 +404,34 @@ class SecurityTagTest(unittest.TestCase):
         # must be deleted
         resource_id, policy = nsx_security_policy.get_policy(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['policy_name']
+            inputs['node_name_prefix'] + inputs['policy_name']
         )
 
         self.assertTrue(resource_id is None)
 
-
+    @pytest.mark.external
     def test_security_policy_bind(self):
-        """Bind security policy to security group minimal test"""
+        """Platform check: bind security policy to security group"""
+        inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
 
         # Define inputs related to this function
-        local_inputs = {
-            'nsx_ip': os.environ.get('NSX_IP'),
-            'nsx_user': os.environ.get('NSX_USER'),
-            'nsx_password': os.environ.get('NSX_PASSWORD'),
-            'security_group_name': os.environ.get('SECURITY_GROUP_NAME'),
-            'policy_name': os.environ.get('POLICY_NAME'),
-            'prefix': str(os.environ.get('PREFIX')),
-        }
+        inputs['security_group_name'] = os.environ.get(
+            'SECURITY_GROUP_NAME', "security_group_name"
+        )
+        inputs['policy_name'] = os.environ.get(
+            'POLICY_NAME', 'policy_name'
+        )
 
         # set blueprint name
         blueprint = os.path.join(
             self.blueprints_path,
-            'bind_policy_group/blueprint.yaml'
+            'bind_policy_group.yaml'
         )
 
         # check prexist of security policy
         resource_id, policy = nsx_security_policy.get_policy(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['policy_name']
+            inputs['node_name_prefix'] + inputs['policy_name']
         )
 
         self.assertTrue(resource_id is None)
@@ -427,7 +440,7 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['security_group_name']
+            inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
         self.assertTrue(resource_id is None)
@@ -435,7 +448,7 @@ class SecurityTagTest(unittest.TestCase):
         # cfy local init
         self.security_group_env = local.init_env(
             blueprint,
-            inputs=local_inputs,
+            inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
@@ -449,7 +462,7 @@ class SecurityTagTest(unittest.TestCase):
         # check security policy properties
         resource_id, policy = nsx_security_policy.get_policy(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['policy_name']
+            inputs['node_name_prefix'] + inputs['policy_name']
         )
 
         self.assertTrue(resource_id is not None)
@@ -459,7 +472,7 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['security_group_name']
+            inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
         self.assertTrue(resource_id is not None)
@@ -474,7 +487,7 @@ class SecurityTagTest(unittest.TestCase):
         # must be deleted
         resource_id, policy = nsx_security_policy.get_policy(
             self.client_session,
-            local_inputs['prefix'] + local_inputs['policy_name']
+            inputs['node_name_prefix'] + inputs['policy_name']
         )
 
         self.assertTrue(resource_id is None)
@@ -482,7 +495,7 @@ class SecurityTagTest(unittest.TestCase):
         resource_id = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
-            local_inputs['prefix'] + local_inputs['security_group_name']
+            inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
         self.assertTrue(resource_id is None)

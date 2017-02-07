@@ -155,26 +155,75 @@ class SecurityTest(test_base.BaseTest):
     @pytest.mark.unit
     def test_policy_group_bind_uninstall(self):
         """Check unbind security group from security policy"""
-        self._common_uninstall_external_and_unintialized(
+        self._common_uninstall_read_update(
             'ab|cd', policy_group_bind.delete,
             {"policy_group_bind": {
                 "security_policy_id": "security_policy_id",
                 "security_group_id": "security_group_id"
-            }}
+            }},
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'cd'}},
+            read_responce={
+                'body': {
+                    'securityPolicy': {
+                        'securityGroupBinding': [{
+                            'objectId': 'ab'
+                        }, {
+                            'objectId': 'fully_other'
+                        }]
+                    }
+                },
+                'status': 204
+            },
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict': {
+                    'securityPolicy': {
+                        'securityGroupBinding': [{
+                            'objectId': 'fully_other'
+                        }]
+                    }
+                },
+                'uri_parameters': {'ID': 'cd'}
+            }
         )
-
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_policy_section_uninstall(self):
         """Check cleanup security policy section"""
-        self._common_uninstall_external_and_unintialized(
+        self._common_uninstall_read_update(
             'ab|cd', policy_section.delete,
             {"policy_section": {
                 "category": "category",
                 "action": "action",
                 "security_policy_id": "security_policy_id"
-            }}
+            }},
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'cd'}},
+            read_responce={
+                'body': {
+                    'securityPolicy': {
+                        'actionsByCategory': [{
+                            'category': 'ab'
+                        }, {
+                            'category': 'fully_other'
+                        }]
+                    }
+                },
+                'status': 204
+            },
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict': {
+                    'securityPolicy': {
+                        'actionsByCategory': [{
+                            'category': 'fully_other'
+                        }]
+                    }
+                },
+                'uri_parameters': {'ID': 'cd'}
+            }
         )
 
     @pytest.mark.internal
@@ -194,7 +243,8 @@ class SecurityTest(test_base.BaseTest):
         self._common_uninstall_delete(
             'ab|cd', tag_vm.delete,
             {"vm_tag": {"vm_id": "vm_id", "tag_id": "tag_id"}},
-            ['securityTagVM'], {'uri_parameters': {'tagId': 'ab', 'vmMoid': 'cd'}}
+            ['securityTagVM'],
+            {'uri_parameters': {'tagId': 'ab', 'vmMoid': 'cd'}}
         )
 
 
