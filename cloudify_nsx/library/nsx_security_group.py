@@ -22,7 +22,7 @@ def get_group(client_session, scopeId, name):
     common.check_raw_result(raw_result)
 
     if 'list' not in raw_result['body']:
-        return None
+        return None, None
 
     groups = raw_result['body']['list'].get('securitygroup')
 
@@ -31,9 +31,9 @@ def get_group(client_session, scopeId, name):
 
     for group in groups:
         if group.get('name') == name:
-            return group.get('objectId')
+            return group.get('objectId'), group
 
-    return None
+    return None, None
 
 
 def add_group(client_session, scopeId, name, member, excludeMember,

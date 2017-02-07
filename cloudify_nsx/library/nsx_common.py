@@ -276,6 +276,22 @@ def check_raw_result(result_raw):
         )
 
 
+def set_boolean_property(obj, path_list, value):
+    """set boolean value correctly"""
+    value_str = 'true' if value else 'false'
+    selected_obj = obj
+    for path in path_list[:-1]:
+        if path not in selected_obj:
+            selected_obj[path] = {}
+        selected_obj = selected_obj[path]
+
+    if selected_obj.get(path_list[-1]) != value_str:
+        selected_obj[path_list[-1]] = value_str
+        return True
+    else:
+        return False
+
+
 def all_relationships_are_present(relationships,
                                   expected_relationships):
     relationships = [relationship.type for relationship in relationships]

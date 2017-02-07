@@ -44,7 +44,7 @@ def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
     interface = dlr_interface_dict['interfaces']['interface']
     interface['addressGroups']['addressGroup']['primaryAddress'] = interface_ip
     interface['addressGroups']['addressGroup']['subnetMask'] = interface_subnet
-    interface['isConnected'] = "True"
+    interface['isConnected'] = "true"
     interface['connectedToId'] = interface_ls_id
     interface['name'] = name
     interface['index'] = vnic
@@ -233,14 +233,9 @@ def del_dhcp_relay(client_session, resource_id):
 def routing_global_config(client_session, esg_id, enabled,
                           routingGlobalConfig=None, staticRouting=None):
 
-    routing = {
-        'routing': {}
-    }
+    routing = {}
 
-    if enabled:
-        routing['routing']['enabled'] = "true"
-    else:
-        routing['routing']['enabled'] = "true"
+    common.set_boolean_property(routing, ['routing', 'enabled'], enabled)
 
     if routingGlobalConfig:
         routing['routing']['routingGlobalConfig'] = routingGlobalConfig
@@ -514,13 +509,14 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
                 continue
 
         bgp_neighbour_rule = bgp_neighbour
+        break
 
     if not bgp_neighbour_rule:
         raise cfy_exc.NonRecoverableError(
             "You don't have such rule"
         )
 
-    if not bgp_neighbour_rule.get('bgp_neighbour_rule'):
+    if not bgp_neighbour_rule.get('bgpFilters'):
         bgp_neighbour_rule['bgpFilters'] = {}
     if not bgp_neighbour_rule['bgpFilters'].get('bgpFilter'):
         bgp_neighbour_rule['bgpFilters']['bgpFilter'] = []
@@ -622,12 +618,14 @@ def del_bgp_neighbour_filter(client_session, resource_id):
                 continue
 
         bgp_neighbour_rule = bgp_neighbour
+        break
 
     if not bgp_neighbour_rule:
         return
 
-    if not bgp_neighbour_rule.get('bgp_neighbour_rule'):
+    if not bgp_neighbour_rule.get('bgpFilters'):
         return
+
     if not bgp_neighbour_rule['bgpFilters'].get('bgpFilter'):
         return
 

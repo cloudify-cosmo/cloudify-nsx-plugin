@@ -574,6 +574,25 @@ class NsxCommonTest(unittest.TestCase):
             )
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_set_boolean_property(self):
+        """Check nsx_common.set_boolean_property func"""
+        # recreate path
+        a = {}
+        self.assertTrue(common.set_boolean_property(a, ['b', 'c'], True))
+        self.assertEqual(a, {'b': {'c': 'true'}})
+
+        # already have correct value
+        a = {'b': {'c': 'true'}}
+        self.assertFalse(common.set_boolean_property(a, ['b', 'c'], True))
+        self.assertEqual(a, {'b': {'c': 'true'}})
+
+        # already have correct value
+        a = {'b': {'c': 'true'}}
+        self.assertTrue(common.set_boolean_property(a, ['b', 'c'], False))
+        self.assertEqual(a, {'b': {'c': 'false'}})
+
 
 if __name__ == '__main__':
     unittest.main()
