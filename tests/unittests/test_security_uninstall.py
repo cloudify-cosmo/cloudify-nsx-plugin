@@ -26,15 +26,15 @@ import cloudify_nsx.security.tag_vm as tag_vm
 from cloudify.state import current_ctx
 
 
-class SecurityTest(test_base.BaseTest):
+class SecurityUninstallTest(test_base.BaseTest):
 
     def setUp(self):
-        super(SecurityTest, self).setUp()
+        super(SecurityUninstallTest, self).setUp()
         self._regen_ctx()
 
     def tearDown(self):
         current_ctx.clear()
-        super(SecurityTest, self).tearDown()
+        super(SecurityUninstallTest, self).tearDown()
 
     @pytest.mark.internal
     @pytest.mark.unit

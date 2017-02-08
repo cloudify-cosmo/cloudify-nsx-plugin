@@ -44,7 +44,7 @@ def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
     interface = dlr_interface_dict['interfaces']['interface']
     interface['addressGroups']['addressGroup']['primaryAddress'] = interface_ip
     interface['addressGroups']['addressGroup']['subnetMask'] = interface_subnet
-    interface['isConnected'] = "True"
+    interface['isConnected'] = "true"
     interface['connectedToId'] = interface_ls_id
     interface['name'] = name
     interface['index'] = vnic
@@ -233,14 +233,9 @@ def del_dhcp_relay(client_session, resource_id):
 def routing_global_config(client_session, esg_id, enabled,
                           routingGlobalConfig=None, staticRouting=None):
 
-    routing = {
-        'routing': {}
-    }
+    routing = {}
 
-    if enabled:
-        routing['routing']['enabled'] = "true"
-    else:
-        routing['routing']['enabled'] = "true"
+    common.set_boolean_property(routing, 'routing/enabled', enabled)
 
     if routingGlobalConfig:
         routing['routing']['routingGlobalConfig'] = routingGlobalConfig
@@ -259,12 +254,10 @@ def routing_global_config(client_session, esg_id, enabled,
 def update_bgp(client_session, esg_id, enabled, defaultOriginate,
                gracefulRestart, redistribution, localAS):
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         # for fully "disabled" case
@@ -309,12 +302,10 @@ def update_bgp(client_session, esg_id, enabled, defaultOriginate,
 def add_bgp_neighbour(client_session, esg_id, use_existing, ipAddress,
                       remoteAS, weight, holdDownTimer, keepAliveTimer,
                       password, protocolAddress, forwardingAddress):
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         # for fully "disabled" case
@@ -414,12 +405,10 @@ def del_bgp_neighbour(client_session, resource_id):
 
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         raise cfy_exc.NonRecoverableError(
@@ -471,12 +460,10 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
 
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         # for fully "disabled" case
@@ -514,13 +501,14 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
                 continue
 
         bgp_neighbour_rule = bgp_neighbour
+        break
 
     if not bgp_neighbour_rule:
         raise cfy_exc.NonRecoverableError(
             "You don't have such rule"
         )
 
-    if not bgp_neighbour_rule.get('bgp_neighbour_rule'):
+    if not bgp_neighbour_rule.get('bgpFilters'):
         bgp_neighbour_rule['bgpFilters'] = {}
     if not bgp_neighbour_rule['bgpFilters'].get('bgpFilter'):
         bgp_neighbour_rule['bgpFilters']['bgpFilter'] = []
@@ -582,12 +570,10 @@ def del_bgp_neighbour_filter(client_session, resource_id):
     protocolAddress = ids[4]
     forwardingAddress = ids[5]
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         return
@@ -622,12 +608,14 @@ def del_bgp_neighbour_filter(client_session, resource_id):
                 continue
 
         bgp_neighbour_rule = bgp_neighbour
+        break
 
     if not bgp_neighbour_rule:
         return
 
-    if not bgp_neighbour_rule.get('bgp_neighbour_rule'):
+    if not bgp_neighbour_rule.get('bgpFilters'):
         return
+
     if not bgp_neighbour_rule['bgpFilters'].get('bgpFilter'):
         return
 

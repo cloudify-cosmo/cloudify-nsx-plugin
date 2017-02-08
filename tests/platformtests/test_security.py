@@ -18,25 +18,25 @@ import os
 
 # Third party imports
 import unittest
-import pytest
 import mock
+import pytest
 
 # Cloudify imports
 from cloudify.workflows import local
+from cloudify import mocks as cfy_mocks
+from cloudify.state import current_ctx
 from cloudify_cli import constants as cli_constants
+import cloudify_nsx.library.nsx_common as common
 import cloudify_nsx.library.nsx_security_tag as nsx_security_tag
 import cloudify_nsx.library.nsx_security_group as nsx_security_group
 import cloudify_nsx.library.nsx_security_policy as nsx_security_policy
-import cloudify_nsx.library.nsx_common as common
-from cloudify import mocks as cfy_mocks
-from cloudify.state import current_ctx
 
 
-class SecurityTagTest(unittest.TestCase):
+class SecurityTest(unittest.TestCase):
 
     def setUp(self):
-        super(SecurityTagTest, self).setUp()
-        self.security_tag_env = None
+        super(SecurityTest, self).setUp()
+        self.local_env = None
         self.ext_inputs = {
             # prefix for run
             'node_name_prefix': os.environ.get('NODE_NAME_PREFIX', ""),
@@ -83,16 +83,16 @@ class SecurityTagTest(unittest.TestCase):
 
     def tearDown(self):
         current_ctx.clear()
-        if self.security_tag_env:
+        if self.local_env:
             try:
-                self.security_tag_env.execute(
+                self.local_env.execute(
                     'uninstall',
                     task_retries=50,
                     task_retry_interval=3,
                 )
             except Exception as ex:
                 print str(ex)
-        super(SecurityTagTest, self).tearDown()
+        super(SecurityTest, self).tearDown()
 
     @pytest.mark.external
     def test_security_tag(self):
@@ -110,17 +110,17 @@ class SecurityTagTest(unittest.TestCase):
             self.ext_inputs['node_name_prefix'] + "secret_tag"
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
-        self.security_tag_env = local.init_env(
+        self.local_env = local.init_env(
             blueprint,
             inputs=self.ext_inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
         # cfy local execute -w install
-        self.security_tag_env.execute(
+        self.local_env.execute(
             'install',
             task_retries=50,
             task_retry_interval=3,
@@ -132,8 +132,8 @@ class SecurityTagTest(unittest.TestCase):
             self.ext_inputs['node_name_prefix'] + "secret_tag"
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(info is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(info)
 
         self.assertEqual(
             info['name'], self.ext_inputs['node_name_prefix'] + "secret_tag"
@@ -141,7 +141,7 @@ class SecurityTagTest(unittest.TestCase):
         self.assertEqual(info['description'], "What can i say?")
 
         # cfy local execute -w uninstall
-        self.security_tag_env.execute(
+        self.local_env.execute(
             'uninstall',
             task_retries=50,
             task_retry_interval=3,
@@ -153,9 +153,9 @@ class SecurityTagTest(unittest.TestCase):
             self.ext_inputs['node_name_prefix'] + "secret_tag"
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
-        self.security_tag_env = None
+        self.local_env = None
 
     @pytest.mark.external
     def test_security_tag_vm_bind(self):
@@ -207,17 +207,17 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
-        self.security_tag_env = local.init_env(
+        self.local_env = local.init_env(
             blueprint,
             inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
         # cfy local execute -w install
-        self.security_tag_env.execute(
+        self.local_env.execute(
             'install',
             task_retries=4,
             task_retry_interval=3,
@@ -229,8 +229,8 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(info is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(info)
 
         self.assertEqual(
             info['name'],
@@ -242,7 +242,7 @@ class SecurityTagTest(unittest.TestCase):
         )
 
         # cfy local execute -w uninstall
-        self.security_tag_env.execute(
+        self.local_env.execute(
             'uninstall',
             task_retries=50,
             task_retry_interval=3,
@@ -254,7 +254,7 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
     @pytest.mark.external
     def test_security_group(self):
@@ -276,76 +276,87 @@ class SecurityTagTest(unittest.TestCase):
         )
 
         # check prexist of security groups
-        resource_id = nsx_security_group.get_group(
+        resource_id, _ = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
-        resource_id = nsx_security_group.get_group(
+        resource_id, _ = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
-        self.security_group_env = local.init_env(
+        self.local_env = local.init_env(
             blueprint,
             inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
         # cfy local execute -w install
-        self.security_group_env.execute(
+        self.local_env.execute(
             'install',
             task_retries=4,
             task_retry_interval=3,
         )
 
         # check security groups properties
-        resource_id = nsx_security_group.get_group(
+        resource_id, main_properties = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is not None)
+        self.assertIsNotNone(resource_id)
 
-        resource_id = nsx_security_group.get_group(
+        nested_resource_id, nested_properties = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
+        self.assertIsNotNone(nested_resource_id)
 
-        self.assertTrue(resource_id is not None)
+        self.assertEqual(
+            main_properties['member']['name'],
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
+        )
+
+        self.assertEqual(
+            main_properties['member']['objectId'],
+            nested_resource_id
+        )
+
+        self.assertFalse(nested_properties.get('member'))
 
         # cfy local execute -w uninstall
-        self.security_group_env.execute(
+        self.local_env.execute(
             'uninstall',
             task_retries=50,
             task_retry_interval=3,
         )
 
         # must be deleted
-        resource_id = nsx_security_group.get_group(
+        resource_id, _ = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
-        resource_id = nsx_security_group.get_group(
+        resource_id, _ = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
     @pytest.mark.external
     def test_security_policy(self):
@@ -369,17 +380,17 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
-        self.security_group_env = local.init_env(
+        self.local_env = local.init_env(
             blueprint,
             inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
         # cfy local execute -w install
-        self.security_group_env.execute(
+        self.local_env.execute(
             'install',
             task_retries=4,
             task_retry_interval=3,
@@ -391,11 +402,11 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(policy is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(policy)
 
         # cfy local execute -w uninstall
-        self.security_group_env.execute(
+        self.local_env.execute(
             'uninstall',
             task_retries=50,
             task_retry_interval=3,
@@ -407,7 +418,7 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
     @pytest.mark.external
     def test_security_policy_bind(self):
@@ -434,26 +445,26 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # check prexist of security group
-        resource_id = nsx_security_group.get_group(
+        resource_id, _ = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
-        self.security_group_env = local.init_env(
+        self.local_env = local.init_env(
             blueprint,
             inputs=inputs,
             name=self._testMethodName,
             ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
 
         # cfy local execute -w install
-        self.security_group_env.execute(
+        self.local_env.execute(
             'install',
             task_retries=4,
             task_retry_interval=3,
@@ -465,20 +476,20 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(policy is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(policy)
 
         # check security group
-        resource_id = nsx_security_group.get_group(
+        resource_id, _ = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is not None)
+        self.assertIsNotNone(resource_id)
 
         # cfy local execute -w uninstall
-        self.security_group_env.execute(
+        self.local_env.execute(
             'uninstall',
             task_retries=50,
             task_retry_interval=3,
@@ -490,15 +501,16 @@ class SecurityTagTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
-        resource_id = nsx_security_group.get_group(
+        resource_id, _ = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
+
 
 if __name__ == '__main__':
     unittest.main()

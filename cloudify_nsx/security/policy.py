@@ -21,12 +21,9 @@ from cloudify import exceptions as cfy_exc
 
 def _update_policy(exist_policy):
     """update policy info by existed policy"""
-    new_policy = ctx.instance.runtime_properties['policy']
-    new_policy['description'] = exist_policy['description']
-    new_policy['precedence'] = exist_policy['precedence']
-    new_policy['parent'] = exist_policy['parent']
-    new_policy['securityGroupBinding'] = exist_policy['securityGroupBinding']
-    new_policy['actionsByCategory'] = exist_policy['actionsByCategory']
+    for i in ['description', 'precedence', 'parent',
+              'securityGroupBinding', 'actionsByCategory']:
+        ctx.instance.runtime_properties['policy'][i] = exist_policy[i]
 
 
 @operation
@@ -78,6 +75,10 @@ def create(**kwargs):
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
                 "Security policy '%s' already exists" % policy['name']
+            )
+        elif use_existing:
+            raise cfy_exc.NonRecoverableError(
+                "Security policy '%s' does not exist" % policy['name']
             )
 
     if not resource_id:

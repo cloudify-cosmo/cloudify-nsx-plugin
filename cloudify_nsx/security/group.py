@@ -54,9 +54,9 @@ def create(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if not resource_id:
-        resource_id = nsx_security_group.get_group(client_session,
-                                                   group['scopeId'],
-                                                   group['name'])
+        resource_id, _ = nsx_security_group.get_group(client_session,
+                                                      group['scopeId'],
+                                                      group['name'])
 
         if use_existing and resource_id:
             ctx.instance.runtime_properties['resource_id'] = resource_id
@@ -64,6 +64,10 @@ def create(**kwargs):
         elif resource_id:
             raise cfy_exc.NonRecoverableError(
                 "Security group '%s' already exists" % group['name']
+            )
+        elif use_existing:
+            raise cfy_exc.NonRecoverableError(
+                "Security group '%s' does not exist" % group['name']
             )
 
     if not resource_id:

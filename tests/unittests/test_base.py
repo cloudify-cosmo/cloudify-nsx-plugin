@@ -61,7 +61,7 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
         # delete check with exeption
-        fake_client, fake_client_result, kwargs = self._kwargs_regen_client(
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
             resource_id, func_kwargs
         )
         if additional_params:
@@ -94,27 +94,187 @@ class BaseTest(unittest.TestCase):
 
     def _kwargs_regen_client(self, resource_id, func_kwargs):
         kwargs = self._kwargs_regen(func_kwargs)
-        self.fake_ctx.instance.runtime_properties['resource_id'] = resource_id
+        runtime = self.fake_ctx.instance.runtime_properties
+        if resource_id:
+            runtime['resource_id'] = resource_id
         kwargs['nsx_auth'] = {
             'username': 'username',
             'password': 'password',
             'host': 'host',
             'raml': 'raml'
         }
-        fake_client_result = mock.Mock()
-        fake_client = mock.MagicMock(return_value=fake_client_result)
-        fake_client_result.delete = mock.Mock(
+        fake_cs_result = mock.Mock()
+        fake_client = mock.MagicMock(return_value=fake_cs_result)
+        fake_cs_result.create = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+        fake_cs_result.delete = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
 
-        fake_client_result.read = mock.Mock(
+        fake_cs_result.read = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
 
-        fake_client_result.update = mock.Mock(
+        fake_cs_result.update = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
-        return fake_client, fake_client_result, kwargs
+        return fake_client, fake_cs_result, kwargs
+
+    def _common_install(self, resource_id, func_call, func_kwargs):
+        """Check skip install logic if we have resource_id
+           or have issues with session"""
+        # check already existed
+        kwargs = self._kwargs_regen(func_kwargs)
+        self.fake_ctx.instance.runtime_properties['resource_id'] = resource_id
+        func_call(**kwargs)
+
+        # try to create but have issue with session connection
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, func_kwargs
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+
+            with self.assertRaises(cfy_exc.NonRecoverableError):
+                func_call(**kwargs)
+
+            fake_client.assert_called_with(
+                'raml', 'host', 'username', 'password'
+            )
+            runtime = self.fake_ctx.instance.runtime_properties
+            self.assertFalse('resource_id' in runtime)
+            self.assertEqual(
+                runtime['nsx_auth'], {
+                    'username': 'username',
+                    'password': 'password',
+                    'host': 'host',
+                    'raml': 'raml'
+                }
+            )
+
+    def _common_install_read_and_create(
+        self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
+        read_responce, create_args, create_kwargs, create_responce,
+        recheck_runtime=None
+    ):
+        """check install logic that check 'existing' by read
+           and than run create"""
+        self._common_install(resource_id, func_call, func_kwargs)
+
+        # use custom responce
+        if read_responce:
+            # use existed
+            fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+                None, func_kwargs
+            )
+            self.fake_ctx.node.properties['use_external_resource'] = True
+            with mock.patch(
+                'cloudify_nsx.library.nsx_common.NsxClient',
+                fake_client
+            ):
+
+                fake_cs_result.read = mock.Mock(
+                    return_value=read_responce
+                )
+                func_call(**kwargs)
+
+                fake_cs_result.read.assert_called_with(
+                    *read_args, **read_kwargs
+                )
+                runtime = self.fake_ctx.instance.runtime_properties
+                self.assertEqual(
+                    runtime['resource_id'], resource_id
+                )
+                if recheck_runtime:
+                    for field in recheck_runtime:
+                        self.assertEqual(
+                            runtime[field],
+                            recheck_runtime[field]
+                        )
+
+            # use existed, but empty responce
+            fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+                None, func_kwargs
+            )
+            self.fake_ctx.node.properties['use_external_resource'] = True
+            with mock.patch(
+                'cloudify_nsx.library.nsx_common.NsxClient',
+                fake_client
+            ):
+
+                fake_cs_result.read = mock.Mock(
+                    return_value={
+                        'status': 204,
+                        'body': {}
+                    }
+                )
+                with self.assertRaises(cfy_exc.NonRecoverableError):
+                    func_call(**kwargs)
+
+                fake_cs_result.create.assert_not_called()
+
+                fake_cs_result.read.assert_called_with(
+                    *read_args, **read_kwargs
+                )
+                self.assertFalse(
+                    'resource_id' in self.fake_ctx.instance.runtime_properties
+                )
+
+            # preexist (use_external_resource=False)
+            fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+                None, func_kwargs
+            )
+            with mock.patch(
+                'cloudify_nsx.library.nsx_common.NsxClient',
+                fake_client
+            ):
+                fake_cs_result.read = mock.Mock(
+                    return_value=read_responce
+                )
+
+                with self.assertRaises(cfy_exc.NonRecoverableError):
+                    func_call(**kwargs)
+
+                fake_cs_result.read.assert_called_with(
+                    *read_args, **read_kwargs
+                )
+                self.assertFalse(
+                    'resource_id' in self.fake_ctx.instance.runtime_properties
+                )
+
+        # create use_external_resource=False
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, func_kwargs
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            fake_cs_result.read = mock.Mock(
+                return_value={
+                    'status': 204,
+                    'body': {}
+                }
+            )
+            fake_cs_result.create = mock.Mock(
+                return_value=create_responce
+            )
+            func_call(**kwargs)
+
+            fake_cs_result.read.assert_called_with(
+                *read_args, **read_kwargs
+            )
+            fake_cs_result.create.assert_called_with(
+                *create_args, **create_kwargs
+            )
+            runtime = self.fake_ctx.instance.runtime_properties
+            self.assertEqual(
+                runtime['resource_id'],
+                resource_id
+            )
 
     def _common_uninstall_delete(
         self, resource_id, func_call, func_kwargs, delete_args, delete_kwargs,
@@ -122,22 +282,23 @@ class BaseTest(unittest.TestCase):
     ):
         """for functions when we only run delete directly"""
         self._common_uninstall_external_and_unintialized(
-            resource_id, func_call, func_kwargs, additional_params=additional_params
+            resource_id, func_call, func_kwargs,
+            additional_params=additional_params
         )
 
         # delete without exeption
-        fake_client, fake_client_result, kwargs = self._kwargs_regen_client(
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
             resource_id, func_kwargs
         )
         with mock.patch(
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            fake_client_result.delete = mock.Mock(
+            fake_cs_result.delete = mock.Mock(
                 return_value={'status': 204}
             )
             func_call(**kwargs)
-            fake_client_result.delete.assert_called_with(
+            fake_cs_result.delete.assert_called_with(
                 *delete_args, **delete_kwargs
             )
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
@@ -153,24 +314,27 @@ class BaseTest(unittest.TestCase):
         )
 
         # delete without exeption
-        fake_client, fake_client_result, kwargs = self._kwargs_regen_client(
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
             resource_id, func_kwargs
         )
         with mock.patch(
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            fake_client_result.read = mock.Mock(
-                return_value=read_responce
-            )
-            fake_client_result.update = mock.Mock(
+            # use custom responce
+            if read_responce:
+                fake_cs_result.read = mock.Mock(
+                    return_value=read_responce
+                )
+
+            fake_cs_result.update = mock.Mock(
                 return_value={'status': 204}
             )
             func_call(**kwargs)
-            fake_client_result.read.assert_called_with(
+            fake_cs_result.read.assert_called_with(
                 *read_args, **read_kwargs
             )
-            fake_client_result.update.assert_called_with(
+            fake_cs_result.update.assert_called_with(
                 *update_args, **update_kwargs
             )
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
