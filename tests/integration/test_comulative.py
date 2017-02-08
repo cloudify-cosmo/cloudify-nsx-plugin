@@ -114,6 +114,10 @@ class ComulativeTest(unittest.TestCase):
             inputs['vcenter_datastore'] = os.environ.get('VCENTER_DATASTORE')
         if os.environ.get('VCENTER_DATACENTER'):
             inputs['vcenter_datacenter'] = os.environ.get('VCENTER_DATACENTER')
+        if os.environ.get('VCENTER_RESOURCE_POOL'):
+            inputs['vcenter_resource_pool'] = os.environ.get(
+                'VCENTER_RESOURCE_POOL'
+            )
         if os.environ.get('VCENTER_TEMPLATE'):
             inputs['template_name'] = os.environ.get('VCENTER_TEMPLATE')
 
