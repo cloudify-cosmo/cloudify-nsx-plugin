@@ -2,6 +2,7 @@
 Cloudify Network Virtualization with VMware (NSX) plugin
 
 # Check platform example
+## Linux example
 ```
 
 # get plugin codebase
@@ -22,8 +23,18 @@ rm .coverage -rf
 
 # check state
 nosetests -v --with-coverage --cover-package=cloudify_nsx cloudify-nsx-plugin/tests/platformtests/ cloudify-nsx-plugin/tests/unittests/
+```
+## Windows example
 
 ```
+Before run the test script next programs and components should be installed:
+ - Python 2.7.9
+ - VCForPython27.msi (http://aka.ms/vcpython27)
+
+Example of test script is located in folder: tests/platformtests/windows_example.ps1
+
+```
+
 # Check total coverage and full functionality
 ```
 
