@@ -110,7 +110,7 @@ class SecurityTest(unittest.TestCase):
             self.ext_inputs['node_name_prefix'] + "secret_tag"
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
         self.local_env = local.init_env(
@@ -132,8 +132,8 @@ class SecurityTest(unittest.TestCase):
             self.ext_inputs['node_name_prefix'] + "secret_tag"
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(info is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(info)
 
         self.assertEqual(
             info['name'], self.ext_inputs['node_name_prefix'] + "secret_tag"
@@ -153,7 +153,7 @@ class SecurityTest(unittest.TestCase):
             self.ext_inputs['node_name_prefix'] + "secret_tag"
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         self.local_env = None
 
@@ -207,7 +207,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
         self.local_env = local.init_env(
@@ -229,8 +229,8 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(info is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(info)
 
         self.assertEqual(
             info['name'],
@@ -254,7 +254,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['name_of_tag']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
     @pytest.mark.external
     def test_security_group(self):
@@ -282,7 +282,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         resource_id, _ = nsx_security_group.get_group(
             self.client_session,
@@ -290,7 +290,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
         self.local_env = local.init_env(
@@ -313,14 +313,14 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is not None)
+        self.assertIsNotNone(resource_id)
 
         nested_resource_id, nested_properties = nsx_security_group.get_group(
             self.client_session,
             'globalroot-0',
             inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
-        self.assertTrue(nested_resource_id is not None)
+        self.assertIsNotNone(nested_resource_id)
 
         self.assertEqual(
             main_properties['member']['name'],
@@ -348,7 +348,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         resource_id, _ = nsx_security_group.get_group(
             self.client_session,
@@ -356,7 +356,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
     @pytest.mark.external
     def test_security_policy(self):
@@ -380,7 +380,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
         self.local_env = local.init_env(
@@ -402,8 +402,8 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(policy is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(policy)
 
         # cfy local execute -w uninstall
         self.local_env.execute(
@@ -418,7 +418,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
     @pytest.mark.external
     def test_security_policy_bind(self):
@@ -445,7 +445,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # check prexist of security group
         resource_id, _ = nsx_security_group.get_group(
@@ -454,7 +454,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         # cfy local init
         self.local_env = local.init_env(
@@ -476,8 +476,8 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is not None)
-        self.assertTrue(policy is not None)
+        self.assertIsNotNone(resource_id)
+        self.assertIsNotNone(policy)
 
         # check security group
         resource_id, _ = nsx_security_group.get_group(
@@ -486,7 +486,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is not None)
+        self.assertIsNotNone(resource_id)
 
         # cfy local execute -w uninstall
         self.local_env.execute(
@@ -501,7 +501,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['policy_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
         resource_id, _ = nsx_security_group.get_group(
             self.client_session,
@@ -509,7 +509,7 @@ class SecurityTest(unittest.TestCase):
             inputs['node_name_prefix'] + inputs['security_group_name']
         )
 
-        self.assertTrue(resource_id is None)
+        self.assertIsNone(resource_id)
 
 
 if __name__ == '__main__':
