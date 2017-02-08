@@ -18,18 +18,81 @@ import os
 
 # Third party imports
 import unittest
+import mock
 import pytest
 
 # Cloudify imports
-import test_base
 from cloudify.workflows import local
+from cloudify import mocks as cfy_mocks
+from cloudify.state import current_ctx
 from cloudify_cli import constants as cli_constants
+import cloudify_nsx.library.nsx_common as common
 import cloudify_nsx.library.nsx_security_tag as nsx_security_tag
 import cloudify_nsx.library.nsx_security_group as nsx_security_group
 import cloudify_nsx.library.nsx_security_policy as nsx_security_policy
 
 
-class SecurityTagTest(test_base.BaseTest):
+class SecurityTest(unittest.TestCase):
+
+    def setUp(self):
+        super(SecurityTest, self).setUp()
+        self.local_env = None
+        self.ext_inputs = {
+            # prefix for run
+            'node_name_prefix': os.environ.get('NODE_NAME_PREFIX', ""),
+            # nsx inputs
+            'nsx_ip': os.environ.get('NSX_IP'),
+            'nsx_user': os.environ.get('NSX_USER'),
+            'nsx_password': os.environ.get('NSX_PASSWORD'),
+        }
+
+        if (
+            not self.ext_inputs['nsx_ip'] or
+            not self.ext_inputs['nsx_ip'] or
+            not self.ext_inputs['nsx_password']
+        ):
+                self.skipTest("You dont have credentials for nsx")
+
+        blueprints_path = os.path.split(os.path.abspath(__file__))[0]
+        self.blueprints_path = os.path.join(
+            blueprints_path,
+            'resources'
+        )
+
+        self._regen_ctx()
+
+        # credentials
+        self.client_session = common.nsx_login({
+            'nsx_auth': {
+                'username': self.ext_inputs['nsx_user'],
+                'password': self.ext_inputs['nsx_password'],
+                'host': self.ext_inputs['nsx_ip']
+            }
+        })
+
+    def _regen_ctx(self):
+        self.fake_ctx = cfy_mocks.MockCloudifyContext()
+        instance = mock.Mock()
+        instance.runtime_properties = {}
+        self.fake_ctx._instance = instance
+        node = mock.Mock()
+        self.fake_ctx._node = node
+        node.properties = {}
+        node.runtime_properties = {}
+        current_ctx.set(self.fake_ctx)
+
+    def tearDown(self):
+        current_ctx.clear()
+        if self.local_env:
+            try:
+                self.local_env.execute(
+                    'uninstall',
+                    task_retries=50,
+                    task_retry_interval=3,
+                )
+            except Exception as ex:
+                print str(ex)
+        super(SecurityTest, self).tearDown()
 
     @pytest.mark.external
     def test_security_tag(self):
@@ -189,6 +252,108 @@ class SecurityTagTest(test_base.BaseTest):
         resource_id, _ = nsx_security_tag.get_tag(
             self.client_session,
             inputs['node_name_prefix'] + inputs['name_of_tag']
+        )
+
+        self.assertTrue(resource_id is None)
+
+    @pytest.mark.external
+    def test_security_group(self):
+        """Platform check: security group"""
+        inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
+
+        # Define inputs related to this function
+        inputs['security_group_name'] = os.environ.get(
+            'SECURITY_GROUP_NAME', "security_group_name"
+        )
+        inputs['nested_security_group_name'] = os.environ.get(
+            'NESTED_SECURITY_GROUP_NAME', "nested_security_group_name"
+        )
+
+        # set blueprint name
+        blueprint = os.path.join(
+            self.blueprints_path,
+            'security_groups.yaml'
+        )
+
+        # check prexist of security groups
+        resource_id, _ = nsx_security_group.get_group(
+            self.client_session,
+            'globalroot-0',
+            inputs['node_name_prefix'] + inputs['security_group_name']
+        )
+
+        self.assertTrue(resource_id is None)
+
+        resource_id, _ = nsx_security_group.get_group(
+            self.client_session,
+            'globalroot-0',
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
+        )
+
+        self.assertTrue(resource_id is None)
+
+        # cfy local init
+        self.local_env = local.init_env(
+            blueprint,
+            inputs=inputs,
+            name=self._testMethodName,
+            ignored_modules=cli_constants.IGNORED_LOCAL_WORKFLOW_MODULES)
+
+        # cfy local execute -w install
+        self.local_env.execute(
+            'install',
+            task_retries=4,
+            task_retry_interval=3,
+        )
+
+        # check security groups properties
+        resource_id, main_properties = nsx_security_group.get_group(
+            self.client_session,
+            'globalroot-0',
+            inputs['node_name_prefix'] + inputs['security_group_name']
+        )
+
+        self.assertTrue(resource_id is not None)
+
+        nested_resource_id, nested_properties = nsx_security_group.get_group(
+            self.client_session,
+            'globalroot-0',
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
+        )
+        self.assertTrue(nested_resource_id is not None)
+
+        self.assertEqual(
+            main_properties['member']['name'],
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
+        )
+
+        self.assertEqual(
+            main_properties['member']['objectId'],
+            nested_resource_id
+        )
+
+        self.assertFalse(nested_properties.get('member'))
+
+        # cfy local execute -w uninstall
+        self.local_env.execute(
+            'uninstall',
+            task_retries=50,
+            task_retry_interval=3,
+        )
+
+        # must be deleted
+        resource_id, _ = nsx_security_group.get_group(
+            self.client_session,
+            'globalroot-0',
+            inputs['node_name_prefix'] + inputs['security_group_name']
+        )
+
+        self.assertTrue(resource_id is None)
+
+        resource_id, _ = nsx_security_group.get_group(
+            self.client_session,
+            'globalroot-0',
+            inputs['node_name_prefix'] + inputs['nested_security_group_name']
         )
 
         self.assertTrue(resource_id is None)

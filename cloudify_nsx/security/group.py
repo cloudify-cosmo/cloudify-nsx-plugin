@@ -67,7 +67,7 @@ def create(**kwargs):
             )
         elif use_existing:
             raise cfy_exc.NonRecoverableError(
-                "Security group '%s' does not exists" % group['name']
+                "Security group '%s' does not exist" % group['name']
             )
 
     if not resource_id:

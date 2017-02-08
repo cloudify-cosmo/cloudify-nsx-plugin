@@ -78,7 +78,7 @@ def create(**kwargs):
             )
         elif use_existing:
             raise cfy_exc.NonRecoverableError(
-                "Security policy '%s' does not exists" % policy['name']
+                "Security policy '%s' does not exist" % policy['name']
             )
 
     if not resource_id:

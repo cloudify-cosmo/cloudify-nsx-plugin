@@ -55,7 +55,7 @@ def create(**kwargs):
             )
         elif use_existing:
             raise cfy_exc.NonRecoverableError(
-                "Security tag '%s' does not exists" % tag['name']
+                "Security tag '%s' does not exist" % tag['name']
             )
 
     if not resource_id:

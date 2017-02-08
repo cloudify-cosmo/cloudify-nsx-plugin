@@ -14,6 +14,7 @@
 import unittest
 import test_base
 import pytest
+import cloudify_nsx.network.dlr_bgp_neighbour as dlr_bgp_neighbour
 import cloudify_nsx.network.bgp_neighbour_filter as bgp_neighbour_filter
 import cloudify_nsx.network.esg_firewall as esg_firewall
 import cloudify_nsx.network.lswitch as lswitch
@@ -30,6 +31,65 @@ class NetworkUninstallTest(test_base.BaseTest):
     def tearDown(self):
         current_ctx.clear()
         super(NetworkUninstallTest, self).tearDown()
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_bgp_neighbour_uninstall(self):
+        """Check remove dlr bgp neighbour"""
+        self._common_uninstall_read_update(
+            'esg_id|ip|remoteAS|protocolIp|forwardingIp',
+            dlr_bgp_neighbour.delete,
+            {},
+            read_args=['routingBGP'],
+            read_kwargs={'uri_parameters': {'edgeId': 'esg_id'}},
+            read_responce={
+                'body': {
+                    'bgp': {
+                        'bgpNeighbours': {
+                            'bgpNeighbour': [{
+                                'ipAddress': 'ip',
+                                'remoteAS': 'remoteAS',
+                                'forwardingAddress': 'forwardingIp',
+                                'protocolAddress': 'protocolIp',
+                                'bgpFilters': {
+                                    'bgpFilter': {
+                                        'network': 'net',
+                                        'action': 'action',
+                                        'ipPrefixGe': 'ipPrefixGe',
+                                        'ipPrefixLe': 'ipPrefixLe',
+                                        'direction': 'direction'
+                                    }
+                                }
+                            }, {
+                                'ipAddress': 'other_ip',
+                                'remoteAS': 'other_remoteAS',
+                                'forwardingAddress': 'other_forwardingIp',
+                                'protocolAddress': 'other_protocolIp',
+                                'bgpFilters': {}
+                            }]
+                        }
+                    }
+                },
+                'status': 204
+            },
+            update_args=['routingBGP'],
+            update_kwargs={
+                'request_body_dict': {
+                    'bgp': {
+                        'bgpNeighbours': {
+                            'bgpNeighbour': [{
+                                'forwardingAddress': 'other_forwardingIp',
+                                'protocolAddress': 'other_protocolIp',
+                                'ipAddress': 'other_ip',
+                                'bgpFilters': {},
+                                'remoteAS': 'other_remoteAS'
+                            }]
+                        }
+                    }
+                },
+                'uri_parameters': {'edgeId': 'esg_id'}
+            }
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
