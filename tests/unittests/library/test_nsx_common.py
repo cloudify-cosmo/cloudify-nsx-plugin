@@ -580,18 +580,53 @@ class NsxCommonTest(unittest.TestCase):
         """Check nsx_common.set_boolean_property func"""
         # recreate path
         a = {}
-        self.assertTrue(common.set_boolean_property(a, ['b', 'c'], True))
+        self.assertTrue(common.set_boolean_property(a, 'b/c', True))
         self.assertEqual(a, {'b': {'c': 'true'}})
 
         # already have correct value
         a = {'b': {'c': 'true'}}
-        self.assertFalse(common.set_boolean_property(a, ['b', 'c'], True))
+        self.assertFalse(common.set_boolean_property(a, 'b/c', True))
         self.assertEqual(a, {'b': {'c': 'true'}})
 
         # already have correct value
         a = {'b': {'c': 'true'}}
-        self.assertTrue(common.set_boolean_property(a, ['b', 'c'], False))
+        self.assertTrue(common.set_boolean_property(a, 'b/c', False))
         self.assertEqual(a, {'b': {'c': 'false'}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_read(self):
+        """Check nsx_common.nsx_read func"""
+        self._regen_ctx()
+        client_session = mock.Mock()
+
+        # we raise error?
+        client_session.read = mock.Mock(return_value={
+            'body': {}, 'status': 300
+        })
+        with self.assertRaises(cfy_exc.NonRecoverableError):
+            common.nsx_read(client_session, 'body/a', 'secret',
+                            uri_parameters={'scopeId': 'scopeId'})
+
+        # return None for not existed
+        client_session.read = mock.Mock(return_value={
+            'body': {'b': 'c'}, 'status': 204
+        })
+        self.assertEqual(
+            common.nsx_read(client_session, 'body/a', 'secret',
+                            uri_parameters={'scopeId': 'scopeId'}),
+            None
+        )
+        client_session.read.assert_called_with(
+            'secret', uri_parameters={'scopeId': 'scopeId'}
+        )
+
+        # return real value
+        self.assertEqual(
+            common.nsx_read(client_session, 'body/b', 'secret',
+                            uri_parameters={'scopeId': 'scopeId'}),
+            'c'
+        )
 
 
 if __name__ == '__main__':

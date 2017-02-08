@@ -16,15 +16,10 @@ from cloudify import exceptions as cfy_exc
 
 
 def get_policy(client_session, name):
-    raw_result = client_session.read('securityPolicyID',
-                                     uri_parameters={'ID': "all"})
-
-    common.check_raw_result(raw_result)
-
-    if 'securityPolicies' not in raw_result['body']:
-        return None, None
-
-    policies = raw_result['body']['securityPolicies'].get('securityPolicy', [])
+    policies = common.nsx_read(
+        client_session, 'body/securityPolicies/securityPolicy',
+        'securityPolicyID', uri_parameters={'ID': "all"}
+    )
 
     if not policies:
         return None, None

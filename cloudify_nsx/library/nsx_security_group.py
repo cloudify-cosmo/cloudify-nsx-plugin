@@ -16,15 +16,13 @@ from cloudify import exceptions as cfy_exc
 
 
 def get_group(client_session, scopeId, name):
-    raw_result = client_session.read('secGroupScope',
-                                     uri_parameters={'scopeId': scopeId})
+    groups = common.nsx_read(
+        client_session, 'body/list/securitygroup',
+        'secGroupScope', uri_parameters={'scopeId': scopeId}
+    )
 
-    common.check_raw_result(raw_result)
-
-    if 'list' not in raw_result['body']:
+    if not groups:
         return None, None
-
-    groups = raw_result['body']['list'].get('securitygroup')
 
     if isinstance(groups, dict):
         groups = [groups]

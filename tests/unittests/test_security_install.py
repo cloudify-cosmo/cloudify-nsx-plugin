@@ -15,8 +15,14 @@ import unittest
 import pytest
 import test_base
 import cloudify_nsx.security.group as group
+import cloudify_nsx.security.group_dynamic_member as group_dynamic_member
+import cloudify_nsx.security.group_exclude_member as group_exclude_member
+import cloudify_nsx.security.group_member as group_member
 import cloudify_nsx.security.policy as policy
+import cloudify_nsx.security.policy_group_bind as policy_group_bind
+import cloudify_nsx.security.policy_section as policy_section
 import cloudify_nsx.security.tag as tag
+import cloudify_nsx.security.tag_vm as tag_vm
 from cloudify.state import current_ctx
 
 
@@ -66,6 +72,42 @@ class SecurityInstallTest(test_base.BaseTest):
                 'status': 204,
                 'objectId': 'id'
             }
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_group_dynamic_member_install(self):
+        """Check update dynamic member in security group"""
+        self._common_install(
+            "some_id", group_dynamic_member.create,
+            {'dynamic_member': {
+                "dynamic_set": "dynamic_set",
+                "security_group_id": "security_group_id"
+            }}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_group_exclude_member_install(self):
+        """Check insert member to exclude list in security group"""
+        self._common_install(
+            "some_id", group_exclude_member.create,
+            {'group_exclude_member': {
+                "objectId": "objectId",
+                "security_group_id": "security_group_id"
+            }}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_group_member_install(self):
+        """Check insert member to include list in security group"""
+        self._common_install(
+            "some_id", group_member.create,
+            {'group_member': {
+                "objectId": "objectId",
+                "security_group_id": "security_group_id"
+            }}
         )
 
     @pytest.mark.internal
@@ -128,6 +170,31 @@ class SecurityInstallTest(test_base.BaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_policy_group_bind_install(self):
+        """Check bind security group to security policy"""
+        self._common_install(
+            "some_id", policy_group_bind.create,
+            {'policy_group_bind': {
+                "security_policy_id": "security_policy_id",
+                "security_group_id": "security_group_id"
+            }}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_policy_section_install(self):
+        """Check replace security policy section"""
+        self._common_install(
+            "some_id", policy_section.create,
+            {'policy_section': {
+                "category": "category",
+                "action": "action",
+                "security_policy_id": "security_policy_id"
+            }}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_tag_install(self):
         """Check create security tag"""
         self._common_install_read_and_create(
@@ -161,6 +228,17 @@ class SecurityInstallTest(test_base.BaseTest):
                 'status': 204,
                 'objectId': 'id'
             }
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_tag_vm_install(self):
+        """Check bind security tag to vm"""
+        self._common_install(
+            "some_id", tag_vm.create,
+            {'vm_tag': {
+                "vm_id": "vm_id", "tag_id": "tag_id"
+            }}
         )
 
 

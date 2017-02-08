@@ -235,7 +235,7 @@ def routing_global_config(client_session, esg_id, enabled,
 
     routing = {}
 
-    common.set_boolean_property(routing, ['routing', 'enabled'], enabled)
+    common.set_boolean_property(routing, 'routing/enabled', enabled)
 
     if routingGlobalConfig:
         routing['routing']['routingGlobalConfig'] = routingGlobalConfig
@@ -254,12 +254,10 @@ def routing_global_config(client_session, esg_id, enabled,
 def update_bgp(client_session, esg_id, enabled, defaultOriginate,
                gracefulRestart, redistribution, localAS):
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         # for fully "disabled" case
@@ -304,12 +302,10 @@ def update_bgp(client_session, esg_id, enabled, defaultOriginate,
 def add_bgp_neighbour(client_session, esg_id, use_existing, ipAddress,
                       remoteAS, weight, holdDownTimer, keepAliveTimer,
                       password, protocolAddress, forwardingAddress):
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         # for fully "disabled" case
@@ -409,12 +405,10 @@ def del_bgp_neighbour(client_session, resource_id):
 
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         raise cfy_exc.NonRecoverableError(
@@ -466,12 +460,10 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
 
     esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         # for fully "disabled" case
@@ -578,12 +570,10 @@ def del_bgp_neighbour_filter(client_session, resource_id):
     protocolAddress = ids[4]
     forwardingAddress = ids[5]
 
-    raw_result = client_session.read(
-        'routingBGP', uri_parameters={'edgeId': esg_id})
-
-    common.check_raw_result(raw_result)
-
-    current_bgp = raw_result['body']
+    current_bgp = common.nsx_read(
+        client_session, 'body',
+        'routingBGP', uri_parameters={'edgeId': esg_id}
+    )
 
     if not current_bgp:
         return

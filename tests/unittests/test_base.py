@@ -121,11 +121,9 @@ class BaseTest(unittest.TestCase):
         )
         return fake_client, fake_cs_result, kwargs
 
-    def _common_install_read_and_create(
-        self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
-        read_responce, create_args, create_kwargs, create_responce,
-        recheck_runtime=None
-    ):
+    def _common_install(self, resource_id, func_call, func_kwargs):
+        """Check skip install logic if we have resource_id
+           or have issues with session"""
         # check already existed
         kwargs = self._kwargs_regen(func_kwargs)
         self.fake_ctx.instance.runtime_properties['resource_id'] = resource_id
@@ -156,6 +154,15 @@ class BaseTest(unittest.TestCase):
                     'raml': 'raml'
                 }
             )
+
+    def _common_install_read_and_create(
+        self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
+        read_responce, create_args, create_kwargs, create_responce,
+        recheck_runtime=None
+    ):
+        """check install logic that check 'existing' by read
+           and than run create"""
+        self._common_install(resource_id, func_call, func_kwargs)
 
         # use custom responce
         if read_responce:
@@ -246,7 +253,6 @@ class BaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-
             fake_cs_result.read = mock.Mock(
                 return_value={
                     'status': 204,

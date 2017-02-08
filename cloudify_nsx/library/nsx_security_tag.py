@@ -15,17 +15,13 @@ import nsx_common as common
 
 
 def get_tag(client_session, name):
-    result_raw = client_session.read('securityTag')
+    tags = common.nsx_read(
+        client_session, 'body/securityTags/securityTag',
+        'securityTag'
+    )
 
-    common.check_raw_result(result_raw)
-
-    if 'securityTags' not in result_raw['body']:
+    if not tags:
         return None, None
-
-    if 'securityTag' not in result_raw['body']['securityTags']:
-        return None, None
-
-    tags = result_raw['body']['securityTags']['securityTag']
 
     if isinstance(tags, dict):
         tags = [tags]

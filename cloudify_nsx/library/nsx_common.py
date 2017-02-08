@@ -276,9 +276,10 @@ def check_raw_result(result_raw):
         )
 
 
-def set_boolean_property(obj, path_list, value):
-    """set boolean value correctly"""
+def set_boolean_property(obj, path, value):
+    """set boolean value correctly for nsx"""
     value_str = 'true' if value else 'false'
+    path_list = path.split("/")
     selected_obj = obj
     for path in path_list[:-1]:
         if path not in selected_obj:
@@ -290,6 +291,24 @@ def set_boolean_property(obj, path_list, value):
         return True
     else:
         return False
+
+
+def nsx_read(client_session, path, searched_resource, **kwargs):
+    """Read with checks and return only result selected by path"""
+    raw_result = client_session.read(
+        searched_resource, **kwargs
+    )
+
+    check_raw_result(raw_result)
+
+    path_list = path.split("/")
+    selected_obj = raw_result
+    for path in path_list:
+        if path not in selected_obj:
+            return None
+        selected_obj = selected_obj[path]
+
+    return selected_obj
 
 
 def all_relationships_are_present(relationships,
