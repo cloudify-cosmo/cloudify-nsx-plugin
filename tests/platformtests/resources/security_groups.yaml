@@ -1,0 +1,100 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This Blueprint creates two security groups and set one of them as nested for
+  another via NSX plugin on an vsphere environment.
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - ../../../plugin.yaml
+
+
+inputs:
+
+# NSX plugin inputs
+  nsx_ip:
+    type: string
+    description: >
+       nsx server ip
+
+  nsx_user:
+    type: string
+    description: >
+       nsx server user
+
+  nsx_password:
+    type: string
+    description: >
+       nsx server user password
+
+  nsx_raml:
+    type: string
+    description: >
+       raml file path
+    default: ""
+
+# Nested security group section
+  nested_security_group_name:
+    type: string
+    description: >
+      Nested security group name
+    default: "nested_sec_group"
+
+# Security group section
+  security_group_name :
+    type: string
+    description: >
+      Master security group name
+    default: "sec_group"
+
+  node_name_prefix:
+    type: string
+    description: >
+       Node name prefix
+    default: platform_test_
+
+###############################################################################
+#  DSL section
+###############################################################################
+dsl_definitions:
+  nsx_auth: &nsx_auth
+    username: { get_input: nsx_user }
+    password: { get_input: nsx_password }
+    host: { get_input: nsx_ip }
+    raml: { get_input: nsx_raml }
+
+###############################################################################
+# Node templates section
+###############################################################################
+node_templates:
+
+  nested_security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: *nsx_auth
+      group:
+        name: { concat: [ { get_input: node_name_prefix }, { get_input: nested_security_group_name } ] }
+        dynamicMemberDefinition:  # https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf "Create Security Group"
+          dynamicSet:
+            - operator: OR
+              dynamicCriteria:
+                - operator: OR
+                  key: "VM.SECURITY_TAG"
+                  value: RED
+                  criteria: contains
+
+  master_security_group:
+    type: cloudify.nsx.security_group
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: nested_security_group
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group:
+              name: { concat: [ { get_input: node_name_prefix }, { get_input: security_group_name } ] }
+              member:
+                objectId: { get_attribute: [ nested_security_group, resource_id ] }

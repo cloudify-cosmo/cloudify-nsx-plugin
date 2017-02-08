@@ -15,6 +15,7 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import pynsxv.library.nsx_dlr as nsx_router
+import cloudify_nsx.library.nsx_esg_dlr as cfy_dlr
 import cloudify_nsx.library.nsx_common as common
 
 
@@ -37,6 +38,11 @@ def create(**kwargs):
         ctx.logger.info("Used existed")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
@@ -52,26 +58,27 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
     use_existing, gateway = common.get_properties('gateway', kwargs)
 
     if use_existing:
+        common.remove_properties('gateway')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('gateway')
         ctx.logger.info("Not fully created, skip")
         return
 
-    result_raw = nsx_router.dlr_del_dgw(
-        client_session,
-        resource_id
-    )
+    # credentials
+    client_session = common.nsx_login(kwargs)
 
-    common.check_raw_result(result_raw)
+    common.attempt_with_rerun(
+        cfy_dlr.dlr_del_dgw,
+        client_session=client_session,
+        resource_id=resource_id
+    )
 
     ctx.logger.info("delete %s" % resource_id)
 

@@ -62,20 +62,24 @@ def delete(**kwargs):
     )
 
     if use_existing:
+        common.remove_properties('relay')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('relay')
         ctx.logger.info("Not fully created, skip")
         return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    ctx.logger.info("checking %s" % resource_id)
-
-    client_session.delete('dhcpRelay', uri_parameters={'edgeId': resource_id})
+    common.attempt_with_rerun(
+        cfy_dlr.del_dhcp_relay,
+        client_session=client_session,
+        resource_id=resource_id
+    )
 
     ctx.logger.info("delete %s" % resource_id)
 

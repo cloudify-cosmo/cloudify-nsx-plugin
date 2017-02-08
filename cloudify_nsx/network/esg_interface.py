@@ -16,7 +16,6 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import cloudify_nsx.library.nsx_esg_dlr as nsx_esg
 import cloudify_nsx.library.nsx_common as common
-from cloudify import exceptions as cfy_exc
 
 
 @operation
@@ -86,7 +85,7 @@ def create(**kwargs):
 
     resource_id = interface['ifindex']
 
-    result_raw = nsx_esg.esg_cfg_interface(
+    nsx_esg.esg_cfg_interface(
         client_session,
         interface['esg_id'],
         interface['ifindex'],
@@ -103,11 +102,6 @@ def create(**kwargs):
         interface['secondary_ips']
     )
 
-    if not result_raw:
-        raise cfy_exc.NonRecoverableError(
-            "Can't create interface."
-        )
-
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s" % resource_id)
 
@@ -117,27 +111,25 @@ def delete(**kwargs):
     use_existing, interface = common.get_properties('interface', kwargs)
 
     if use_existing:
+        common.remove_properties('interface')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('interface')
         ctx.logger.info("Not fully created, skip")
         return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_esg.esg_clear_interface(
-        client_session,
-        interface['esg_id'],
-        resource_id
+    common.attempt_with_rerun(
+        nsx_esg.esg_clear_interface,
+        client_session=client_session,
+        esg_id=interface['esg_id'],
+        resource_id=resource_id
     )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete interface."
-        )
 
     ctx.logger.info("delete %s" % resource_id)
 

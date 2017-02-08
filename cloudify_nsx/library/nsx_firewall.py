@@ -61,7 +61,7 @@ def add_firewall_rule(client_session, esg_id, application='any',
 
     common.check_raw_result(result_raw)
 
-    return result_raw['objectId'], result_raw['location']
+    return result_raw['objectId']
 
 
 def delete_firewall_rule(client_session, esg_id, resource_id):
@@ -70,7 +70,4 @@ def delete_firewall_rule(client_session, esg_id, resource_id):
             'edgeId': esg_id, 'ruleId': resource_id
         })
 
-    if result['status'] == 204:
-        return True
-    else:
-        return None
+    common.check_raw_result(result)

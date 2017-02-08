@@ -31,17 +31,12 @@ def nat_service(client_session, esg_id, enabled):
             new_nat_config['nat']['enabled'] = 'false'
             change_needed = True
 
-    if not change_needed:
-        return True
-    else:
+    if change_needed:
         result = client_session.update(
             'edgeNat', uri_parameters={'edgeId': esg_id},
             request_body_dict=new_nat_config
         )
-        if result['status'] == 204:
-            return True
-        else:
-            return False
+        common.check_raw_result(result)
 
 
 def add_nat_rule(client_session, esg_id, action, originalAddress,
@@ -83,15 +78,11 @@ def add_nat_rule(client_session, esg_id, action, originalAddress,
 
     common.check_raw_result(result_raw)
 
-    return result_raw['objectId'], result_raw['location']
+    return result_raw['objectId']
 
 
 def delete_nat_rule(client_session, esg_id, resource_id):
     result = client_session.delete(
         'edgeNatRule', uri_parameters={'edgeId': esg_id, 'ruleID': resource_id}
     )
-
-    if result['status'] == 204:
-        return True
-    else:
-        return None
+    common.check_raw_result(result)

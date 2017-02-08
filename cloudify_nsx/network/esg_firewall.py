@@ -80,10 +80,15 @@ def create(**kwargs):
         ctx.logger.info("Used existed")
         return
 
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if resource_id:
+        ctx.logger.info("Reused %s" % resource_id)
+        return
+
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    resource_id, location = nsx_firewall.add_firewall_rule(
+    resource_id = nsx_firewall.add_firewall_rule(
         client_session,
         firewall_dict['esg_id'],
         firewall_dict['application'],
@@ -105,8 +110,7 @@ def create(**kwargs):
         )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+    ctx.logger.info("created %s" % resource_id)
 
 
 @operation
@@ -114,27 +118,25 @@ def delete(**kwargs):
     use_existing, nat_dict = common.get_properties('rule', kwargs)
 
     if use_existing:
+        common.remove_properties('rule')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('rule')
         ctx.logger.info("Not fully created, skip")
         return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_firewall.delete_firewall_rule(
-        client_session,
-        nat_dict['esg_id'],
-        resource_id
+    common.attempt_with_rerun(
+        nsx_firewall.delete_firewall_rule,
+        client_session=client_session,
+        esg_id=nat_dict['esg_id'],
+        resource_id=resource_id
     )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete interface."
-        )
 
     ctx.logger.info("delete %s" % resource_id)
 

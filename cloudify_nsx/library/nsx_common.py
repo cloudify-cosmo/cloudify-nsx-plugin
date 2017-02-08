@@ -16,6 +16,7 @@ from cloudify import ctx
 from pkg_resources import resource_filename
 from nsxramlclient.client import NsxClient
 from cloudify import exceptions as cfy_exc
+import time
 
 
 def _cleanup_properties(value):
@@ -64,7 +65,8 @@ def _cleanup_if_empty(value):
     return value
 
 
-def validate(check_dict, validate_rules, use_existing):
+def _validate(check_dict, validate_rules, use_existing):
+    """Validate inputs for node creation"""
     result = {}
     for name in validate_rules:
         rule = validate_rules[name]
@@ -103,7 +105,7 @@ def validate(check_dict, validate_rules, use_existing):
             value = value.lower()
 
         if caseinsensitive and values:
-            values = [v.lower() for v in values]
+            values = [str(v).lower() for v in values]
 
         if set_none and not value:
             # empty value
@@ -118,13 +120,14 @@ def validate(check_dict, validate_rules, use_existing):
                         )
                     )
             if sub_checks:
-                value = validate(value, sub_checks, use_existing)
+                value = _validate(value, sub_checks, use_existing)
                 if set_none:
                     value = _cleanup_if_empty(value)
 
         # sory some time we have mistake in value for boolean fields
-        if value_type == 'boolean' and isinstance(value, str):
-            value = value.lower() == 'true'
+        if value_type == 'boolean' and isinstance(value, basestring):
+            value = str(value).lower() == 'true'
+        # for case value==0 and we need check difference with None and False
         elif value_type == 'string' and isinstance(value, int):
             value = str(value)
         result[name] = value
@@ -132,7 +135,7 @@ def validate(check_dict, validate_rules, use_existing):
     return result
 
 
-def __get_properties(name, kwargs):
+def _get_properties(name, kwargs):
     properties_dict = ctx.node.properties.get(name, {})
     properties_dict.update(kwargs.get(name, {}))
     properties_dict.update(ctx.instance.runtime_properties.get(name, {}))
@@ -155,19 +158,17 @@ def __get_properties(name, kwargs):
 
 
 def get_properties(name, kwargs):
-    properties_dict = __get_properties(name, kwargs)
+    properties_dict = _get_properties(name, kwargs)
     use_existing = ctx.node.properties.get(
         'use_external_resource', False
     )
     return use_existing, properties_dict
 
 
-def get_properties_and_validate(name, kwargs, validate_dict=None):
+def get_properties_and_validate(name, kwargs, validate_dict):
     use_existing, properties_dict = get_properties(name, kwargs)
-    if not validate_dict:
-        validate_dict = {}
     ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
-    return use_existing, validate(
+    return use_existing, _validate(
         properties_dict, validate_dict, use_existing
     )
 
@@ -175,12 +176,71 @@ def get_properties_and_validate(name, kwargs, validate_dict=None):
 def remove_properties(name):
     if 'resource_id' in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties['resource_id']
+    if 'nsx_auth' in ctx.instance.runtime_properties:
+        del ctx.instance.runtime_properties['nsx_auth']
     if name in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties[name]
 
 
+def delete_object(func_call, element_struct, kwargs, clements_to_clean=None):
+    """Common code for delete object with client/resource_id params"""
+    use_existing, _ = get_properties(element_struct, kwargs)
+
+    if use_existing:
+        remove_properties(element_struct)
+        if clements_to_clean:
+            for name in clements_to_clean:
+                remove_properties(name)
+        ctx.logger.info("Used existed")
+        return
+
+    resource_id = ctx.instance.runtime_properties.get('resource_id')
+    if not resource_id:
+        remove_properties(element_struct)
+        if clements_to_clean:
+            for name in clements_to_clean:
+                remove_properties(name)
+        ctx.logger.info("Not fully created, skip")
+        return
+
+    # credentials
+    client_session = nsx_login(kwargs)
+
+    attempt_with_rerun(
+        func_call,
+        client_session=client_session,
+        resource_id=resource_id
+    )
+
+    ctx.logger.info("delete %s" % resource_id)
+
+    remove_properties(element_struct)
+    if clements_to_clean:
+        for name in clements_to_clean:
+            remove_properties(name)
+
+
+def attempt_with_rerun(func, **kwargs):
+    """Rerun func several times, useful after dlr/esg delete"""
+    i = 10
+    while i >= 0:
+        try:
+            func(**kwargs)
+            return
+        except cfy_exc.RecoverableError as ex:
+            ctx.logger.error("%s: %s attempts left: Message: %s " % (
+                func.__name__, i, str(ex)
+            ))
+            if not i:
+                raise cfy_exc.RecoverableError(
+                    message="Retry %s little later" % func.__name__
+                )
+        time.sleep(30)
+        i -= 1
+
+
 def nsx_login(kwargs):
-    nsx_auth = __get_properties('nsx_auth', kwargs)
+    nsx_auth = _get_properties('nsx_auth', kwargs)
 
     ctx.logger.info("NSX login...")
     user = nsx_auth.get('username')
@@ -208,27 +268,12 @@ def nsx_login(kwargs):
 
 
 def check_raw_result(result_raw):
-    if result_raw['status'] < 200 and result_raw['status'] >= 300:
+    """check that we have 'success' http status"""
+    if result_raw['status'] < 200 or result_raw['status'] >= 300:
         ctx.logger.error("Status %s" % result_raw['status'])
         raise cfy_exc.NonRecoverableError(
             "We have error with request."
         )
-
-
-def get_logical_switch(client_session, logical_switch_id):
-    raw_result = client_session.read('logicalSwitch', uri_parameters={
-        'virtualWireID': logical_switch_id
-    })
-    check_raw_result(raw_result)
-    return raw_result['body']['virtualWire']
-
-
-def get_edgegateway(client_session, edgeId):
-    raw_result = client_session.read('nsxEdge', uri_parameters={
-        'edgeId': edgeId
-    })
-    check_raw_result(raw_result)
-    return raw_result['body']['edge']
 
 
 def all_relationships_are_present(relationships,

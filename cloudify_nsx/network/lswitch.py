@@ -16,6 +16,7 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import cloudify_nsx.library.nsx_common as common
 import pynsxv.library.nsx_logical_switch as nsx_logical_switch
+import cloudify_nsx.library.nsx_lswitch as nsx_lswitch
 from cloudify import exceptions as cfy_exc
 
 
@@ -76,21 +77,20 @@ def create(**kwargs):
             switch_mode = switch_dict.get("mode")
             # nsx does not understand unicode strings
             ctx.logger.info("creating %s" % switch_dict["name"])
-            resource_id, location = nsx_logical_switch.logical_switch_create(
+            resource_id, _ = nsx_logical_switch.logical_switch_create(
                 client_session, switch_dict["transport_zone"],
                 switch_dict["name"], switch_mode
             )
-            ctx.instance.runtime_properties['location'] = location
-            ctx.logger.info("created %s | %s" % (resource_id, location))
+            ctx.logger.info("created %s" % resource_id)
             switch_params = None
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
 
-    if not ctx.instance.runtime_properties.get('resource_dvportgroup_id'):
+    if not ctx.instance.runtime_properties.get('vsphere_network_id'):
         # read additional info about switch
         if not switch_params:
-            switch_params = common.get_logical_switch(client_session,
-                                                      resource_id)
+            switch_params = nsx_lswitch.get_logical_switch(client_session,
+                                                           resource_id)
 
         dpg_id = switch_params.get(
             'vdsContextWithBacking', {}
@@ -113,22 +113,28 @@ def delete(**kwargs):
     use_existing, switch_dict = common.get_properties('switch', kwargs)
 
     if use_existing:
+        common.remove_properties('switch')
+        common.remove_properties('vsphere_network_id')
         ctx.logger.info("Used pre existed!")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('switch')
+        common.remove_properties('vsphere_network_id')
         ctx.logger.info("We dont have resource_id")
         return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    client_session.delete(
-        'logicalSwitch', uri_parameters={'virtualWireID': resource_id}
+    common.attempt_with_rerun(
+        nsx_lswitch.del_logical_switch,
+        client_session=client_session,
+        resource_id=resource_id
     )
 
     ctx.logger.info("deleted %s" % resource_id)
 
     common.remove_properties('switch')
-    common.remove_properties('resource_dvportgroup_id')
+    common.remove_properties('vsphere_network_id')

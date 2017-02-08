@@ -3,7 +3,7 @@ plugins:
     executor: central_deployment_agent
     source: https://github.com/cloudify-cosmo/cloudify-nsx-plugin/archive/master.zip
     package_name: cloudify-nsx-plugin
-    package_version: '3.4a1'
+    package_version: '1.0'
 
 data_types:
 
@@ -13,10 +13,10 @@ data_types:
         default: administrator@vsphere.local
         required: true
       password:
-        default: vcenter
+        default: vsphere
         required: true
       host:
-        default: vcenter.local
+        default: vsphere.local
         required: true
       raml:
         default: ''
@@ -28,7 +28,7 @@ data_types:
 
 node_types:
 
-  # SecuriteGroup
+  # SecurityGroup
   cloudify.nsx.security_group:
     derived_from: cloudify.nodes.ApplicationServer
     properties:

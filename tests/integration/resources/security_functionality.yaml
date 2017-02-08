@@ -2,8 +2,8 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - ../plugin.yaml
-  - ../../cloudify-vsphere-plugin/plugin.yaml
+  - ../../../plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0-m1/plugin.yaml
 
 inputs:
 
@@ -67,6 +67,11 @@ inputs:
        vcenter datacenter
     default: Datacenter
 
+  vcenter_resource_pool:
+    description: >
+      Resource pool name
+    default: Resources
+
   template_name:
     description: >
       Template to clone VMs from
@@ -88,7 +93,7 @@ node_templates:
         host: { get_input: vcenter_ip }
         port: 443
         datacenter_name: { get_input: vcenter_datacenter }
-        resource_pool_name: Resources
+        resource_pool_name: { get_input: vcenter_resource_pool }
         auto_placement: true
 
   slave_security_group:
@@ -306,7 +311,7 @@ node_templates:
     properties:
       install_agent: false
       server:
-        name: systemtestlinuxnointerfaces
+        name: {concat:[{get_input: node_name_prefix}, linuxnointerfaces]}
         template: { get_input: template_name }
         cpus: 1
         memory: 2048

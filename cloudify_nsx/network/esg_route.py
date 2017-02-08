@@ -16,7 +16,6 @@ from cloudify import ctx
 from cloudify.decorators import operation
 import cloudify_nsx.library.nsx_esg_dlr as nsx_esg
 import cloudify_nsx.library.nsx_common as common
-from cloudify import exceptions as cfy_exc
 
 
 @operation
@@ -66,7 +65,7 @@ def create(**kwargs):
 
     resource_id = route['next_hop']
 
-    result_raw = nsx_esg.esg_route_add(
+    nsx_esg.esg_route_add(
         client_session,
         route['esg_id'],
         route['network'],
@@ -76,15 +75,8 @@ def create(**kwargs):
         route['admin_distance'],
         route['description'])
 
-    if not result_raw:
-        raise cfy_exc.NonRecoverableError(
-            "Can't set route."
-        )
-
-    location = route['esg_id'] + "/" + resource_id
     ctx.instance.runtime_properties['resource_id'] = resource_id
-    ctx.instance.runtime_properties['location'] = location
-    ctx.logger.info("created %s | %s" % (resource_id, location))
+    ctx.logger.info("created %s" % resource_id)
 
 
 @operation
@@ -92,27 +84,25 @@ def delete(**kwargs):
     use_existing, route = common.get_properties('route', kwargs)
 
     if use_existing:
+        common.remove_properties('route')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('route')
         ctx.logger.info("Not fully created, skip")
         return
 
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_esg.esg_route_del(
-        client_session,
-        route['esg_id'],
-        route['network'],
-        resource_id
+    common.attempt_with_rerun(
+        nsx_esg.esg_route_del,
+        client_session=client_session,
+        esg_id=route['esg_id'],
+        network=route['network'],
+        next_hop=resource_id
     )
-    if not result_raw:
-        ctx.logger.error("Status %s" % result_raw['status'])
-        raise cfy_exc.NonRecoverableError(
-            "Can't delete gateway."
-        )
 
     ctx.logger.info("delete %s" % resource_id)
 

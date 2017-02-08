@@ -98,36 +98,10 @@ def add_group_exclude_member(client_session, security_group_id, member_id):
 
 def add_group_member(client_session, security_group_id, member_id):
 
-    raw_result = client_session.read(
-        'secGroupObject', uri_parameters={'objectId': security_group_id}
-    )
-
-    common.check_raw_result(raw_result)
-
-    security_group = raw_result['body']
-
-    if 'member' not in security_group['securitygroup']:
-        security_group['securitygroup']['member'] = []
-
-    members = security_group['securitygroup']['member']
-    if isinstance(members, dict):
-        members = [members]
-
-    for member in members:
-        if member.get("objectId") == member_id:
-            raise cfy_exc.NonRecoverableError(
-                "Member %s already exists in %s" % (
-                    member_id, security_group['securitygroup']['name']
-                )
-            )
-
-    members.append({"objectId": member_id})
-
-    security_group['securitygroup']['member'] = members
-
     raw_result = client_session.update(
-        'secGroupObject', uri_parameters={'objectId': security_group_id},
-        request_body_dict=security_group
+        'secGroupMember', uri_parameters={
+            'objectId': security_group_id,
+            'memberMoref': member_id}
     )
 
     common.check_raw_result(raw_result)
@@ -188,31 +162,10 @@ def del_dynamic_member(client_session, security_group_id):
 def del_group_member(client_session, resource_id):
     security_group_id, member_id = resource_id.split("|")
 
-    raw_result = client_session.read(
-        'secGroupObject', uri_parameters={'objectId': security_group_id}
-    )
-
-    common.check_raw_result(raw_result)
-
-    security_group = raw_result['body']
-
-    if 'member' not in security_group['securitygroup']:
-        return
-
-    members = security_group['securitygroup']['member']
-    if isinstance(members, dict):
-        members = [members]
-
-    for member in members:
-        if member.get("objectId") == member_id:
-            members.remove(member)
-            break
-
-    security_group['securitygroup']['member'] = members
-
-    raw_result = client_session.update(
-        'secGroupObject', uri_parameters={'objectId': security_group_id},
-        request_body_dict=security_group
+    raw_result = client_session.delete(
+        'secGroupMember', uri_parameters={
+            'objectId': security_group_id,
+            'memberMoref': member_id}
     )
 
     common.check_raw_result(raw_result)
@@ -241,7 +194,7 @@ def del_group_exclude_member(client_session, resource_id):
             excludeMembers.remove(member)
             break
 
-    security_group['securitygroup']['member'] = excludeMembers
+    security_group['securitygroup']['excludeMember'] = excludeMembers
 
     raw_result = client_session.update(
         'secGroupObject', uri_parameters={'objectId': security_group_id},

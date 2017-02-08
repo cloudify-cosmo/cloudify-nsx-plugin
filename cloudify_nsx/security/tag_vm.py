@@ -53,25 +53,7 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existing, vm_tag = common.get_properties('vm_tag', kwargs)
-
-    if use_existing:
-        ctx.logger.info("Used existed")
-        return
-
-    resource_id = ctx.instance.runtime_properties.get('resource_id')
-    if not resource_id:
-        ctx.logger.info("Not fully created, skip")
-        return
-
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
-    nsx_security_tag.delete_tag_vm(
-        client_session,
-        resource_id
+    common.delete_object(
+        nsx_security_tag.delete_tag_vm, 'vm_tag',
+        kwargs
     )
-
-    ctx.logger.info("deleted %s" % resource_id)
-
-    common.remove_properties('vm_tag')

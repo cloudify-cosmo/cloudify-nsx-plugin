@@ -82,20 +82,23 @@ def delete(**kwargs):
     use_existing, interface = common.get_properties('interface', kwargs)
 
     if use_existing:
+        common.remove_properties('interface')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('interface')
         ctx.logger.info("Not fully created, skip")
         return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    cfy_dlr.del_esg_ospf_interface(
-        client_session,
-        ctx.instance.runtime_properties['resource_id']
+    common.attempt_with_rerun(
+        cfy_dlr.del_esg_ospf_interface,
+        client_session=client_session,
+        resource_id=resource_id
     )
 
     ctx.logger.info("deleted %s" % resource_id)

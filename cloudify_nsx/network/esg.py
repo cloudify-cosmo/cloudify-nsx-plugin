@@ -60,7 +60,6 @@ def create(**kwargs):
     use_existing, edge_dict = common.get_properties_and_validate(
         'edge', kwargs, validation_rules
     )
-    edge_dict = common.possibly_assign_vm_creation_props(edge_dict)
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
 
@@ -68,7 +67,7 @@ def create(**kwargs):
     client_session = common.nsx_login(kwargs)
 
     if use_existing and resource_id:
-        name = common.get_edgegateway(client_session, resource_id)['name']
+        name = nsx_dlr.get_edgegateway(client_session, resource_id)['name']
         edge_dict['name'] = name
         ctx.instance.runtime_properties['edge']['name'] = name
 
@@ -87,7 +86,10 @@ def create(**kwargs):
             )
 
     if not resource_id:
-        resource_id, location = nsx_esg.esg_create(
+        # update properties with vcenter specific values,
+        # required only on create
+        edge_dict = common.possibly_assign_vm_creation_props(edge_dict)
+        resource_id, _ = nsx_esg.esg_create(
             client_session,
             edge_dict['name'],
             edge_dict['esg_pwd'],
@@ -101,8 +103,7 @@ def create(**kwargs):
         )
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.instance.runtime_properties['location'] = location
-        ctx.logger.info("created %s | %s" % (resource_id, location))
+        ctx.logger.info("created %s" % resource_id)
 
     nsx_dlr.update_common_edges(client_session, resource_id, kwargs, True)
 
@@ -113,19 +114,23 @@ def delete(**kwargs):
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        nsx_dlr.remove_properties_edges()
         ctx.logger.info("We dont have resource_id")
         return
 
     if use_existing:
+        nsx_dlr.remove_properties_edges()
         ctx.logger.info("Used existed %s" % edge_dict.get('name'))
         return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    ctx.logger.info("checking %s" % resource_id)
-
-    client_session.delete('nsxEdge', uri_parameters={'edgeId': resource_id})
+    common.attempt_with_rerun(
+        nsx_dlr.del_edge,
+        client_session=client_session,
+        resource_id=resource_id
+    )
 
     ctx.logger.info("delete %s" % resource_id)
 

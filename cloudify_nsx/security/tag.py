@@ -55,37 +55,16 @@ def create(**kwargs):
             )
 
     if not resource_id:
-        resource_id, location = nsx_security_tag.add_tag(
+        resource_id = nsx_security_tag.add_tag(
             client_session,
             tag['name'],
             tag['description'],
         )
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
-        ctx.logger.info("created %s|%s" % (resource_id, location))
+        ctx.logger.info("created %s" % resource_id)
 
 
 @operation
 def delete(**kwargs):
-    use_existing, tag = common.get_properties('tag', kwargs)
-
-    if use_existing:
-        ctx.logger.info("Used existed")
-        return
-
-    resource_id = ctx.instance.runtime_properties.get('resource_id')
-    if not resource_id:
-        ctx.logger.info("Not fully created, skip")
-        return
-
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
-    nsx_security_tag.delete_tag(
-        client_session,
-        resource_id
-    )
-
-    ctx.logger.info("delete %s" % resource_id)
-
-    common.remove_properties('tag')
+    common.delete_object(nsx_security_tag.delete_tag, 'tag', kwargs)

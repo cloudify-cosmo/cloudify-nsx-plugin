@@ -14,7 +14,6 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-import pynsxv.library.nsx_dlr as nsx_router
 import cloudify_nsx.library.nsx_esg_dlr as cfy_dlr
 import cloudify_nsx.library.nsx_common as common
 
@@ -78,24 +77,25 @@ def delete(**kwargs):
     use_existing, interface = common.get_properties('interface', kwargs)
 
     if use_existing:
+        common.remove_properties('interface')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
+        common.remove_properties('interface')
         ctx.logger.info("Not fully created, skip")
         return
 
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = nsx_router.dlr_del_interface(
-        client_session,
-        ctx.instance.runtime_properties['resource_dlr_id'],
-        resource_id
+    common.attempt_with_rerun(
+        cfy_dlr.dlr_del_interface,
+        client_session=client_session,
+        dlr_id=ctx.instance.runtime_properties['resource_dlr_id'],
+        resource_id=resource_id
     )
-
-    common.check_raw_result(result_raw)
 
     ctx.logger.info("delete %s" % resource_id)
 
