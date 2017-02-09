@@ -628,6 +628,151 @@ class NsxCommonTest(unittest.TestCase):
             'c'
         )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_search(self):
+        """Check nsx_common.nsx_search func"""
+        self._regen_ctx()
+        client_session = mock.Mock()
+
+        # we raise error?
+        client_session.read = mock.Mock(return_value={
+            'body': {}, 'status': 300
+        })
+        with self.assertRaises(cfy_exc.NonRecoverableError):
+            common.nsx_search(client_session, 'body/a', 'b', 'secret',
+                              uri_parameters={'scopeId': 'scopeId'})
+        # no results
+        client_session.read = mock.Mock(return_value={
+            'body': {}, 'status': 204
+        })
+        self.assertEqual(
+            common.nsx_search(client_session, 'body/a', 'a', 'secret',
+                              uri_parameters={'scopeId': 'scopeId'}),
+            (None, None)
+        )
+
+        # dict result
+        client_session.read = mock.Mock(return_value={
+            'body': {'a': {'name': 'b', 'objectId': 'c'}}, 'status': 204
+        })
+        self.assertEqual(
+            common.nsx_search(client_session, 'body/a', 'b', 'secret',
+                              uri_parameters={'scopeId': 'scopeId'}),
+            ('c', {'name': 'b', 'objectId': 'c'})
+        )
+
+        # list result
+        client_session.read = mock.Mock(return_value={
+            'body': {'a': [{
+                'name': 'b',
+                'objectId': 'c'
+            }, {
+                'name': 'd',
+                'objectId': 'e'
+            }]}, 'status': 204
+        })
+        self.assertEqual(
+            common.nsx_search(client_session, 'body/a', 'd', 'secret',
+                              uri_parameters={'scopeId': 'scopeId'}),
+            ('e', {'name': 'd', 'objectId': 'e'})
+        )
+
+        # object not exist
+        client_session.read = mock.Mock(return_value={
+            'body': {'a': [{
+                'name': 'b',
+                'objectId': 'c'
+            }, {
+                'name': 'd',
+                'objectId': 'e'
+            }]}, 'status': 204
+        })
+        self.assertEqual(
+            common.nsx_search(client_session, 'body/a', 'g', 'secret',
+                              uri_parameters={'scopeId': 'scopeId'}),
+            (None, None)
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_struct_get_list(self):
+        """Check nsx_common.nsx_struct_get_list func"""
+
+        # create
+        nsx_object = {}
+        self.assertEqual(
+            common.nsx_struct_get_list(nsx_object, 'a/b/c'),
+            []
+        )
+        self.assertEqual(
+            nsx_object,
+            {
+                'a': {
+                    'b': {
+                        'c': [
+                        ]
+                    }
+                }
+            }
+        )
+
+        # list by path
+        nsx_object = {
+            'a': {
+                'b': [{
+                    'c': 'd'
+                }, {
+                    'e': 'f'
+                }]
+            }
+        }
+        self.assertEqual(
+            common.nsx_struct_get_list(nsx_object, 'a/b'),
+            [{
+                'c': 'd'
+            }, {
+                'e': 'f'
+            }]
+        )
+        self.assertEqual(
+            nsx_object,
+            {
+                'a': {
+                    'b': [{
+                        'c': 'd'
+                    }, {
+                        'e': 'f'
+                    }]
+                }
+            }
+        )
+
+        # convert dict to list
+        nsx_object = {
+            'a': {
+                'b': {
+                    'c': 'd'
+                }
+            }
+        }
+        self.assertEqual(
+            common.nsx_struct_get_list(nsx_object, 'a/b'),
+            [{
+                'c': 'd'
+            }]
+        )
+        self.assertEqual(
+            nsx_object,
+            {
+                'a': {
+                    'b': [{
+                        'c': 'd'
+                    }]
+                }
+            }
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

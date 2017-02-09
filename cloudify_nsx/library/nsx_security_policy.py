@@ -16,22 +16,10 @@ from cloudify import exceptions as cfy_exc
 
 
 def get_policy(client_session, name):
-    policies = common.nsx_read(
-        client_session, 'body/securityPolicies/securityPolicy',
+    return common.nsx_search(
+        client_session, 'body/securityPolicies/securityPolicy', name,
         'securityPolicyID', uri_parameters={'ID': "all"}
     )
-
-    if not policies:
-        return None, None
-
-    if isinstance(policies, dict):
-        policies = [policies]
-
-    for policy in policies:
-        if policy.get('name') == name:
-            return policy.get('objectId'), policy
-
-    return None, None
 
 
 def add_policy(client_session, name, description, precedence, parent,
@@ -60,33 +48,25 @@ def add_policy(client_session, name, description, precedence, parent,
 def add_policy_group_bind(client_session, security_policy_id,
                           security_group_id):
 
-    raw_result = client_session.read(
+    security_policy = common.nsx_read(
+        client_session, 'body',
         'securityPolicyID', uri_parameters={'ID': security_policy_id}
     )
 
-    common.check_raw_result(raw_result)
-
-    security_policy = raw_result['body']
-
-    bindings = security_policy['securityPolicy'].get(
-        'securityGroupBinding', []
+    bindings = common.nsx_struct_get_list(
+        security_policy, 'securityPolicy/securityGroupBinding'
     )
-
-    if isinstance(bindings, dict):
-        bindings = [bindings]
 
     for bind in bindings:
         if bind.get('objectId') == security_group_id:
             raise cfy_exc.NonRecoverableError(
                 "Group %s already exists in %s" % (
                     security_group_id,
-                    security_policy['securityPolicy']['name']
+                    security_policy['securityPolicy'].get('name')
                 )
             )
 
     bindings.append({'objectId': security_group_id})
-
-    security_policy['securityPolicy']['securityGroupBinding'] = bindings
 
     raw_result = client_session.update(
         'securityPolicyID', uri_parameters={'ID': security_policy_id},
@@ -99,20 +79,14 @@ def add_policy_group_bind(client_session, security_policy_id,
 
 
 def add_policy_section(client_session, security_policy_id, category, action):
-    raw_result = client_session.read(
+    security_policy = common.nsx_read(
+        client_session, 'body',
         'securityPolicyID', uri_parameters={'ID': security_policy_id}
     )
 
-    common.check_raw_result(raw_result)
-
-    security_policy = raw_result['body']
-
-    actionsByCategory = security_policy['securityPolicy'].get(
-        'actionsByCategory', []
+    actionsByCategory = common.nsx_struct_get_list(
+        security_policy, 'securityPolicy/actionsByCategory'
     )
-
-    if isinstance(actionsByCategory, dict):
-        actionsByCategory = [actionsByCategory]
 
     for actions in actionsByCategory:
         if actions.get('category') == category:
@@ -123,8 +97,6 @@ def add_policy_section(client_session, security_policy_id, category, action):
             'category': category,
             'action': action
         })
-
-    security_policy['securityPolicy']['actionsByCategory'] = actionsByCategory
 
     raw_result = client_session.update(
         'securityPolicyID', uri_parameters={'ID': security_policy_id},
@@ -139,20 +111,14 @@ def add_policy_section(client_session, security_policy_id, category, action):
 def del_policy_section(client_session, resource_id):
     category, security_policy_id = resource_id.split("|")
 
-    raw_result = client_session.read(
+    security_policy = common.nsx_read(
+        client_session, 'body',
         'securityPolicyID', uri_parameters={'ID': security_policy_id}
     )
 
-    common.check_raw_result(raw_result)
-
-    security_policy = raw_result['body']
-
-    actionsByCategory = security_policy['securityPolicy'].get(
-        'actionsByCategory', []
+    actionsByCategory = common.nsx_struct_get_list(
+        security_policy, 'securityPolicy/actionsByCategory'
     )
-
-    if isinstance(actionsByCategory, dict):
-        actionsByCategory = [actionsByCategory]
 
     for actions in actionsByCategory:
         if actions.get('category') == category:
@@ -160,8 +126,6 @@ def del_policy_section(client_session, resource_id):
             break
     else:
         return
-
-    security_policy['securityPolicy']['actionsByCategory'] = actionsByCategory
 
     raw_result = client_session.update(
         'securityPolicyID', uri_parameters={'ID': security_policy_id},
@@ -175,20 +139,14 @@ def del_policy_group_bind(client_session, resource_id):
 
     security_group_id, security_policy_id = resource_id.split("|")
 
-    raw_result = client_session.read(
+    security_policy = common.nsx_read(
+        client_session, 'body',
         'securityPolicyID', uri_parameters={'ID': security_policy_id}
     )
 
-    common.check_raw_result(raw_result)
-
-    security_policy = raw_result['body']
-
-    bindings = security_policy['securityPolicy'].get(
-        'securityGroupBinding', []
+    bindings = common.nsx_struct_get_list(
+        security_policy, 'securityPolicy/securityGroupBinding'
     )
-
-    if isinstance(bindings, dict):
-        bindings = [bindings]
 
     for bind in bindings:
         if bind.get('objectId') == security_group_id:
@@ -196,8 +154,6 @@ def del_policy_group_bind(client_session, resource_id):
             break
     else:
         return
-
-    security_policy['securityPolicy']['securityGroupBinding'] = bindings
 
     raw_result = client_session.update(
         'securityPolicyID', uri_parameters={'ID': security_policy_id},

@@ -1,4 +1,4 @@
-# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2017 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,38 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import mock
+import test_base
 import pytest
+import mock
 import cloudify_nsx.network.esg_nat as esg_nat
-from cloudify import mocks as cfy_mocks
 from cloudify.state import current_ctx
 
 
-class EsgNatTest(unittest.TestCase):
+class NetworkInstallTest(test_base.BaseTest):
 
     def setUp(self):
-        super(EsgNatTest, self).setUp()
+        super(NetworkInstallTest, self).setUp()
         self._regen_ctx()
-
-    def _regen_ctx(self):
-        self.fake_ctx = cfy_mocks.MockCloudifyContext()
-        instance = mock.Mock()
-        instance.runtime_properties = {}
-        self.fake_ctx._instance = instance
-        node = mock.Mock()
-        self.fake_ctx._node = node
-        node.properties = {}
-        node.runtime_properties = {}
-        current_ctx.set(self.fake_ctx)
 
     def tearDown(self):
         current_ctx.clear()
-        super(EsgNatTest, self).tearDown()
+        super(NetworkInstallTest, self).tearDown()
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_install(self):
+    def test_esg_nat_install(self):
         """Check create esg nat rule"""
+        self._common_install(
+            "some_id", esg_nat.create,
+            {
+                'rule': {
+                    "esg_id": "esg_id",
+                    "action": "action",
+                    "originalAddress": "originalAddress",
+                    "translatedAddress": "translatedAddress"
+                }
+            }
+        )
+
         self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
 
         esg_nat.create(ctx=self.fake_ctx,

@@ -78,36 +78,108 @@ class SecurityInstallTest(test_base.BaseTest):
     @pytest.mark.unit
     def test_group_dynamic_member_install(self):
         """Check update dynamic member in security group"""
-        self._common_install(
-            "some_id", group_dynamic_member.create,
+        self._common_install_read_and_update(
+            "security_group_id", group_dynamic_member.create,
             {'dynamic_member': {
                 "dynamic_set": "dynamic_set",
                 "security_group_id": "security_group_id"
-            }}
+            }},
+            ['secGroupObject'],
+            {'uri_parameters': {'objectId': 'security_group_id'}},
+            {
+                'status': 204,
+                'body': {
+                    'securitygroup': {
+                        'dynamicMemberDefinition': {
+                            'dynamicSet': 'oldDynamicSet',
+                        }
+                    }
+                }
+            },
+            # for update need to use 'secGroupBulk'
+            ['secGroupBulk'],
+            {
+                'request_body_dict': {
+                    'securitygroup': {
+                        'dynamicMemberDefinition': {
+                            'dynamicSet': 'dynamic_set'
+                        }
+                    }
+                },
+                'uri_parameters': {
+                    'scopeId': 'security_group_id'
+                }
+            },
+            {
+                'status': 204
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_group_exclude_member_install(self):
         """Check insert member to exclude list in security group"""
-        self._common_install(
-            "some_id", group_exclude_member.create,
+        self._common_install_read_and_update(
+            "security_group_id|objectId", group_exclude_member.create,
             {'group_exclude_member': {
                 "objectId": "objectId",
                 "security_group_id": "security_group_id"
-            }}
+            }},
+            ['secGroupObject'],
+            {'uri_parameters': {'objectId': 'security_group_id'}},
+            {
+                'status': 204,
+                'body': {
+                    'securitygroup': {
+                        'excludeMember': [{
+                            "objectId": "other_objectId",
+                        }]
+                    }
+                }
+            },
+            ['secGroupObject'],
+            {
+                'request_body_dict': {
+                    'securitygroup': {
+                        'excludeMember': [{
+                            "objectId": "other_objectId",
+                        }, {
+                            "objectId": "objectId",
+                        }]
+                    }
+
+                },
+                'uri_parameters': {'objectId': 'security_group_id'}
+            },
+            {
+                'status': 204
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_group_member_install(self):
         """Check insert member to include list in security group"""
-        self._common_install(
-            "some_id", group_member.create,
+        self._common_install_read_and_update(
+            'security_group_id|objectId', group_member.create,
             {'group_member': {
                 "objectId": "objectId",
                 "security_group_id": "security_group_id"
-            }}
+            }},
+            # group attach never run read
+            read_args=None, read_kwargs=None, read_responce=None,
+            # but run update
+            update_args=['secGroupMember'],
+            update_kwargs={
+                'uri_parameters': {
+                    'memberMoref': 'objectId',
+                    'objectId': 'security_group_id'
+                }
+            },
+            update_responce={
+                'status': 204,
+                'objectId': 'id'
+            }
         )
 
     @pytest.mark.internal
@@ -172,25 +244,85 @@ class SecurityInstallTest(test_base.BaseTest):
     @pytest.mark.unit
     def test_policy_group_bind_install(self):
         """Check bind security group to security policy"""
-        self._common_install(
-            "some_id", policy_group_bind.create,
+        self._common_install_read_and_update(
+            "security_group_id|security_policy_id",
+            policy_group_bind.create,
             {'policy_group_bind': {
                 "security_policy_id": "security_policy_id",
                 "security_group_id": "security_group_id"
-            }}
+            }},
+            ['securityPolicyID'],
+            {'uri_parameters': {'ID': 'security_policy_id'}},
+            {
+                'status': 204,
+                'body': {
+                    'securityPolicy': {
+                        'securityGroupBinding': [{
+                            'objectId': 'other'
+                        }]
+                    }
+                }
+            },
+            ['securityPolicyID'],
+            {
+                'request_body_dict': {
+                    'securityPolicy': {
+                        'securityGroupBinding': [{
+                            'objectId': 'other'
+                        }, {
+                            'objectId': 'security_group_id'
+                        }]
+                    }
+                },
+                'uri_parameters': {'ID': 'security_policy_id'}
+            },
+            {
+                'status': 204
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_policy_section_install(self):
         """Check replace security policy section"""
-        self._common_install(
-            "some_id", policy_section.create,
+        self._common_install_read_and_update(
+            "category|security_policy_id", policy_section.create,
             {'policy_section': {
                 "category": "category",
                 "action": "action",
                 "security_policy_id": "security_policy_id"
-            }}
+            }},
+            ['securityPolicyID'],
+            {'uri_parameters': {'ID': 'security_policy_id'}},
+            {
+                'status': 204,
+                'body': {
+                    'securityPolicy': {
+                        'actionsByCategory': [{
+                            "category": "other_category",
+                            "action": "other_action"
+                        }]
+                    }
+                }
+            },
+            ['securityPolicyID'],
+            {
+                'request_body_dict': {
+                    'securityPolicy': {
+                        'actionsByCategory': [{
+                            "category": "other_category",
+                            "action": "other_action"
+                        }, {
+                            "category": "category",
+                            "action": "action"
+                        }]
+                    }
+                },
+                'uri_parameters': {'ID': 'security_policy_id'}
+            },
+            {
+                'status': 204
+            }
         )
 
     @pytest.mark.internal
@@ -234,11 +366,25 @@ class SecurityInstallTest(test_base.BaseTest):
     @pytest.mark.unit
     def test_tag_vm_install(self):
         """Check bind security tag to vm"""
-        self._common_install(
-            "some_id", tag_vm.create,
+        self._common_install_read_and_update(
+            'tag_id|vm_id', tag_vm.create,
             {'vm_tag': {
                 "vm_id": "vm_id", "tag_id": "tag_id"
-            }}
+            }},
+            # vm attach to tag never run read
+            read_args=None, read_kwargs=None, read_responce=None,
+            # but run update
+            update_args=['securityTagVM'],
+            update_kwargs={
+                'uri_parameters': {
+                    'tagId': 'tag_id',
+                    'vmMoid': 'vm_id'
+                }
+            },
+            update_responce={
+                'status': 204,
+                'objectId': 'id'
+            }
         )
 
 

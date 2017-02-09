@@ -105,9 +105,11 @@ class BaseTest(unittest.TestCase):
         }
         fake_cs_result = mock.Mock()
         fake_client = mock.MagicMock(return_value=fake_cs_result)
+
         fake_cs_result.create = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
+
         fake_cs_result.delete = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
@@ -119,6 +121,11 @@ class BaseTest(unittest.TestCase):
         fake_cs_result.update = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
+
+        fake_cs_result.extract_resource_body_example = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
         return fake_client, fake_cs_result, kwargs
 
     def _common_install(self, resource_id, func_call, func_kwargs):
@@ -153,6 +160,49 @@ class BaseTest(unittest.TestCase):
                     'host': 'host',
                     'raml': 'raml'
                 }
+            )
+
+    def _common_install_read_and_update(
+        self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
+        read_responce, update_args, update_kwargs, update_responce
+    ):
+        """check install logic that read current state and than send
+           update request"""
+        self._common_install(resource_id, func_call, func_kwargs)
+
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, func_kwargs
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            if read_args:
+                fake_cs_result.read = mock.Mock(
+                    return_value=read_responce
+                )
+
+            fake_cs_result.update = mock.Mock(
+                return_value=update_responce
+            )
+
+            func_call(**kwargs)
+
+            if not read_args:
+                # doesn't need read at all
+                fake_cs_result.read.assert_not_called()
+            else:
+                fake_cs_result.read.assert_called_with(
+                    *read_args, **read_kwargs
+                )
+
+            fake_cs_result.update.assert_called_with(
+                *update_args, **update_kwargs
+            )
+            runtime = self.fake_ctx.instance.runtime_properties
+            self.assertEqual(
+                runtime['resource_id'],
+                resource_id
             )
 
     def _common_install_read_and_create(

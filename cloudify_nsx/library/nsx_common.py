@@ -55,13 +55,12 @@ def _cleanup_properties_list(properties_list):
 
 def _cleanup_if_empty(value):
     """return None if all fileds equal to None, else origin dict"""
-    have_not_none = False
     for key in value:
         if value[key]:
-            have_not_none = True
             break
-    if not have_not_none:
+    else:
         value = None
+
     return value
 
 
@@ -307,8 +306,57 @@ def nsx_read(client_session, path, searched_resource, **kwargs):
         if path not in selected_obj:
             return None
         selected_obj = selected_obj[path]
+    else:
+        return selected_obj
 
-    return selected_obj
+
+def nsx_struct_get_list(nsx_object, path):
+    """create path to searched part and convert part to list"""
+    path_list = path.split("/")
+    selected_obj = nsx_object
+    # select parent
+    for path in path_list[:-1]:
+        if path not in selected_obj:
+            selected_obj[path] = {}
+        selected_obj = selected_obj[path]
+
+    # restruct parent
+    last_part = path_list[-1]
+
+    # create if not exist
+    if last_part not in selected_obj:
+        selected_obj[last_part] = []
+
+    # convert dict to list
+    if isinstance(selected_obj[last_part], dict):
+        selected_obj[last_part] = [selected_obj[last_part]]
+
+    return selected_obj[last_part]
+
+
+def nsx_search(client_session, path, name, searched_resource, **kwargs):
+    """search object by name, same logic as in nsx_read
+       but return object_id, object"""
+
+    path_list = path.split("/")
+    first_part = "/".join(path_list[:-1])
+    last_part = path_list[-1]
+
+    nsx_object = nsx_read(
+        client_session, first_part, searched_resource, **kwargs
+    )
+
+    if not nsx_object:
+        return None, None
+
+    nsx_objects = nsx_struct_get_list(nsx_object, last_part)
+
+    for nsx_object in nsx_objects:
+        if 'name' in nsx_object:
+            if str(nsx_object['name']) == str(name):
+                return nsx_object['objectId'], nsx_object
+    else:
+        return None, None
 
 
 def all_relationships_are_present(relationships,
