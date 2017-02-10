@@ -309,12 +309,21 @@ class NsxCommonTest(unittest.TestCase):
             }}),
             (False, {'somevalue': True})
         )
+        # use_external_resource in properties
         self._regen_ctx()
         self.fake_ctx.node.properties['use_external_resource'] = True
         self.assertEqual(
             common.get_properties('some_name', {'some_name': {
                 'somevalue': False
             }}),
+            (True, {'somevalue': False})
+        )
+        # use_external_resource in inputs
+        self._regen_ctx()
+        self.assertEqual(
+            common.get_properties('some_name', {'some_name': {
+                'somevalue': False
+            }, 'use_external_resource': True}),
             (True, {'somevalue': False})
         )
 

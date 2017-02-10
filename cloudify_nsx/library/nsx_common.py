@@ -161,6 +161,8 @@ def get_properties(name, kwargs):
     use_existing = ctx.node.properties.get(
         'use_external_resource', False
     )
+    if 'use_external_resource' in kwargs:
+        use_existing = kwargs['use_external_resource']
     return use_existing, properties_dict
 
 
