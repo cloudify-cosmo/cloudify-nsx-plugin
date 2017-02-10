@@ -57,8 +57,10 @@ def add_group_exclude_member(client_session, security_group_id, member_id):
     for member in excludeMembers:
         if member.get("objectId") == member_id:
             raise cfy_exc.NonRecoverableError(
-                "Member %s already exists in %s" % (
-                    member_id, security_group['securitygroup'].get('name')
+                "Member %s already exists in %s group" % (
+                    member_id, security_group['securitygroup'].get(
+                        'name', '*unknown*'
+                    )
                 )
             )
 

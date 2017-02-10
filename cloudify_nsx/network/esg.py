@@ -120,7 +120,9 @@ def delete(**kwargs):
 
     if use_existing:
         nsx_dlr.remove_properties_edges()
-        ctx.logger.info("Used existed %s" % edge_dict.get('name'))
+        ctx.logger.info(
+            "Used existed %s edge" % edge_dict.get('name', '*unknown*')
+        )
         return
 
     # credentials

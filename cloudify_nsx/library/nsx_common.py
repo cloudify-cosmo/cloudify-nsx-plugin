@@ -54,14 +54,11 @@ def _cleanup_properties_list(properties_list):
 
 
 def _cleanup_if_empty(value):
-    """return None if all fileds equal to None, else origin dict"""
-    for key in value:
-        if value[key]:
-            break
+    """return None if all fileds is empty, else origin dict"""
+    if any(value[key] is not None for key in value):
+        return value
     else:
-        value = None
-
-    return value
+        return None
 
 
 def _validate(check_dict, validate_rules, use_existing):
@@ -295,7 +292,8 @@ def set_boolean_property(obj, path, value):
 
 
 def nsx_read(client_session, path, searched_resource, **kwargs):
-    """Read with checks and return only result selected by path"""
+    """run client_session.read(searched_resource, **kwargs) with checks
+       and return only result selected by path"""
     raw_result = client_session.read(
         searched_resource, **kwargs
     )
@@ -337,8 +335,9 @@ def nsx_struct_get_list(nsx_object, path):
 
 
 def nsx_search(client_session, path, name, searched_resource, **kwargs):
-    """search object by name, same logic as in nsx_read
-       but return object_id, object"""
+    """search object by name in path in responce
+       from nsx_read(searched_resource, **kwargs)
+       and return object_id, object"""
 
     path_list = path.split("/")
     first_part = "/".join(path_list[:-1])

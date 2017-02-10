@@ -60,9 +60,11 @@ def add_policy_group_bind(client_session, security_policy_id,
     for bind in bindings:
         if bind.get('objectId') == security_group_id:
             raise cfy_exc.NonRecoverableError(
-                "Group %s already exists in %s" % (
+                "Group %s already exists in %s policy" % (
                     security_group_id,
-                    security_policy['securityPolicy'].get('name')
+                    security_policy['securityPolicy'].get(
+                        'name', '*unknown*'
+                    )
                 )
             )
 

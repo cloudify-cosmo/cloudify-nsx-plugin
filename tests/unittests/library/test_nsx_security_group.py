@@ -24,7 +24,7 @@ class NsxSecurityGroupTest(unittest.TestCase):
     @pytest.mark.unit
     def test_add_group_exclude_member(self):
         """Check nsx_security_group.add_group_exclude_member func"""
-        def prepere_check():
+        def prepare_check():
             client_session = mock.Mock()
             client_session.read = mock.Mock(
                 return_value={
@@ -49,7 +49,7 @@ class NsxSecurityGroupTest(unittest.TestCase):
             return client_session
 
         # common add
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         self.assertEqual(
             nsx_security_group.add_group_exclude_member(
@@ -78,7 +78,7 @@ class NsxSecurityGroupTest(unittest.TestCase):
         )
 
         # issue with add
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         with self.assertRaises(cfy_exc.NonRecoverableError):
             nsx_security_group.add_group_exclude_member(
@@ -95,7 +95,7 @@ class NsxSecurityGroupTest(unittest.TestCase):
     @pytest.mark.unit
     def test_del_group_exclude_member(self):
         """Check nsx_security_group.del_group_exclude_member func"""
-        def prepere_check():
+        def prepare_check():
             client_session = mock.Mock()
             client_session.read = mock.Mock(
                 return_value={
@@ -122,7 +122,7 @@ class NsxSecurityGroupTest(unittest.TestCase):
             return client_session
 
         # delete existed
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         nsx_security_group.del_group_exclude_member(
             client_session, "security_group_id|member_id"
@@ -146,7 +146,7 @@ class NsxSecurityGroupTest(unittest.TestCase):
         )
 
         # delete unexisted
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         nsx_security_group.del_group_exclude_member(
             client_session, "security_group_id|other_member_id"

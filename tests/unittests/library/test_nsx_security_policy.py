@@ -24,7 +24,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
     @pytest.mark.unit
     def test_add_policy_group_bind(self):
         """Check nsx_security_policy.add_policy_group_bind func"""
-        def prepere_check():
+        def prepare_check():
             client_session = mock.Mock()
             client_session.read = mock.Mock(
                 return_value={
@@ -49,7 +49,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             return client_session
 
         # common add
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         self.assertEqual(
             nsx_security_policy.add_policy_group_bind(
@@ -78,7 +78,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
         )
 
         # issue with add
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         with self.assertRaises(cfy_exc.NonRecoverableError):
             nsx_security_policy.add_policy_group_bind(
@@ -95,7 +95,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
     @pytest.mark.unit
     def test_del_policy_group_bind(self):
         """Check nsx_security_policy.del_policy_group_bind func"""
-        def prepere_check():
+        def prepare_check():
             client_session = mock.Mock()
             client_session.read = mock.Mock(
                 return_value={
@@ -122,7 +122,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             return client_session
 
         # delete existed
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         nsx_security_policy.del_policy_group_bind(
             client_session, "security_group_id|security_policy_id"
@@ -146,7 +146,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
         )
 
         # delete unexisted
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         nsx_security_policy.del_policy_group_bind(
             client_session, "security_id|security_policy_id"
@@ -162,7 +162,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
     @pytest.mark.unit
     def test_add_policy_section(self):
         """Check nsx_security_policy.add_policy_section func"""
-        def prepere_check():
+        def prepare_check():
             client_session = mock.Mock()
             client_session.read = mock.Mock(
                 return_value={
@@ -187,7 +187,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             return client_session
 
         # common add
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         self.assertEqual(
             nsx_security_policy.add_policy_section(
@@ -217,7 +217,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
         )
 
         # overwrite with add
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         self.assertEqual(
             nsx_security_policy.add_policy_section(
@@ -248,7 +248,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
     @pytest.mark.unit
     def test_del_policy_section(self):
         """Check nsx_security_policy.del_policy_section func"""
-        def prepere_check():
+        def prepare_check():
             client_session = mock.Mock()
             client_session.read = mock.Mock(
                 return_value={
@@ -276,7 +276,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             return client_session
 
         # delete existed
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         nsx_security_policy.del_policy_section(
             client_session, "category|security_policy_id"
@@ -300,7 +300,7 @@ class NsxSecurityPolicyTest(unittest.TestCase):
         )
 
         # delete unexisted
-        client_session = prepere_check()
+        client_session = prepare_check()
 
         nsx_security_policy.del_policy_section(
             client_session, "unknown|security_policy_id"
