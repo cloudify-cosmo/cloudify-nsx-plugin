@@ -1,4 +1,4 @@
-# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2017 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -639,8 +639,8 @@ class NsxCommonTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_nsx_search(self):
-        """Check nsx_common.nsx_search func"""
+    def test_nsx_search_error_raise(self):
+        """Check nsx_common.nsx_search func: error raise"""
         self._regen_ctx()
         client_session = mock.Mock()
 
@@ -651,6 +651,14 @@ class NsxCommonTest(unittest.TestCase):
         with self.assertRaises(cfy_exc.NonRecoverableError):
             common.nsx_search(client_session, 'body/a', 'b', 'secret',
                               uri_parameters={'scopeId': 'scopeId'})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_search_no_results(self):
+        """Check nsx_common.nsx_search func: no result"""
+        self._regen_ctx()
+        client_session = mock.Mock()
+
         # no results
         client_session.read = mock.Mock(return_value={
             'body': {}, 'status': 204
@@ -661,6 +669,13 @@ class NsxCommonTest(unittest.TestCase):
             (None, None)
         )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_search_dict(self):
+        """Check nsx_common.nsx_search func: dict_result"""
+        self._regen_ctx()
+        client_session = mock.Mock()
+
         # dict result
         client_session.read = mock.Mock(return_value={
             'body': {'a': {'name': 'b', 'objectId': 'c'}}, 'status': 204
@@ -670,6 +685,13 @@ class NsxCommonTest(unittest.TestCase):
                               uri_parameters={'scopeId': 'scopeId'}),
             ('c', {'name': 'b', 'objectId': 'c'})
         )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_search_list(self):
+        """Check nsx_common.nsx_search func: list result"""
+        self._regen_ctx()
+        client_session = mock.Mock()
 
         # list result
         client_session.read = mock.Mock(return_value={
@@ -686,6 +708,13 @@ class NsxCommonTest(unittest.TestCase):
                               uri_parameters={'scopeId': 'scopeId'}),
             ('e', {'name': 'd', 'objectId': 'e'})
         )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_search_no_object(self):
+        """Check nsx_common.nsx_search func: no object"""
+        self._regen_ctx()
+        client_session = mock.Mock()
 
         # object not exist
         client_session.read = mock.Mock(return_value={
@@ -705,8 +734,8 @@ class NsxCommonTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_nsx_struct_get_list(self):
-        """Check nsx_common.nsx_struct_get_list func"""
+    def test_nsx_struct_get_list_create(self):
+        """Check nsx_common.nsx_struct_get_list func create"""
 
         # create
         nsx_object = {}
@@ -725,6 +754,11 @@ class NsxCommonTest(unittest.TestCase):
                 }
             }
         )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_struct_get_list_list(self):
+        """Check nsx_common.nsx_struct_get_list func list"""
 
         # list by path
         nsx_object = {
@@ -757,6 +791,10 @@ class NsxCommonTest(unittest.TestCase):
             }
         )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_struct_get_list_dict2list(self):
+        """Check nsx_common.nsx_struct_get_list func dict2list"""
         # convert dict to list
         nsx_object = {
             'a': {

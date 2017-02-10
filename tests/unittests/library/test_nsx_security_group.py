@@ -12,44 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import mock
 import pytest
+import test_nsx_base
 import cloudify_nsx.library.nsx_security_group as nsx_security_group
 from cloudify import exceptions as cfy_exc
 
 
-class NsxSecurityGroupTest(unittest.TestCase):
+class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_add_group_exclude_member(self):
-        """Check nsx_security_group.add_group_exclude_member func"""
-        def prepare_check():
-            client_session = mock.Mock()
-            client_session.read = mock.Mock(
-                return_value={
-                    'status': 204,
-                    'body': {
-                        'securitygroup': {
-                            'excludeMember': [{
-                                "objectId": "other_objectId",
-                            }],
-                            'name': 'some_name'
-                        }
-                    }
+    def test_add_group_exclude_member_insert(self):
+        """Check nsx_security_group.add_group_exclude_member func insert"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securitygroup': {
+                    'excludeMember': [{
+                        "objectId": "other_objectId",
+                    }],
+                    'name': 'some_name'
                 }
-            )
-
-            client_session.update = mock.Mock(
-                return_value={
-                    'status': 204
-                }
-            )
-
-            return client_session
-
-        # common add
-        client_session = prepare_check()
+            }
+        })
 
         self.assertEqual(
             nsx_security_group.add_group_exclude_member(
@@ -77,13 +62,31 @@ class NsxSecurityGroupTest(unittest.TestCase):
             uri_parameters={'objectId': 'security_group_id'}
         )
 
-        # issue with add
-        client_session = prepare_check()
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_add_group_exclude_member_existing(self):
+        """Check nsx_security_group.add_group_exclude_member func existing"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securitygroup': {
+                    'excludeMember': [{
+                        "objectId": "other_objectId",
+                    }],
+                    'name': 'some_name'
+                }
+            }
+        })
 
-        with self.assertRaises(cfy_exc.NonRecoverableError):
+        with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             nsx_security_group.add_group_exclude_member(
                 client_session, 'security_group_id', 'other_objectId'
             )
+
+        self.assertEqual(
+            str(error.exception),
+            "Member other_objectId already exists in some_name group"
+        )
 
         client_session.read.assert_called_with(
             'secGroupObject', uri_parameters={'objectId': 'security_group_id'}
@@ -93,36 +96,22 @@ class NsxSecurityGroupTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_del_group_exclude_member(self):
-        """Check nsx_security_group.del_group_exclude_member func"""
-        def prepare_check():
-            client_session = mock.Mock()
-            client_session.read = mock.Mock(
-                return_value={
-                    'status': 204,
-                    'body': {
-                        'securitygroup': {
-                            'excludeMember': [{
-                                'objectId': 'member_id'
-                            }, {
-                                'objectId': 'objectOtherId'
-                            }],
-                            'name': 'some_name'
-                        }
-                    }
+    def test_del_group_exclude_member_existing(self):
+        """Check nsx_security_group.del_group_exclude_member func existing"""
+
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securitygroup': {
+                    'excludeMember': [{
+                        'objectId': 'member_id'
+                    }, {
+                        'objectId': 'objectOtherId'
+                    }],
+                    'name': 'some_name'
                 }
-            )
-
-            client_session.update = mock.Mock(
-                return_value={
-                    'status': 204
-                }
-            )
-
-            return client_session
-
-        # delete existed
-        client_session = prepare_check()
+            }
+        })
 
         nsx_security_group.del_group_exclude_member(
             client_session, "security_group_id|member_id"
@@ -145,8 +134,24 @@ class NsxSecurityGroupTest(unittest.TestCase):
             uri_parameters={'objectId': 'security_group_id'}
         )
 
-        # delete unexisted
-        client_session = prepare_check()
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_del_group_exclude_member_unexisting(self):
+        """Check nsx_security_group.del_group_exclude_member func unexisting"""
+
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securitygroup': {
+                    'excludeMember': [{
+                        'objectId': 'member_id'
+                    }, {
+                        'objectId': 'objectOtherId'
+                    }],
+                    'name': 'some_name'
+                }
+            }
+        })
 
         nsx_security_group.del_group_exclude_member(
             client_session, "security_group_id|other_member_id"

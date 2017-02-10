@@ -1,4 +1,4 @@
-# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2017 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,44 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import mock
 import pytest
+import test_nsx_base
 import cloudify_nsx.library.nsx_security_policy as nsx_security_policy
 from cloudify import exceptions as cfy_exc
 
 
-class NsxSecurityPolicyTest(unittest.TestCase):
+class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_add_policy_group_bind(self):
-        """Check nsx_security_policy.add_policy_group_bind func"""
-        def prepare_check():
-            client_session = mock.Mock()
-            client_session.read = mock.Mock(
-                return_value={
-                    'status': 204,
-                    'body': {
-                        'securityPolicy': {
-                            'securityGroupBinding': [{
-                                'objectId': 'other'
-                            }],
-                            'name': 'name'
-                        }
-                    }
+    def test_add_policy_group_bind_insert(self):
+        """Check nsx_security_policy.add_policy_group_bind func: insert"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'securityGroupBinding': [{
+                        'objectId': 'other'
+                    }],
+                    'name': 'name'
                 }
-            )
-
-            client_session.update = mock.Mock(
-                return_value={
-                    'status': 204
-                }
-            )
-
-            return client_session
-
-        # common add
-        client_session = prepare_check()
+            }
+        })
 
         self.assertEqual(
             nsx_security_policy.add_policy_group_bind(
@@ -77,13 +62,30 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             uri_parameters={'ID': 'security_policy_id'}
         )
 
-        # issue with add
-        client_session = prepare_check()
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_add_policy_group_bind_existing(self):
+        """Check nsx_security_policy.add_policy_group_bind func existing"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'securityGroupBinding': [{
+                        'objectId': 'other'
+                    }],
+                    'name': 'name'
+                }
+            }
+        })
 
-        with self.assertRaises(cfy_exc.NonRecoverableError):
+        with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             nsx_security_policy.add_policy_group_bind(
                 client_session, 'security_policy_id', 'other'
             )
+        self.assertEqual(
+            str(error.exception),
+            "Group other already exists in name policy"
+        )
 
         client_session.read.assert_called_with(
             'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
@@ -93,36 +95,21 @@ class NsxSecurityPolicyTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_del_policy_group_bind(self):
-        """Check nsx_security_policy.del_policy_group_bind func"""
-        def prepare_check():
-            client_session = mock.Mock()
-            client_session.read = mock.Mock(
-                return_value={
-                    'status': 204,
-                    'body': {
-                        'securityPolicy': {
-                            'securityGroupBinding': [{
-                                'objectId': 'other'
-                            }, {
-                                'objectId': 'security_group_id'
-                            }],
-                            'name': 'name'
-                        }
-                    }
+    def test_del_policy_group_bind_existing(self):
+        """Check nsx_security_policy.del_policy_group_bind func: existing"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'securityGroupBinding': [{
+                        'objectId': 'other'
+                    }, {
+                        'objectId': 'security_group_id'
+                    }],
+                    'name': 'name'
                 }
-            )
-
-            client_session.update = mock.Mock(
-                return_value={
-                    'status': 204
-                }
-            )
-
-            return client_session
-
-        # delete existed
-        client_session = prepare_check()
+            }
+        })
 
         nsx_security_policy.del_policy_group_bind(
             client_session, "security_group_id|security_policy_id"
@@ -145,8 +132,23 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             uri_parameters={'ID': 'security_policy_id'}
         )
 
-        # delete unexisted
-        client_session = prepare_check()
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_del_policy_group_bind_unexisting(self):
+        """Check nsx_security_policy.del_policy_group_bind func: unexisting"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'securityGroupBinding': [{
+                        'objectId': 'other'
+                    }, {
+                        'objectId': 'security_group_id'
+                    }],
+                    'name': 'name'
+                }
+            }
+        })
 
         nsx_security_policy.del_policy_group_bind(
             client_session, "security_id|security_policy_id"
@@ -160,34 +162,19 @@ class NsxSecurityPolicyTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_add_policy_section(self):
-        """Check nsx_security_policy.add_policy_section func"""
-        def prepare_check():
-            client_session = mock.Mock()
-            client_session.read = mock.Mock(
-                return_value={
-                    'status': 204,
-                    'body': {
-                        'securityPolicy': {
-                            'actionsByCategory': [{
-                                "category": "other_category",
-                                "action": "other_action"
-                            }]
-                        }
-                    }
+    def test_add_policy_section_insert(self):
+        """Check nsx_security_policy.add_policy_section func: positive"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'actionsByCategory': [{
+                        "category": "other_category",
+                        "action": "other_action"
+                    }]
                 }
-            )
-
-            client_session.update = mock.Mock(
-                return_value={
-                    'status': 204
-                }
-            )
-
-            return client_session
-
-        # common add
-        client_session = prepare_check()
+            }
+        })
 
         self.assertEqual(
             nsx_security_policy.add_policy_section(
@@ -216,8 +203,21 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             uri_parameters={'ID': 'security_policy_id'}
         )
 
-        # overwrite with add
-        client_session = prepare_check()
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_add_policy_section_overwrite(self):
+        """Check nsx_security_policy.add_policy_section func: overwrite"""
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'actionsByCategory': [{
+                        "category": "other_category",
+                        "action": "other_action"
+                    }]
+                }
+            }
+        })
 
         self.assertEqual(
             nsx_security_policy.add_policy_section(
@@ -246,37 +246,24 @@ class NsxSecurityPolicyTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_del_policy_section(self):
-        """Check nsx_security_policy.del_policy_section func"""
-        def prepare_check():
-            client_session = mock.Mock()
-            client_session.read = mock.Mock(
-                return_value={
-                    'status': 204,
-                    'body': {
-                        'securityPolicy': {
-                            'actionsByCategory': [{
-                                "category": "other_category",
-                                "action": "other_action"
-                            }, {
-                                "category": "category",
-                                "action": "action"
-                            }]
-                        }
-                    }
-                }
-            )
-
-            client_session.update = mock.Mock(
-                return_value={
-                    'status': 204
-                }
-            )
-
-            return client_session
+    def test_del_policy_section_existing(self):
+        """Check nsx_security_policy.del_policy_section func existing"""
 
         # delete existed
-        client_session = prepare_check()
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'actionsByCategory': [{
+                        "category": "other_category",
+                        "action": "other_action"
+                    }, {
+                        "category": "category",
+                        "action": "action"
+                    }]
+                }
+            }
+        })
 
         nsx_security_policy.del_policy_section(
             client_session, "category|security_policy_id"
@@ -299,8 +286,26 @@ class NsxSecurityPolicyTest(unittest.TestCase):
             uri_parameters={'ID': 'security_policy_id'}
         )
 
-        # delete unexisted
-        client_session = prepare_check()
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_del_policy_section_unexisting(self):
+        """Check nsx_security_policy.del_policy_section func: unexisting"""
+
+        # delete existed
+        client_session = self._prepare_check(read={
+            'status': 204,
+            'body': {
+                'securityPolicy': {
+                    'actionsByCategory': [{
+                        "category": "other_category",
+                        "action": "other_action"
+                    }, {
+                        "category": "category",
+                        "action": "action"
+                    }]
+                }
+            }
+        })
 
         nsx_security_policy.del_policy_section(
             client_session, "unknown|security_policy_id"
