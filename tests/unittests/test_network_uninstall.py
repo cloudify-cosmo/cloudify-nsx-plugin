@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import test_base
+import library.test_nsx_base as test_nsx_base
 import pytest
 import cloudify_nsx.network.dlr_bgp_neighbour as dlr_bgp_neighbour
 import cloudify_nsx.network.bgp_neighbour_filter as bgp_neighbour_filter
@@ -22,7 +22,7 @@ import cloudify_nsx.network.esg_nat as esg_nat
 from cloudify.state import current_ctx
 
 
-class NetworkUninstallTest(test_base.BaseTest):
+class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
 
     def setUp(self):
         super(NetworkUninstallTest, self).setUp()
@@ -42,7 +42,7 @@ class NetworkUninstallTest(test_base.BaseTest):
             {},
             read_args=['routingBGP'],
             read_kwargs={'uri_parameters': {'edgeId': 'esg_id'}},
-            read_responce={
+            read_response={
                 'body': {
                     'bgp': {
                         'bgpNeighbours': {
@@ -101,7 +101,7 @@ class NetworkUninstallTest(test_base.BaseTest):
             {},
             read_args=['routingBGP'],
             read_kwargs={'uri_parameters': {'edgeId': 'esg_id'}},
-            read_responce={
+            read_response={
                 'body': {
                     'bgp': {
                         'bgpNeighbours': {

@@ -16,25 +16,14 @@ import mock
 import pytest
 import cloudify_nsx.library.nsx_common as common
 from cloudify import exceptions as cfy_exc
-from cloudify import mocks as cfy_mocks
 from cloudify.state import current_ctx
+import test_nsx_base
 
 
-class NsxCommonTest(unittest.TestCase):
+class NsxCommonTest(test_nsx_base.NSXBaseTest):
 
     def setUp(self):
         super(NsxCommonTest, self).setUp()
-
-    def _regen_ctx(self):
-        self.fake_ctx = cfy_mocks.MockCloudifyContext()
-        instance = mock.Mock()
-        instance.runtime_properties = {}
-        self.fake_ctx._instance = instance
-        node = mock.Mock()
-        self.fake_ctx._node = node
-        node.properties = {}
-        node.runtime_properties = {}
-        current_ctx.set(self.fake_ctx)
 
     def tearDown(self):
         current_ctx.clear()
@@ -87,14 +76,17 @@ class NsxCommonTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_validate(self):
-        """Check nsx_common._validate func"""
-        # empty
+    def test_validate_empty(self):
+        """Check nsx_common._validate func: empty"""
         self.assertEqual(
             common._validate({}, {}, False),
             {}
         )
-        # default
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_default(self):
+        """Check nsx_common._validate func: default"""
         self.assertEqual(
             common._validate({}, {'a': {'default': 'd'}}, False),
             {'a': 'd'}
@@ -105,7 +97,10 @@ class NsxCommonTest(unittest.TestCase):
             {'a': 'c'}
         )
 
-        # external
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_external(self):
+        """Check nsx_common._validate func: external"""
         with self.assertRaises(cfy_exc.NonRecoverableError):
             common._validate({}, {'a': {'external_use': True}}, True)
 
@@ -114,11 +109,17 @@ class NsxCommonTest(unittest.TestCase):
             {'a': None}
         )
 
-        # required
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_required(self):
+        """Check nsx_common._validate func: required"""
         with self.assertRaises(cfy_exc.NonRecoverableError):
             common._validate({}, {'a': {'required': True}}, False)
 
-        # caseinsensitive
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_caseinsensitive(self):
+        """Check nsx_common._validate func: caseinsensitive"""
         self.assertEqual(
             common._validate(
                 {'a': 'AbC'}, {'a': {'caseinsensitive': True}}, False
@@ -126,7 +127,10 @@ class NsxCommonTest(unittest.TestCase):
             {'a': 'abc'}
         )
 
-        # values
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_values(self):
+        """Check nsx_common._validate func: values"""
         self.assertEqual(
             common._validate(
                 {'a': 'a'}, {'a': {'values': ['a', 'b', 'c']}}, False
@@ -152,7 +156,10 @@ class NsxCommonTest(unittest.TestCase):
             {'a': 'a'}
         )
 
-        # set None
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_set_None(self):
+        """Check nsx_common._validate func: set None"""
         self.assertEqual(
             common._validate(
                 {}, {'a': {'set_none': True}}, False
@@ -160,7 +167,10 @@ class NsxCommonTest(unittest.TestCase):
             {'a': None}
         )
 
-        # sub checks
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_sub_checks(self):
+        """Check nsx_common._validate func: sub checks"""
         self.assertEqual(
             common._validate(
                 {'a': {'b': 'c'}},
@@ -191,7 +201,10 @@ class NsxCommonTest(unittest.TestCase):
             {'a': None}
         )
 
-        # boolean type
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_boolean_type(self):
+        """Check nsx_common._validate func: boolean type"""
         self.assertEqual(
             common._validate(
                 {'a': 'true'},
@@ -222,7 +235,10 @@ class NsxCommonTest(unittest.TestCase):
             {'a': False}
         )
 
-        # string type
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_validate_string_type(self):
+        """Check nsx_common._validate func: string type"""
         self.assertEqual(
             common._validate(
                 {'a': 0},
@@ -309,7 +325,12 @@ class NsxCommonTest(unittest.TestCase):
             }}),
             (False, {'somevalue': True})
         )
-        # use_external_resource in properties
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_get_properties_public_external_properties(self):
+        """Check nsx_common.get_properties func:
+           use_external_resource in properties"""
         self._regen_ctx()
         self.fake_ctx.node.properties['use_external_resource'] = True
         self.assertEqual(
@@ -318,7 +339,12 @@ class NsxCommonTest(unittest.TestCase):
             }}),
             (True, {'somevalue': False})
         )
-        # use_external_resource in inputs
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_get_properties_public_external_inputs(self):
+        """Check nsx_common.get_properties func:
+           use_external_resource in inputs"""
         self._regen_ctx()
         self.assertEqual(
             common.get_properties('some_name', {'some_name': {
@@ -351,11 +377,19 @@ class NsxCommonTest(unittest.TestCase):
         for i in xrange(200, 299):
             common.check_raw_result({'status': i})
 
-        with self.assertRaises(cfy_exc.NonRecoverableError):
+        with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             common.check_raw_result({'status': 199})
+        self.assertEqual(
+            str(error.exception),
+            "We have error with request."
+        )
 
-        with self.assertRaises(cfy_exc.NonRecoverableError):
+        with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             common.check_raw_result({'status': 300})
+        self.assertEqual(
+            str(error.exception),
+            "We have error with request."
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
@@ -380,7 +414,7 @@ class NsxCommonTest(unittest.TestCase):
 
         def func_error(need_error):
             if need_error:
-                raise need_error
+                raise need_error()
 
         common.attempt_with_rerun(func_error, need_error=False)
 
@@ -403,8 +437,8 @@ class NsxCommonTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_nsx_login(self):
-        """Check nsx_common.attempt_with_rerun func"""
+    def test_nsx_login_no_credentials(self):
+        """Check nsx_common.attempt_with_rerun func: no credentials"""
         self._regen_ctx()
 
         fake_client = mock.MagicMock()
@@ -413,10 +447,19 @@ class NsxCommonTest(unittest.TestCase):
             fake_client
         ):
             # no credentials
-            with self.assertRaises(cfy_exc.NonRecoverableError):
+            with self.assertRaises(cfy_exc.NonRecoverableError) as error:
                 common.nsx_login({})
             fake_client.assert_not_called()
 
+            self.assertEqual(
+                str(error.exception),
+                "please check your credentials"
+            )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_login_ip_from_instance(self):
+        """Check nsx_common.attempt_with_rerun func: ip from instance ip"""
         self._regen_ctx()
         fake_client = mock.MagicMock(return_value='Called')
         with mock.patch(
@@ -438,6 +481,10 @@ class NsxCommonTest(unittest.TestCase):
                 'raml', 'instance_ip', 'username', 'password'
             )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_login_ip_from_inputs(self):
+        """Check nsx_common.attempt_with_rerun func:ip from inputs"""
         self._regen_ctx()
         fake_client = mock.MagicMock(return_value='Called')
         with mock.patch(
@@ -459,6 +506,10 @@ class NsxCommonTest(unittest.TestCase):
                 'raml', 'ip', 'username', 'password'
             )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_nsx_login_without_raml(self):
+        """Check nsx_common.attempt_with_rerun func: withour raml"""
         self._regen_ctx()
         fake_client = mock.MagicMock(return_value='Called')
         with mock.patch(
@@ -486,11 +537,9 @@ class NsxCommonTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_delete_object(self):
-        """Check nsx_common.attempt_with_rerun func"""
+    def test_delete_object_not_fully(self):
+        """Check nsx_common.attempt_with_rerun func: not fully created"""
         self._regen_ctx()
-
-        # not fully created
         fake_client = mock.MagicMock()
         with mock.patch(
             'cloudify_nsx.library.nsx_common.NsxClient',
@@ -502,7 +551,10 @@ class NsxCommonTest(unittest.TestCase):
             common.delete_object(None, 'a', {'a': {'b': 'c'}}, ['d', 'm'])
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
-        # check use existed
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_delete_object_use_external(self):
+        """Check nsx_common.attempt_with_rerun func: use external"""
         self._regen_ctx()
         fake_client = mock.MagicMock()
         with mock.patch(
@@ -516,7 +568,10 @@ class NsxCommonTest(unittest.TestCase):
             common.delete_object(None, 'a', {'a': {'b': 'c'}}, ['d', 'm'])
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
-        # call with exception
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_delete_object_call_with_exception(self):
+        """Check nsx_common.attempt_with_rerun func: call with exception"""
         self._regen_ctx()
         self.fake_ctx.instance.runtime_properties['resource_id'] = 'r_id'
         kwargs = {
@@ -553,7 +608,10 @@ class NsxCommonTest(unittest.TestCase):
                 }
             )
 
-        # good case
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_delete_object_positive(self):
+        """Check nsx_common.attempt_with_rerun func: success"""
         self._regen_ctx()
         self.fake_ctx.instance.runtime_properties['resource_id'] = 'r_id'
         kwargs = {
@@ -585,19 +643,26 @@ class NsxCommonTest(unittest.TestCase):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_set_boolean_property(self):
-        """Check nsx_common.set_boolean_property func"""
+    def test_set_boolean_property_recreate_path(self):
+        """Check nsx_common.set_boolean_property func: recreate path"""
         # recreate path
         a = {}
         self.assertTrue(common.set_boolean_property(a, 'b/c', True))
         self.assertEqual(a, {'b': {'c': 'true'}})
 
-        # already have correct value
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_set_boolean_property_without_changes(self):
+        """Check nsx_common.set_boolean_property func:
+           already have correct value"""
         a = {'b': {'c': 'true'}}
         self.assertFalse(common.set_boolean_property(a, 'b/c', True))
         self.assertEqual(a, {'b': {'c': 'true'}})
 
-        # already have correct value
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_set_boolean_property_with_changes(self):
+        """Check nsx_common.set_boolean_property func: need to update"""
         a = {'b': {'c': 'true'}}
         self.assertTrue(common.set_boolean_property(a, 'b/c', False))
         self.assertEqual(a, {'b': {'c': 'false'}})
@@ -613,9 +678,13 @@ class NsxCommonTest(unittest.TestCase):
         client_session.read = mock.Mock(return_value={
             'body': {}, 'status': 300
         })
-        with self.assertRaises(cfy_exc.NonRecoverableError):
+        with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             common.nsx_read(client_session, 'body/a', 'secret',
                             uri_parameters={'scopeId': 'scopeId'})
+        self.assertEqual(
+            str(error.exception),
+            "We have error with request."
+        )
 
         # return None for not existed
         client_session.read = mock.Mock(return_value={
@@ -648,9 +717,13 @@ class NsxCommonTest(unittest.TestCase):
         client_session.read = mock.Mock(return_value={
             'body': {}, 'status': 300
         })
-        with self.assertRaises(cfy_exc.NonRecoverableError):
+        with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             common.nsx_search(client_session, 'body/a', 'b', 'secret',
                               uri_parameters={'scopeId': 'scopeId'})
+        self.assertEqual(
+            str(error.exception),
+            "We have error with request."
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit

@@ -6,3 +6,5 @@ nose-cov>=1.3
 tox
 pylint
 pytest
+# for integration and platform tests
+cloudify>=3.4.1

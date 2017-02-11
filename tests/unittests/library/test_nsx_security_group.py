@@ -24,16 +24,9 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_add_group_exclude_member_insert(self):
         """Check nsx_security_group.add_group_exclude_member func insert"""
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securitygroup': {
-                    'excludeMember': [{
-                        "objectId": "other_objectId",
-                    }],
-                    'name': 'some_name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE
         })
 
         self.assertEqual(
@@ -49,16 +42,7 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
 
         client_session.update.assert_called_with(
             'secGroupObject',
-            request_body_dict={
-                'securitygroup': {
-                    'excludeMember': [{
-                        'objectId': 'other_objectId'
-                    }, {
-                        'objectId': 'member_id'
-                    }],
-                    'name': 'some_name'
-                }
-            },
+            request_body_dict=test_nsx_base.SEC_GROUP_EXCLUDE_AFTER,
             uri_parameters={'objectId': 'security_group_id'}
         )
 
@@ -66,16 +50,9 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_add_group_exclude_member_existing(self):
         """Check nsx_security_group.add_group_exclude_member func existing"""
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securitygroup': {
-                    'excludeMember': [{
-                        "objectId": "other_objectId",
-                    }],
-                    'name': 'some_name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE
         })
 
         with self.assertRaises(cfy_exc.NonRecoverableError) as error:
@@ -99,18 +76,9 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
     def test_del_group_exclude_member_existing(self):
         """Check nsx_security_group.del_group_exclude_member func existing"""
 
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securitygroup': {
-                    'excludeMember': [{
-                        'objectId': 'member_id'
-                    }, {
-                        'objectId': 'objectOtherId'
-                    }],
-                    'name': 'some_name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER
         })
 
         nsx_security_group.del_group_exclude_member(
@@ -123,14 +91,7 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
 
         client_session.update.assert_called_with(
             'secGroupObject',
-            request_body_dict={
-                'securitygroup': {
-                    'excludeMember': [{
-                        'objectId': 'objectOtherId'
-                    }],
-                    'name': 'some_name'
-                }
-            },
+            request_body_dict=test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE,
             uri_parameters={'objectId': 'security_group_id'}
         )
 
@@ -139,22 +100,13 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
     def test_del_group_exclude_member_unexisting(self):
         """Check nsx_security_group.del_group_exclude_member func unexisting"""
 
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securitygroup': {
-                    'excludeMember': [{
-                        'objectId': 'member_id'
-                    }, {
-                        'objectId': 'objectOtherId'
-                    }],
-                    'name': 'some_name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER
         })
 
         nsx_security_group.del_group_exclude_member(
-            client_session, "security_group_id|other_member_id"
+            client_session, "security_group_id|unknown"
         )
 
         client_session.read.assert_called_with(

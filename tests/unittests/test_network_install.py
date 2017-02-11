@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import test_base
+import library.test_nsx_base as test_nsx_base
 import pytest
 import mock
 import cloudify_nsx.network.esg_nat as esg_nat
 from cloudify.state import current_ctx
 
 
-class NetworkInstallTest(test_base.BaseTest):
+class NetworkInstallTest(test_nsx_base.NSXBaseTest):
 
     def setUp(self):
         super(NetworkInstallTest, self).setUp()

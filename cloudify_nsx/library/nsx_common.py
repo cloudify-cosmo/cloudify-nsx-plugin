@@ -335,7 +335,7 @@ def nsx_struct_get_list(nsx_object, path):
 
 
 def nsx_search(client_session, path, name, searched_resource, **kwargs):
-    """search object by name in path in responce
+    """search object by name in path in response
        from nsx_read(searched_resource, **kwargs)
        and return object_id, object"""
 

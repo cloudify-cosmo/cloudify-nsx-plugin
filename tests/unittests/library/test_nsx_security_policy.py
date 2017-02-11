@@ -24,16 +24,9 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_add_policy_group_bind_insert(self):
         """Check nsx_security_policy.add_policy_group_bind func: insert"""
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'securityGroupBinding': [{
-                        'objectId': 'other'
-                    }],
-                    'name': 'name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
         })
 
         self.assertEqual(
@@ -49,16 +42,7 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
 
         client_session.update.assert_called_with(
             'securityPolicyID',
-            request_body_dict={
-                'securityPolicy': {
-                    'securityGroupBinding': [{
-                        'objectId': 'other'
-                    }, {
-                        'objectId': 'security_group_id'
-                    }],
-                    'name': 'name'
-                }
-            },
+            request_body_dict=test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER,
             uri_parameters={'ID': 'security_policy_id'}
         )
 
@@ -66,16 +50,9 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_add_policy_group_bind_existing(self):
         """Check nsx_security_policy.add_policy_group_bind func existing"""
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'securityGroupBinding': [{
-                        'objectId': 'other'
-                    }],
-                    'name': 'name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
         })
 
         with self.assertRaises(cfy_exc.NonRecoverableError) as error:
@@ -97,18 +74,9 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_del_policy_group_bind_existing(self):
         """Check nsx_security_policy.del_policy_group_bind func: existing"""
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'securityGroupBinding': [{
-                        'objectId': 'other'
-                    }, {
-                        'objectId': 'security_group_id'
-                    }],
-                    'name': 'name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER
         })
 
         nsx_security_policy.del_policy_group_bind(
@@ -121,14 +89,7 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
 
         client_session.update.assert_called_with(
             'securityPolicyID',
-            request_body_dict={
-                'securityPolicy': {
-                    'securityGroupBinding': [{
-                        'objectId': 'other'
-                    }],
-                    'name': 'name'
-                }
-            },
+            request_body_dict=test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE,
             uri_parameters={'ID': 'security_policy_id'}
         )
 
@@ -136,18 +97,9 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_del_policy_group_bind_unexisting(self):
         """Check nsx_security_policy.del_policy_group_bind func: unexisting"""
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'securityGroupBinding': [{
-                        'objectId': 'other'
-                    }, {
-                        'objectId': 'security_group_id'
-                    }],
-                    'name': 'name'
-                }
-            }
+            'body': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER
         })
 
         nsx_security_policy.del_policy_group_bind(
@@ -163,17 +115,10 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.internal
     @pytest.mark.unit
     def test_add_policy_section_insert(self):
-        """Check nsx_security_policy.add_policy_section func: positive"""
-        client_session = self._prepare_check(read={
+        """Check nsx_security_policy.add_policy_section func: insert"""
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'actionsByCategory': [{
-                        "category": "other_category",
-                        "action": "other_action"
-                    }]
-                }
-            }
+            'body': test_nsx_base.SEC_POLICY_SECTION_BEFORE
         })
 
         self.assertEqual(
@@ -189,17 +134,7 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
 
         client_session.update.assert_called_with(
             'securityPolicyID',
-            request_body_dict={
-                'securityPolicy': {
-                    'actionsByCategory': [{
-                        "category": "other_category",
-                        "action": "other_action"
-                    }, {
-                        "category": "category",
-                        "action": "action"
-                    }]
-                }
-            },
+            request_body_dict=test_nsx_base.SEC_POLICY_SECTION_AFTER,
             uri_parameters={'ID': 'security_policy_id'}
         )
 
@@ -207,16 +142,9 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_add_policy_section_overwrite(self):
         """Check nsx_security_policy.add_policy_section func: overwrite"""
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'actionsByCategory': [{
-                        "category": "other_category",
-                        "action": "other_action"
-                    }]
-                }
-            }
+            'body': test_nsx_base.SEC_POLICY_SECTION_BEFORE
         })
 
         self.assertEqual(
@@ -233,14 +161,7 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
 
         client_session.update.assert_called_with(
             'securityPolicyID',
-            request_body_dict={
-                'securityPolicy': {
-                    'actionsByCategory': [{
-                        "category": "other_category",
-                        "action": "action"
-                    }]
-                }
-            },
+            request_body_dict=test_nsx_base.SEC_POLICY_SECTION_OVERWRITE,
             uri_parameters={'ID': 'security_policy_id'}
         )
 
@@ -250,19 +171,9 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
         """Check nsx_security_policy.del_policy_section func existing"""
 
         # delete existed
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'actionsByCategory': [{
-                        "category": "other_category",
-                        "action": "other_action"
-                    }, {
-                        "category": "category",
-                        "action": "action"
-                    }]
-                }
-            }
+            'body': test_nsx_base.SEC_POLICY_SECTION_AFTER
         })
 
         nsx_security_policy.del_policy_section(
@@ -275,14 +186,7 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
 
         client_session.update.assert_called_with(
             'securityPolicyID',
-            request_body_dict={
-                'securityPolicy': {
-                    'actionsByCategory': [{
-                        "category": "other_category",
-                        "action": "other_action"
-                    }]
-                }
-            },
+            request_body_dict=test_nsx_base.SEC_POLICY_SECTION_BEFORE,
             uri_parameters={'ID': 'security_policy_id'}
         )
 
@@ -292,19 +196,9 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
         """Check nsx_security_policy.del_policy_section func: unexisting"""
 
         # delete existed
-        client_session = self._prepare_check(read={
+        client_session = self._prepare_check(read_response={
             'status': 204,
-            'body': {
-                'securityPolicy': {
-                    'actionsByCategory': [{
-                        "category": "other_category",
-                        "action": "other_action"
-                    }, {
-                        "category": "category",
-                        "action": "action"
-                    }]
-                }
-            }
+            'body': test_nsx_base.SEC_POLICY_SECTION_AFTER
         })
 
         nsx_security_policy.del_policy_section(

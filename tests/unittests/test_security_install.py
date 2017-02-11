@@ -13,7 +13,7 @@
 # limitations under the License.
 import unittest
 import pytest
-import test_base
+import library.test_nsx_base as test_nsx_base
 import cloudify_nsx.security.group as group
 import cloudify_nsx.security.group_dynamic_member as group_dynamic_member
 import cloudify_nsx.security.group_exclude_member as group_exclude_member
@@ -26,7 +26,7 @@ import cloudify_nsx.security.tag_vm as tag_vm
 from cloudify.state import current_ctx
 
 
-class SecurityInstallTest(test_base.BaseTest):
+class SecurityInstallTest(test_nsx_base.NSXBaseTest):
 
     def setUp(self):
         super(SecurityInstallTest, self).setUp()
@@ -45,7 +45,7 @@ class SecurityInstallTest(test_base.BaseTest):
             {'group': {"name": "name"}},
             read_args=['secGroupScope'],
             read_kwargs={'uri_parameters': {'scopeId': 'globalroot-0'}},
-            read_responce={
+            read_response={
                 'status': 204,
                 'body': {
                     'list': {
@@ -68,7 +68,7 @@ class SecurityInstallTest(test_base.BaseTest):
                 },
                 'uri_parameters': {'scopeId': 'globalroot-0'}
             },
-            create_responce={
+            create_response={
                 'status': 204,
                 'objectId': 'id'
             }
@@ -120,35 +120,20 @@ class SecurityInstallTest(test_base.BaseTest):
     def test_group_exclude_member_install(self):
         """Check insert member to exclude list in security group"""
         self._common_install_read_and_update(
-            "security_group_id|objectId", group_exclude_member.create,
+            "security_group_id|member_id", group_exclude_member.create,
             {'group_exclude_member': {
-                "objectId": "objectId",
+                "objectId": "member_id",
                 "security_group_id": "security_group_id"
             }},
             ['secGroupObject'],
             {'uri_parameters': {'objectId': 'security_group_id'}},
             {
                 'status': 204,
-                'body': {
-                    'securitygroup': {
-                        'excludeMember': [{
-                            "objectId": "other_objectId",
-                        }]
-                    }
-                }
+                'body': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE
             },
             ['secGroupObject'],
             {
-                'request_body_dict': {
-                    'securitygroup': {
-                        'excludeMember': [{
-                            "objectId": "other_objectId",
-                        }, {
-                            "objectId": "objectId",
-                        }]
-                    }
-
-                },
+                'request_body_dict': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER,
                 'uri_parameters': {'objectId': 'security_group_id'}
             },
             {
@@ -167,7 +152,7 @@ class SecurityInstallTest(test_base.BaseTest):
                 "security_group_id": "security_group_id"
             }},
             # group attach never run read
-            read_args=None, read_kwargs=None, read_responce=None,
+            read_args=None, read_kwargs=None, read_response=None,
             # but run update
             update_args=['secGroupMember'],
             update_kwargs={
@@ -176,7 +161,7 @@ class SecurityInstallTest(test_base.BaseTest):
                     'objectId': 'security_group_id'
                 }
             },
-            update_responce={
+            update_response={
                 'status': 204,
                 'objectId': 'id'
             }
@@ -195,7 +180,7 @@ class SecurityInstallTest(test_base.BaseTest):
             }},
             read_args=['securityPolicyID'],
             read_kwargs={'uri_parameters': {'ID': 'all'}},
-            read_responce={
+            read_response={
                 'status': 204,
                 'body': {
                     'securityPolicies': {
@@ -224,7 +209,7 @@ class SecurityInstallTest(test_base.BaseTest):
                     }
                 }
             },
-            create_responce={
+            create_response={
                 'status': 204,
                 'objectId': 'id'
             },
@@ -255,25 +240,11 @@ class SecurityInstallTest(test_base.BaseTest):
             {'uri_parameters': {'ID': 'security_policy_id'}},
             {
                 'status': 204,
-                'body': {
-                    'securityPolicy': {
-                        'securityGroupBinding': [{
-                            'objectId': 'other'
-                        }]
-                    }
-                }
+                'body': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
             },
             ['securityPolicyID'],
             {
-                'request_body_dict': {
-                    'securityPolicy': {
-                        'securityGroupBinding': [{
-                            'objectId': 'other'
-                        }, {
-                            'objectId': 'security_group_id'
-                        }]
-                    }
-                },
+                'request_body_dict': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER,
                 'uri_parameters': {'ID': 'security_policy_id'}
             },
             {
@@ -296,28 +267,11 @@ class SecurityInstallTest(test_base.BaseTest):
             {'uri_parameters': {'ID': 'security_policy_id'}},
             {
                 'status': 204,
-                'body': {
-                    'securityPolicy': {
-                        'actionsByCategory': [{
-                            "category": "other_category",
-                            "action": "other_action"
-                        }]
-                    }
-                }
+                'body': test_nsx_base.SEC_POLICY_SECTION_BEFORE
             },
             ['securityPolicyID'],
             {
-                'request_body_dict': {
-                    'securityPolicy': {
-                        'actionsByCategory': [{
-                            "category": "other_category",
-                            "action": "other_action"
-                        }, {
-                            "category": "category",
-                            "action": "action"
-                        }]
-                    }
-                },
+                'request_body_dict': test_nsx_base.SEC_POLICY_SECTION_AFTER,
                 'uri_parameters': {'ID': 'security_policy_id'}
             },
             {
@@ -336,7 +290,7 @@ class SecurityInstallTest(test_base.BaseTest):
             }},
             read_args=['securityTag'],
             read_kwargs={},
-            read_responce={
+            read_response={
                 'status': 204,
                 'body': {
                     'securityTags': {
@@ -356,7 +310,7 @@ class SecurityInstallTest(test_base.BaseTest):
                     }
                 }
             },
-            create_responce={
+            create_response={
                 'status': 204,
                 'objectId': 'id'
             }
@@ -372,7 +326,7 @@ class SecurityInstallTest(test_base.BaseTest):
                 "vm_id": "vm_id", "tag_id": "tag_id"
             }},
             # vm attach to tag never run read
-            read_args=None, read_kwargs=None, read_responce=None,
+            read_args=None, read_kwargs=None, read_response=None,
             # but run update
             update_args=['securityTagVM'],
             update_kwargs={
@@ -381,7 +335,7 @@ class SecurityInstallTest(test_base.BaseTest):
                     'vmMoid': 'vm_id'
                 }
             },
-            update_responce={
+            update_response={
                 'status': 204,
                 'objectId': 'id'
             }
