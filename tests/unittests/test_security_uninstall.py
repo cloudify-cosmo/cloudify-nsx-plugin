@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import test_base
+import library.test_nsx_base as test_nsx_base
 import pytest
 import cloudify_nsx.security.group as group
 import cloudify_nsx.security.group_dynamic_member as group_dynamic_member
@@ -26,7 +26,7 @@ import cloudify_nsx.security.tag_vm as tag_vm
 from cloudify.state import current_ctx
 
 
-class SecurityUninstallTest(test_base.BaseTest):
+class SecurityUninstallTest(test_nsx_base.NSXBaseTest):
 
     def setUp(self):
         super(SecurityUninstallTest, self).setUp()
@@ -61,7 +61,7 @@ class SecurityUninstallTest(test_base.BaseTest):
             }},
             read_args=['secGroupObject'],
             read_kwargs={'uri_parameters': {'objectId': 'id'}},
-            read_responce={
+            read_response={
                 'body': {
                     'securitygroup': {
                         'dynamicMemberDefinition': {
@@ -87,35 +87,21 @@ class SecurityUninstallTest(test_base.BaseTest):
     def test_group_exclude_member_uninstall(self):
         """Check remove member from exclude list in security group"""
         self._common_uninstall_read_update(
-            'id|di', group_exclude_member.delete,
+            'security_group_id|member_id', group_exclude_member.delete,
             {"group_exclude_member": {
                 "objectId": "objectId",
                 "security_group_id": "security_group_id"
             }},
             read_args=['secGroupObject'],
-            read_kwargs={'uri_parameters': {'objectId': 'id'}},
-            read_responce={
-                'body': {
-                    'securitygroup': {
-                        'excludeMember': [{
-                            'objectId': 'di'
-                        }, {
-                            'objectId': 'objectOtherId'
-                        }]
-                    }
-                },
+            read_kwargs={'uri_parameters': {'objectId': 'security_group_id'}},
+            read_response={
+                'body': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER,
                 'status': 204
             },
             update_args=['secGroupObject'],
             update_kwargs={
-                'request_body_dict': {
-                    'securitygroup': {
-                        'excludeMember': [{
-                            'objectId': 'objectOtherId'
-                        }]
-                    }
-                },
-                'uri_parameters': {'objectId': 'id'}
+                'request_body_dict': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE,
+                'uri_parameters': {'objectId': 'security_group_id'}
             }
         )
 
@@ -156,35 +142,22 @@ class SecurityUninstallTest(test_base.BaseTest):
     def test_policy_group_bind_uninstall(self):
         """Check unbind security group from security policy"""
         self._common_uninstall_read_update(
-            'ab|cd', policy_group_bind.delete,
+            'security_group_id|security_policy_id', policy_group_bind.delete,
             {"policy_group_bind": {
                 "security_policy_id": "security_policy_id",
                 "security_group_id": "security_group_id"
             }},
             read_args=['securityPolicyID'],
-            read_kwargs={'uri_parameters': {'ID': 'cd'}},
-            read_responce={
-                'body': {
-                    'securityPolicy': {
-                        'securityGroupBinding': [{
-                            'objectId': 'ab'
-                        }, {
-                            'objectId': 'fully_other'
-                        }]
-                    }
-                },
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            read_response={
+                'body': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER,
                 'status': 204
             },
             update_args=['securityPolicyID'],
             update_kwargs={
-                'request_body_dict': {
-                    'securityPolicy': {
-                        'securityGroupBinding': [{
-                            'objectId': 'fully_other'
-                        }]
-                    }
-                },
-                'uri_parameters': {'ID': 'cd'}
+                'request_body_dict':
+                    test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE,
+                'uri_parameters': {'ID': 'security_policy_id'}
             }
         )
 
@@ -193,36 +166,22 @@ class SecurityUninstallTest(test_base.BaseTest):
     def test_policy_section_uninstall(self):
         """Check cleanup security policy section"""
         self._common_uninstall_read_update(
-            'ab|cd', policy_section.delete,
+            'category|security_policy_id', policy_section.delete,
             {"policy_section": {
                 "category": "category",
                 "action": "action",
                 "security_policy_id": "security_policy_id"
             }},
             read_args=['securityPolicyID'],
-            read_kwargs={'uri_parameters': {'ID': 'cd'}},
-            read_responce={
-                'body': {
-                    'securityPolicy': {
-                        'actionsByCategory': [{
-                            'category': 'ab'
-                        }, {
-                            'category': 'fully_other'
-                        }]
-                    }
-                },
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            read_response={
+                'body': test_nsx_base.SEC_POLICY_SECTION_AFTER,
                 'status': 204
             },
             update_args=['securityPolicyID'],
             update_kwargs={
-                'request_body_dict': {
-                    'securityPolicy': {
-                        'actionsByCategory': [{
-                            'category': 'fully_other'
-                        }]
-                    }
-                },
-                'uri_parameters': {'ID': 'cd'}
+                'request_body_dict': test_nsx_base.SEC_POLICY_SECTION_BEFORE,
+                'uri_parameters': {'ID': 'security_policy_id'}
             }
         )
 

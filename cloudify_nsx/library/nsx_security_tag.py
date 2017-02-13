@@ -15,23 +15,10 @@ import nsx_common as common
 
 
 def get_tag(client_session, name):
-    tags = common.nsx_read(
+    return common.nsx_search(
         client_session, 'body/securityTags/securityTag',
-        'securityTag'
+        name, 'securityTag'
     )
-
-    if not tags:
-        return None, None
-
-    if isinstance(tags, dict):
-        tags = [tags]
-
-    for tag in tags:
-        if 'name' in tag:
-            if str(tag['name']) == str(name):
-                return tag['objectId'], tag
-
-    return None, None
 
 
 def add_tag(client_session, name, description):

@@ -51,10 +51,6 @@ def create(**kwargs):
         'route', kwargs, validation_rules
     )
 
-    if use_existing:
-        ctx.logger.info("Used existed")
-        return
-
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)

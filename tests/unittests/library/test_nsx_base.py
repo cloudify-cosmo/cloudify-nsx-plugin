@@ -1,4 +1,4 @@
-# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2017 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,89 @@
 # limitations under the License.
 import unittest
 import mock
+import copy
 from cloudify import mocks as cfy_mocks
-from cloudify.state import current_ctx
 from cloudify import exceptions as cfy_exc
+from cloudify.state import current_ctx
 
 
-class BaseTest(unittest.TestCase):
+SUCCESS_RESPONSE = {
+    'status': 204,
+    'body': {}
+}
+
+SEC_GROUP_EXCLUDE_BEFORE = {
+    'securitygroup': {
+        'excludeMember': [{
+            "objectId": "other_objectId",
+        }],
+        'name': 'some_name'
+    }
+}
+
+SEC_GROUP_EXCLUDE_AFTER = {
+    'securitygroup': {
+        'excludeMember': [{
+            'objectId': 'other_objectId'
+        }, {
+            'objectId': 'member_id'
+        }],
+        'name': 'some_name'
+    }
+}
+
+SEC_GROUP_POLICY_BIND_BEFORE = {
+    'securityPolicy': {
+        'securityGroupBinding': [{
+            'objectId': 'other'
+        }],
+        'name': 'name'
+    }
+}
+
+SEC_GROUP_POLICY_BIND_AFTER = {
+    'securityPolicy': {
+        'securityGroupBinding': [{
+            'objectId': 'other'
+        }, {
+            'objectId': 'security_group_id'
+        }],
+        'name': 'name'
+    }
+}
+
+SEC_POLICY_SECTION_BEFORE = {
+    'securityPolicy': {
+        'actionsByCategory': [{
+            "category": "other_category",
+            "action": "other_action"
+        }]
+    }
+}
+
+SEC_POLICY_SECTION_AFTER = {
+    'securityPolicy': {
+        'actionsByCategory': [{
+            "category": "other_category",
+            "action": "other_action"
+        }, {
+            "category": "category",
+            "action": "action"
+        }]
+    }
+}
+
+SEC_POLICY_SECTION_OVERWRITE = {
+    'securityPolicy': {
+        'actionsByCategory': [{
+            "category": "other_category",
+            "action": "action"
+        }]
+    }
+}
+
+
+class NSXBaseTest(unittest.TestCase):
 
     def _regen_ctx(self):
         self.fake_ctx = cfy_mocks.MockCloudifyContext()
@@ -105,9 +182,11 @@ class BaseTest(unittest.TestCase):
         }
         fake_cs_result = mock.Mock()
         fake_client = mock.MagicMock(return_value=fake_cs_result)
+
         fake_cs_result.create = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
+
         fake_cs_result.delete = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
@@ -119,6 +198,11 @@ class BaseTest(unittest.TestCase):
         fake_cs_result.update = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
+
+        fake_cs_result.extract_resource_body_example = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
         return fake_client, fake_cs_result, kwargs
 
     def _common_install(self, resource_id, func_call, func_kwargs):
@@ -155,17 +239,60 @@ class BaseTest(unittest.TestCase):
                 }
             )
 
+    def _common_install_read_and_update(
+        self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
+        read_response, update_args, update_kwargs, update_response
+    ):
+        """check install logic that read current state and than send
+           update request"""
+        self._common_install(resource_id, func_call, func_kwargs)
+
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, func_kwargs
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            if read_args:
+                fake_cs_result.read = mock.Mock(
+                    return_value=copy.deepcopy(read_response)
+                )
+
+            fake_cs_result.update = mock.Mock(
+                return_value=copy.deepcopy(update_response)
+            )
+
+            func_call(**kwargs)
+
+            if not read_args:
+                # doesn't need read at all
+                fake_cs_result.read.assert_not_called()
+            else:
+                fake_cs_result.read.assert_called_with(
+                    *read_args, **read_kwargs
+                )
+
+            fake_cs_result.update.assert_called_with(
+                *update_args, **update_kwargs
+            )
+            runtime = self.fake_ctx.instance.runtime_properties
+            self.assertEqual(
+                runtime['resource_id'],
+                resource_id
+            )
+
     def _common_install_read_and_create(
         self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
-        read_responce, create_args, create_kwargs, create_responce,
+        read_response, create_args, create_kwargs, create_response,
         recheck_runtime=None
     ):
         """check install logic that check 'existing' by read
            and than run create"""
         self._common_install(resource_id, func_call, func_kwargs)
 
-        # use custom responce
-        if read_responce:
+        # use custom response
+        if read_response:
             # use existed
             fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
                 None, func_kwargs
@@ -177,7 +304,7 @@ class BaseTest(unittest.TestCase):
             ):
 
                 fake_cs_result.read = mock.Mock(
-                    return_value=read_responce
+                    return_value=copy.deepcopy(read_response)
                 )
                 func_call(**kwargs)
 
@@ -195,7 +322,7 @@ class BaseTest(unittest.TestCase):
                             recheck_runtime[field]
                         )
 
-            # use existed, but empty responce
+            # use existed, but empty response
             fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
                 None, func_kwargs
             )
@@ -206,10 +333,7 @@ class BaseTest(unittest.TestCase):
             ):
 
                 fake_cs_result.read = mock.Mock(
-                    return_value={
-                        'status': 204,
-                        'body': {}
-                    }
+                    return_value=copy.deepcopy(SUCCESS_RESPONSE)
                 )
                 with self.assertRaises(cfy_exc.NonRecoverableError):
                     func_call(**kwargs)
@@ -232,7 +356,7 @@ class BaseTest(unittest.TestCase):
                 fake_client
             ):
                 fake_cs_result.read = mock.Mock(
-                    return_value=read_responce
+                    return_value=copy.deepcopy(read_response)
                 )
 
                 with self.assertRaises(cfy_exc.NonRecoverableError):
@@ -254,13 +378,10 @@ class BaseTest(unittest.TestCase):
             fake_client
         ):
             fake_cs_result.read = mock.Mock(
-                return_value={
-                    'status': 204,
-                    'body': {}
-                }
+                return_value=copy.deepcopy(SUCCESS_RESPONSE)
             )
             fake_cs_result.create = mock.Mock(
-                return_value=create_responce
+                return_value=copy.deepcopy(create_response)
             )
             func_call(**kwargs)
 
@@ -295,7 +416,7 @@ class BaseTest(unittest.TestCase):
             fake_client
         ):
             fake_cs_result.delete = mock.Mock(
-                return_value={'status': 204}
+                return_value=copy.deepcopy(SUCCESS_RESPONSE)
             )
             func_call(**kwargs)
             fake_cs_result.delete.assert_called_with(
@@ -305,7 +426,7 @@ class BaseTest(unittest.TestCase):
 
     def _common_uninstall_read_update(
         self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
-        read_responce, update_args, update_kwargs, additional_params=None
+        read_response, update_args, update_kwargs, additional_params=None
     ):
         """delete when read/update enought"""
         self._common_uninstall_external_and_unintialized(
@@ -321,14 +442,14 @@ class BaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            # use custom responce
-            if read_responce:
+            # use custom response
+            if read_response:
                 fake_cs_result.read = mock.Mock(
-                    return_value=read_responce
+                    return_value=copy.deepcopy(read_response)
                 )
 
             fake_cs_result.update = mock.Mock(
-                return_value={'status': 204}
+                return_value=copy.deepcopy(SUCCESS_RESPONSE)
             )
             func_call(**kwargs)
             fake_cs_result.read.assert_called_with(
@@ -339,6 +460,25 @@ class BaseTest(unittest.TestCase):
             )
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
+    def _prepare_check(self, read_response=None, update_response=None):
+        "prepare responses for read and update"
+        client_session = mock.Mock()
+        if read_response:
+            client_session.read = mock.Mock(
+                return_value=copy.deepcopy(read_response)
+            )
+        else:
+            client_session.read = mock.Mock(
+                return_value=copy.deepcopy(SUCCESS_RESPONSE)
+            )
 
-if __name__ == '__main__':
-    unittest.main()
+        if update_response:
+            client_session.update = mock.Mock(
+                return_value=copy.deepcopy(update_response)
+            )
+        else:
+            client_session.update = mock.Mock(
+                return_value=copy.deepcopy(SUCCESS_RESPONSE)
+            )
+
+        return client_session

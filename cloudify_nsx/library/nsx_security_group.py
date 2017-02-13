@@ -16,22 +16,10 @@ from cloudify import exceptions as cfy_exc
 
 
 def get_group(client_session, scopeId, name):
-    groups = common.nsx_read(
-        client_session, 'body/list/securitygroup',
+    return common.nsx_search(
+        client_session, 'body/list/securitygroup', name,
         'secGroupScope', uri_parameters={'scopeId': scopeId}
     )
-
-    if not groups:
-        return None, None
-
-    if isinstance(groups, dict):
-        groups = [groups]
-
-    for group in groups:
-        if group.get('name') == name:
-            return group.get('objectId'), group
-
-    return None, None
 
 
 def add_group(client_session, scopeId, name, member, excludeMember,
@@ -57,32 +45,26 @@ def add_group(client_session, scopeId, name, member, excludeMember,
 
 
 def add_group_exclude_member(client_session, security_group_id, member_id):
-    raw_result = client_session.read(
+    security_group = common.nsx_read(
+        client_session, 'body',
         'secGroupObject', uri_parameters={'objectId': security_group_id}
     )
 
-    common.check_raw_result(raw_result)
-
-    security_group = raw_result['body']
-
-    if 'excludeMember' not in security_group['securitygroup']:
-        security_group['securitygroup']['excludeMember'] = []
-
-    excludeMembers = security_group['securitygroup']['excludeMember']
-    if isinstance(excludeMembers, dict):
-        excludeMembers = [excludeMembers]
+    excludeMembers = common.nsx_struct_get_list(
+        security_group, 'securitygroup/excludeMember'
+    )
 
     for member in excludeMembers:
         if member.get("objectId") == member_id:
             raise cfy_exc.NonRecoverableError(
-                "Member %s already exists in %s" % (
-                    member_id, security_group['securitygroup']['name']
+                "Member %s already exists in %s group" % (
+                    member_id, security_group['securitygroup'].get(
+                        'name', '*unknown*'
+                    )
                 )
             )
 
     excludeMembers.append({"objectId": member_id})
-
-    security_group['securitygroup']['excludeMember'] = excludeMembers
 
     raw_result = client_session.update(
         'secGroupObject', uri_parameters={'objectId': security_group_id},
@@ -109,14 +91,10 @@ def add_group_member(client_session, security_group_id, member_id):
 
 def set_dynamic_member(client_session, security_group_id, dynamic_set):
 
-    raw_result = client_session.read(
+    security_group = common.nsx_read(
+        client_session, 'body',
         'secGroupObject', uri_parameters={'objectId': security_group_id}
     )
-
-    common.check_raw_result(raw_result)
-
-    security_group = raw_result['body']
-
     # fully overwrite previous state
     security_group['securitygroup']['dynamicMemberDefinition'] = {
         'dynamicSet': dynamic_set
@@ -136,14 +114,10 @@ def set_dynamic_member(client_session, security_group_id, dynamic_set):
 
 
 def del_dynamic_member(client_session, security_group_id):
-    raw_result = client_session.read(
+    security_group = common.nsx_read(
+        client_session, 'body',
         'secGroupObject', uri_parameters={'objectId': security_group_id}
     )
-
-    common.check_raw_result(raw_result)
-
-    security_group = raw_result['body']
-
     security_group['securitygroup']['dynamicMemberDefinition'] = {}
 
     # it is not error!
@@ -172,27 +146,21 @@ def del_group_member(client_session, resource_id):
 def del_group_exclude_member(client_session, resource_id):
     security_group_id, member_id = resource_id.split("|")
 
-    raw_result = client_session.read(
+    security_group = common.nsx_read(
+        client_session, 'body',
         'secGroupObject', uri_parameters={'objectId': security_group_id}
     )
 
-    common.check_raw_result(raw_result)
-
-    security_group = raw_result['body']
-
-    if 'excludeMember' not in security_group['securitygroup']:
-        return
-
-    excludeMembers = security_group['securitygroup']['excludeMember']
-    if isinstance(excludeMembers, dict):
-        excludeMembers = [excludeMembers]
+    excludeMembers = common.nsx_struct_get_list(
+        security_group, 'securitygroup/excludeMember'
+    )
 
     for member in excludeMembers:
         if member.get("objectId") == member_id:
             excludeMembers.remove(member)
             break
-
-    security_group['securitygroup']['excludeMember'] = excludeMembers
+    else:
+        return
 
     raw_result = client_session.update(
         'secGroupObject', uri_parameters={'objectId': security_group_id},

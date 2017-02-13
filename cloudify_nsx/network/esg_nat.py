@@ -15,7 +15,6 @@
 from cloudify import ctx
 from cloudify.decorators import operation
 import cloudify_nsx.library.nsx_common as common
-from cloudify import exceptions as cfy_exc
 import cloudify_nsx.library.nsx_nat as nsx_nat
 
 
@@ -66,10 +65,6 @@ def create(**kwargs):
         'rule', kwargs, validation_rules
     )
 
-    if use_existing:
-        ctx.logger.info("Used existed")
-        return
-
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if resource_id:
         ctx.logger.info("Reused %s" % resource_id)
@@ -92,11 +87,6 @@ def create(**kwargs):
         nat_dict['protocol'],
         nat_dict['translatedPort'],
         nat_dict['originalPort'])
-
-    if not resource_id:
-        raise cfy_exc.NonRecoverableError(
-            "Can't create nat rule."
-        )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.logger.info("created %s " % resource_id)
