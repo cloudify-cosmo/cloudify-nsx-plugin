@@ -59,13 +59,11 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    resource_id = route['next_hop']
-
-    nsx_esg.esg_route_add(
+    resource_id = nsx_esg.esg_route_add(
         client_session,
         route['esg_id'],
         route['network'],
-        resource_id,
+        route['next_hop'],
         route['vnic'],
         route['mtu'],
         route['admin_distance'],
@@ -95,9 +93,7 @@ def delete(**kwargs):
     common.attempt_with_rerun(
         nsx_esg.esg_route_del,
         client_session=client_session,
-        esg_id=route['esg_id'],
-        network=route['network'],
-        next_hop=resource_id
+        resource_id=resource_id
     )
 
     ctx.logger.info("delete %s" % resource_id)

@@ -61,13 +61,16 @@ def add_firewall_rule(client_session, esg_id, application='any',
 
     common.check_raw_result(result_raw)
 
-    return result_raw['objectId']
+    return result_raw['objectId'], "%s|%s" % (esg_id, result_raw['objectId'])
 
 
-def delete_firewall_rule(client_session, esg_id, resource_id):
+def delete_firewall_rule(client_session, resource_id):
+    """Delete firewall rule, as resource_id used response
+       from add_firewall_rule"""
+    esg_id, rule_id = resource_id.split("|")
     result = client_session.delete(
         'firewallRule', uri_parameters={
-            'edgeId': esg_id, 'ruleId': resource_id
+            'edgeId': esg_id, 'ruleId': rule_id
         })
 
     common.check_raw_result(result)

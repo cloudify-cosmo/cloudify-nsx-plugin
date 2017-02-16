@@ -155,11 +155,17 @@ def _get_properties(name, kwargs):
 
 def get_properties(name, kwargs):
     properties_dict = _get_properties(name, kwargs)
+    # global properties
     use_existing = ctx.node.properties.get(
         'use_external_resource', False
     )
+    # node runtime properties
+    if 'use_external_resource' in ctx.instance.runtime_properties:
+        use_existing = ctx.instance.runtime_properties['use_external_resource']
+    # input params
     if 'use_external_resource' in kwargs:
         use_existing = kwargs['use_external_resource']
+        ctx.instance.runtime_properties['use_external_resource'] = use_existing
     return use_existing, properties_dict
 
 
@@ -174,20 +180,22 @@ def get_properties_and_validate(name, kwargs, validate_dict):
 def remove_properties(name):
     if 'resource_id' in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties['resource_id']
+    if 'use_external_resource' in ctx.instance.runtime_properties:
+        del ctx.instance.runtime_properties['use_external_resource']
     if 'nsx_auth' in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties['nsx_auth']
     if name in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties[name]
 
 
-def delete_object(func_call, element_struct, kwargs, clements_to_clean=None):
+def delete_object(func_call, element_struct, kwargs, elements_to_clean=None):
     """Common code for delete object with client/resource_id params"""
     use_existing, _ = get_properties(element_struct, kwargs)
 
     if use_existing:
         remove_properties(element_struct)
-        if clements_to_clean:
-            for name in clements_to_clean:
+        if elements_to_clean:
+            for name in elements_to_clean:
                 remove_properties(name)
         ctx.logger.info("Used existed")
         return
@@ -195,8 +203,8 @@ def delete_object(func_call, element_struct, kwargs, clements_to_clean=None):
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
         remove_properties(element_struct)
-        if clements_to_clean:
-            for name in clements_to_clean:
+        if elements_to_clean:
+            for name in elements_to_clean:
                 remove_properties(name)
         ctx.logger.info("Not fully created, skip")
         return
@@ -213,8 +221,8 @@ def delete_object(func_call, element_struct, kwargs, clements_to_clean=None):
     ctx.logger.info("delete %s" % resource_id)
 
     remove_properties(element_struct)
-    if clements_to_clean:
-        for name in clements_to_clean:
+    if elements_to_clean:
+        for name in elements_to_clean:
             remove_properties(name)
 
 

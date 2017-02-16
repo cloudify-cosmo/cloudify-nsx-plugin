@@ -24,6 +24,21 @@ SUCCESS_RESPONSE = {
     'body': {}
 }
 
+SUCCESS_RESPONSE_ID = {
+    'status': 204,
+    'body': {},
+    'objectId': 'id'
+}
+
+SEC_GROUP_LIST = {
+    'list': {
+        'securitygroup': {
+            'name': 'name',
+            'objectId': 'id'
+        }
+    }
+}
+
 SEC_GROUP_EXCLUDE_BEFORE = {
     'securitygroup': {
         'excludeMember': [{
@@ -64,6 +79,20 @@ SEC_GROUP_POLICY_BIND_AFTER = {
     }
 }
 
+SEC_POLICY_LIST = {
+    'securityPolicies': {
+        'securityPolicy': {
+            'name': 'name',
+            'objectId': 'id',
+            'description': 'description',
+            'precedence': 'precedence',
+            'parent': None,
+            'securityGroupBinding': None,
+            'actionsByCategory': None
+        }
+    }
+}
+
 SEC_POLICY_SECTION_BEFORE = {
     'securityPolicy': {
         'actionsByCategory': [{
@@ -91,6 +120,15 @@ SEC_POLICY_SECTION_OVERWRITE = {
             "category": "other_category",
             "action": "action"
         }]
+    }
+}
+
+SEC_TAG_LIST = {
+    'securityTags': {
+        'securityTag': {
+            'name': 'name',
+            'objectId': 'id'
+        }
     }
 }
 
@@ -239,11 +277,13 @@ class NSXBaseTest(unittest.TestCase):
                 }
             )
 
-    def _common_install_read_and_update(
-        self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
-        read_response, update_args, update_kwargs, update_response
+    def _common_install_extract_or_read_and_update(
+        self, resource_id, func_call, func_kwargs,
+        extract_args=None, extract_kwargs=None, extract_response=None,
+        read_args=None, read_kwargs=None, read_response=None,
+        update_args=None, update_kwargs=None, update_response=None
     ):
-        """check install logic that read current state and than send
+        """check install logic that read/extract current state and than send
            update request"""
         self._common_install(resource_id, func_call, func_kwargs)
 
@@ -254,18 +294,34 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            if read_args:
+            if extract_response:
+                fake_cs_result.extract_resource_body_example = mock.Mock(
+                    return_value=copy.deepcopy(extract_response)
+                )
+
+            if read_response:
                 fake_cs_result.read = mock.Mock(
                     return_value=copy.deepcopy(read_response)
                 )
 
-            fake_cs_result.update = mock.Mock(
-                return_value=copy.deepcopy(update_response)
-            )
+            if update_response:
+                fake_cs_result.update = mock.Mock(
+                    return_value=copy.deepcopy(update_response)
+                )
 
             func_call(**kwargs)
 
-            if not read_args:
+            if not extract_response:
+                # doesn't need extract at all
+                fake_cs_result.extract_resource_body_example.\
+                    assert_not_called()
+            else:
+                fake_cs_result.extract_resource_body_example.\
+                    assert_called_with(
+                        *extract_args, **extract_kwargs
+                    )
+
+            if not read_response:
                 # doesn't need read at all
                 fake_cs_result.read.assert_not_called()
             else:
@@ -273,9 +329,14 @@ class NSXBaseTest(unittest.TestCase):
                     *read_args, **read_kwargs
                 )
 
-            fake_cs_result.update.assert_called_with(
-                *update_args, **update_kwargs
-            )
+            if not update_response:
+                # doesn't need update at all
+                fake_cs_result.update.assert_not_called()
+            else:
+                fake_cs_result.update.assert_called_with(
+                    *update_args, **update_kwargs
+                )
+
             runtime = self.fake_ctx.instance.runtime_properties
             self.assertEqual(
                 runtime['resource_id'],

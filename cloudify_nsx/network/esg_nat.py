@@ -113,7 +113,6 @@ def delete(**kwargs):
     common.attempt_with_rerun(
         nsx_nat.delete_nat_rule,
         client_session=client_session,
-        esg_id=nat_dict['esg_id'],
         resource_id=resource_id
     )
 

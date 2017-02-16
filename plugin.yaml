@@ -1162,6 +1162,27 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.network.dhcp_bind.delete
 
+  # NSX object check
+  cloudify.nsx.nsx_object:
+    derived_from: cloudify.nodes.Root
+    properties:
+      nsx_auth:
+        type: nsx_auth_type
+      nsx_object:
+        default:
+          # name of nsx object to existing check
+          name: ""
+          # type of object
+          type: ""
+          # scope, make sense for group
+          scopeId: "globalroot-0"
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx.cloudify_nsx.nsx_object.create
+        delete:
+          implementation: nsx.cloudify_nsx.nsx_object.delete
+
   # distributed firewall
   cloudify.nsx.dfw_section:
     derived_from: cloudify.nodes.Root

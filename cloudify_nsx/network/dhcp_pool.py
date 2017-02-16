@@ -103,8 +103,7 @@ def delete(**kwargs):
     common.attempt_with_rerun(
         nsx_dhcp.delete_dhcp_pool,
         client_session=client_session,
-        esg_id=pool_dict['esg_id'],
-        pool_id=resource_id
+        resource_id=resource_id
     )
 
     ctx.logger.info("deleted %s" % resource_id)

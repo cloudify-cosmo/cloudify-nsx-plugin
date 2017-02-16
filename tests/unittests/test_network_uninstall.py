@@ -16,9 +16,15 @@ import library.test_nsx_base as test_nsx_base
 import pytest
 import cloudify_nsx.network.dlr_bgp_neighbour as dlr_bgp_neighbour
 import cloudify_nsx.network.bgp_neighbour_filter as bgp_neighbour_filter
+import cloudify_nsx.network.dhcp_bind as dhcp_bind
+import cloudify_nsx.network.dhcp_pool as dhcp_pool
+import cloudify_nsx.network.dlr_interface as dlr_interface
 import cloudify_nsx.network.esg_firewall as esg_firewall
 import cloudify_nsx.network.lswitch as lswitch
+import cloudify_nsx.network.esg_gateway as esg_gateway
+import cloudify_nsx.network.esg_interface as esg_interface
 import cloudify_nsx.network.esg_nat as esg_nat
+import cloudify_nsx.network.esg_route as esg_route
 from cloudify.state import current_ctx
 
 
@@ -160,16 +166,44 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_firewall_rule_uninstall(self):
+    def test_dlr_interface_uninstall(self):
+        """Check delete dlr interface"""
+        self._common_uninstall_external_and_unintialized(
+            'esg_id|nic_id', dlr_interface.delete,
+            {'interface': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dhcp_bind_uninstall(self):
+        """Check remove binding rule vm to dhcp ip"""
+        self._common_uninstall_external_and_unintialized(
+            'esg_id|bind_id', dhcp_bind.delete,
+            {'bind': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dhcp_pool_uninstall(self):
+        """Check delete dhcp pool"""
+        self._common_uninstall_external_and_unintialized(
+            'esg_id|pool_id', dhcp_pool.delete,
+            {'pool': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_firewall_rule_uninstall(self):
         """Check delete esg firewall rule"""
         self._common_uninstall_delete(
-            'id', esg_firewall.delete,
+            'esg_id|id', esg_firewall.delete,
             {'rule': {
                 'esg_id': 'esg_id'
             }},
             ['firewallRule'], {
                 'uri_parameters': {'edgeId': 'esg_id', 'ruleId': 'id'}
-            }
+            },
+            additional_params=['rule_id']
         )
 
     @pytest.mark.internal
@@ -187,16 +221,43 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_esg_gateway_uninstall(self):
+        """Check delete esg gateway"""
+        self._common_uninstall_external_and_unintialized(
+            'esg_id|ip', esg_gateway.delete,
+            {'gateway': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_interface_uninstall(self):
+        """Check delete esg interface"""
+        self._common_uninstall_external_and_unintialized(
+            'esg_id|id', esg_interface.delete,
+            {'interface': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_esg_nat_uninstall(self):
         """Check delete esg nat rule"""
         self._common_uninstall_delete(
-            'id', esg_nat.delete,
+            'esg_id|id', esg_nat.delete,
             {'rule': {
                 'esg_id': 'esg_id'
             }},
             ['edgeNatRule'], {
                 'uri_parameters': {'edgeId': 'esg_id', 'ruleID': 'id'}
             }
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_route_uninstall(self):
+        """Check delete esg route"""
+        self._common_uninstall_external_and_unintialized(
+            'esg_id|rule_id|next_hop', esg_route.delete,
+            {'route': {}}
         )
 
 
