@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import nsx_common as common
+from cloudify import exceptions as cfy_exc
 
 
 def nat_service(client_session, esg_id, enabled):
@@ -78,11 +79,17 @@ def add_nat_rule(client_session, esg_id, action, originalAddress,
 
     common.check_raw_result(result_raw)
 
-    return result_raw['objectId']
+    return "%s|%s" % (esg_id, result_raw['objectId'])
 
 
-def delete_nat_rule(client_session, esg_id, resource_id):
+def delete_nat_rule(client_session, resource_id):
+    try:
+        esg_id, ruleID = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
     result = client_session.delete(
-        'edgeNatRule', uri_parameters={'edgeId': esg_id, 'ruleID': resource_id}
+        'edgeNatRule', uri_parameters={'edgeId': esg_id, 'ruleID': ruleID}
     )
     common.check_raw_result(result)

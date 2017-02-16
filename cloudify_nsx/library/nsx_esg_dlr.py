@@ -49,13 +49,16 @@ def dlr_add_interface(client_session, dlr_id, interface_ls_id, interface_ip,
     interface['name'] = name
     interface['index'] = vnic
 
-    dlr_interface = client_session.create(
+    result_raw = client_session.create(
         'interfaces', uri_parameters={'edgeId': dlr_id},
         query_parameters_dict={'action': "patch"},
         request_body_dict=dlr_interface_dict
     )
-    common.check_raw_result(dlr_interface)
-    return dlr_interface
+    common.check_raw_result(result_raw)
+    ifindex = result_raw['body']['interfaces']['interface']['index']
+    resource_id = "%s|%s" % (ifindex, dlr_id)
+
+    return ifindex, resource_id
 
 
 def esg_fw_default_set(client_session, esg_id, def_action,
@@ -87,16 +90,22 @@ def esg_fw_default_set(client_session, esg_id, def_action,
     common.check_raw_result(cfg_result)
 
 
-def dlr_del_interface(client_session, dlr_id, resource_id):
+def dlr_del_interface(client_session, resource_id):
     """
     This function deletes an interface gw to one dlr
-    :param dlr_id: dlr uuid
-    :param resource_id: dlr interface id
+    :param resource_id: response from dlr_add_interface
     """
+    try:
+        ifindex, dlr_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
+
     result_raw = client_session.delete(
         'interfaces', uri_parameters={'edgeId': dlr_id},
         query_parameters_dict={
-            'index': resource_id
+            'index': ifindex
         })
     common.check_raw_result(result_raw)
 
@@ -400,10 +409,14 @@ def del_edge(client_session, resource_id):
 
 
 def del_bgp_neighbour(client_session, resource_id):
+    try:
+        ids = resource_id.split("|")
 
-    ids = resource_id.split("|")
-
-    esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+        esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     current_bgp = common.nsx_read(
         client_session, 'body',
@@ -562,7 +575,10 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
 
 def del_bgp_neighbour_filter(client_session, resource_id):
     ids = resource_id.split("|")
-
+    if len(ids) != 6:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID'
+        )
     network = ids[0]
     esg_id = ids[1]
     ipAddress = ids[2]
@@ -817,8 +833,12 @@ def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existing,
 
 
 def del_esg_ospf_area(client_session, resource_id):
-
-    esg_id, area_id = resource_id.split("|")
+    try:
+        esg_id, area_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId': esg_id})
@@ -852,8 +872,12 @@ def del_esg_ospf_area(client_session, resource_id):
 
 
 def del_esg_ospf_interface(client_session, resource_id):
-
-    esg_id, area_id, vnic = resource_id.split("|")
+    try:
+        esg_id, area_id, vnic = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId': esg_id})
@@ -958,24 +982,31 @@ def esg_cfg_interface(client_session, esg_id, ifindex, ipaddr=None,
         'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id},
         request_body_dict=vnic_config)
     common.check_raw_result(cfg_result)
+    return ifindex, "%s|%s" % (ifindex, esg_id)
 
 
-def esg_clear_interface(client_session, esg_id, resource_id):
+def esg_clear_interface(client_session, resource_id):
     """
     This function resets the vnic configuration of an ESG to its default
       state
     :param client_session: An instance of an NsxClient Session
-    :param esg_id: esg uuid
-    :param ifindex: The vnic index, e.g. vnic3 and the index 3
+    :param resource_id: response from esg_cfg_interface
     :return: Returns True on successful configuration of the Interface
     """
+    try:
+        ifindex, esg_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
+
     vnic_config = client_session.read(
-        'vnic', uri_parameters={'index': resource_id, 'edgeId': esg_id}
+        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id}
     )['body']
 
     vnic_config['vnic']['mtu'] = '1500'
     vnic_config['vnic']['type'] = 'internal'
-    vnic_config['vnic']['name'] = 'vnic{}'.format(resource_id)
+    vnic_config['vnic']['name'] = 'vnic{}'.format(ifindex)
     vnic_config['vnic']['addressGroups'] = None
     vnic_config['vnic']['portgroupId'] = None
     vnic_config['vnic']['portgroupName'] = None
@@ -984,7 +1015,7 @@ def esg_clear_interface(client_session, esg_id, resource_id):
     vnic_config['vnic']['isConnected'] = 'false'
 
     cfg_result = client_session.update(
-        'vnic', uri_parameters={'index': resource_id, 'edgeId': esg_id},
+        'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id},
         request_body_dict=vnic_config)
     common.check_raw_result(cfg_result)
 
@@ -1305,8 +1336,12 @@ def add_routing_prefix(client_session, use_existing, esg_id, name, ipAddress):
 
 
 def del_routing_prefix(client_session, resource_id):
-
-    esg_id, name = resource_id.split("|")
+    try:
+        esg_id, name = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingConfig', uri_parameters={'edgeId': str(esg_id)})
@@ -1442,8 +1477,12 @@ def add_routing_rule(client_session, use_existing, esg_id, routing_type,
 
 
 def del_routing_rule(client_session, resource_id):
-
-    esg_id, routing_type, prefixName = resource_id.split("|")
+    try:
+        esg_id, routing_type, prefixName = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingConfig', uri_parameters={'edgeId': str(esg_id)})
@@ -1505,13 +1544,19 @@ def del_routing_rule(client_session, resource_id):
     common.check_raw_result(raw_result)
 
 
-def esg_dgw_clear(client_session, esg_id):
+def esg_dgw_clear(client_session, resource_id):
     """
     This function clears the default gateway config on an ESG
     :param client_session: An instance of an NsxClient Session
-    :param esg_id: The id of the ESG to list interfaces of
+    :param resource_id: response from esg_dgw_set
     :return: True on success, False on failure
     """
+    try:
+        esg_id, _ = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     rtg_cfg = client_session.read(
         'routingConfigStatic', uri_parameters={'edgeId': esg_id}
@@ -1557,6 +1602,7 @@ def esg_dgw_set(client_session, esg_id, dgw_ip, vnic, mtu=None,
         request_body_dict=rtg_cfg
     )
     common.check_raw_result(cfg_result)
+    return "%s|%s" % (esg_id, dgw_ip)
 
 
 def esg_route_add(client_session, esg_id, network, next_hop, vnic=None,
@@ -1605,17 +1651,22 @@ def esg_route_add(client_session, esg_id, network, next_hop, vnic=None,
 
     common.check_raw_result(cfg_result)
 
+    return "%s|%s|%s" % (esg_id, network, next_hop)
 
-def esg_route_del(client_session, esg_id, network, next_hop):
+
+def esg_route_del(client_session, resource_id):
     """
     This function deletes a static route to an ESG
     :param client_session: An instance of an NsxClient Session
-    :param esg_id: The id of the ESG where the route should be deleted
-    :param network: The routes network in the x.x.x.x/yy format,
-        e.g. 192.168.1.0/24
-    :param next_hop: The next hop ip
+    :param resource_id: response from esg_route_add
     :return: True on success, False on failure
     """
+    try:
+        esg_id, network, next_hop = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     rtg_cfg = client_session.read(
         'routingConfigStatic', uri_parameters={'edgeId': esg_id}
@@ -1701,10 +1752,10 @@ def add_dhcp_pool(client_session, esg_id, ip_range, default_gateway=None,
 
     common.check_raw_result(result)
 
-    return result['objectId']
+    return "%s|%s" % (esg_id, result['objectId'])
 
 
-def delete_dhcp_pool(client_session, esg_id, pool_id):
+def delete_dhcp_pool(client_session, resource_id):
     """
     This function deletes a DHCP Pools from an edge DHCP Server
 
@@ -1718,6 +1769,12 @@ def delete_dhcp_pool(client_session, esg_id, pool_id):
     :return: Returns None if Edge was not found or the operation failed,
         returns true on success
     """
+    try:
+        esg_id, pool_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     result = client_session.delete(
         'dhcpPoolID', uri_parameters={'edgeId': esg_id, 'poolID': pool_id})
@@ -1778,7 +1835,7 @@ def add_mac_binding(client_session, esg_id, mac, hostname, ip,
         request_body_dict={'staticBinding': binding_dict}
     )
     common.check_raw_result(result)
-    return result['objectId']
+    return "%s|%s" % (esg_id, result['objectId'])
 
 
 def add_vm_binding(client_session, esg_id, vm_id, vnic_id, hostname, ip,
@@ -1838,10 +1895,10 @@ def add_vm_binding(client_session, esg_id, vm_id, vnic_id, hostname, ip,
         request_body_dict={'staticBinding': binding_dict}
     )
     common.check_raw_result(result)
-    return result['objectId']
+    return "%s|%s" % (esg_id, result['objectId'])
 
 
-def delete_dhcp_binding(client_session, esg_id, resource_id):
+def delete_dhcp_binding(client_session, resource_id):
     """
     This function deletes a DHCP binding from an edge DHCP Server
 
@@ -1855,10 +1912,16 @@ def delete_dhcp_binding(client_session, esg_id, resource_id):
     :return: Returns None if Edge was not found or the operation failed,
         returns true on success
     """
+    try:
+        esg_id, bindingID = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     result = client_session.delete(
         'dhcpStaticBindingID',
-        uri_parameters={'edgeId': esg_id, 'bindingID': resource_id}
+        uri_parameters={'edgeId': esg_id, 'bindingID': bindingID}
     )
 
     common.check_raw_result(result)

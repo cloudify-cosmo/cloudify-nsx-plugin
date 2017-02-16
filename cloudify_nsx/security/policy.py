@@ -23,7 +23,7 @@ def _update_policy(exist_policy):
     """update policy info by existed policy"""
     for i in ['description', 'precedence', 'parent',
               'securityGroupBinding', 'actionsByCategory']:
-        ctx.instance.runtime_properties['policy'][i] = exist_policy[i]
+        ctx.instance.runtime_properties['policy'][i] = exist_policy.get(i)
 
 
 @operation

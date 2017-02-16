@@ -138,7 +138,6 @@ def delete(**kwargs):
     common.attempt_with_rerun(
         nsx_dhcp.delete_dhcp_binding,
         client_session=client_session,
-        esg_id=bind_dict['esg_id'],
         resource_id=resource_id
     )
 

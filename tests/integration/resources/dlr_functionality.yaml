@@ -295,7 +295,7 @@ node_templates:
                 ipAddress: 8.8.8.8
               relayAgents:
                 relayAgent:
-                  vnicIndex: { get_attribute: [ interface, resource_id ] }
+                  vnicIndex: { get_attribute: [ interface, ifindex ] }
                   giAddress: { get_attribute: [ interface, interface, interface_ip ] }
     relationships:
       - type: cloudify.relationships.contained_in

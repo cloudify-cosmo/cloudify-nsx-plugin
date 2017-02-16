@@ -58,17 +58,17 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    result_raw = cfy_dlr.dlr_add_interface(client_session,
-                                           interface['dlr_id'],
-                                           interface['interface_ls_id'],
-                                           interface['interface_ip'],
-                                           interface['interface_subnet'],
-                                           interface['name'],
-                                           interface['vnic'])
-
-    resource_id = result_raw['body']['interfaces']['interface']['index']
-    ctx.instance.runtime_properties['resource_dlr_id'] = interface['dlr_id']
+    ifindex, resource_id = cfy_dlr.dlr_add_interface(
+        client_session,
+        interface['dlr_id'],
+        interface['interface_ls_id'],
+        interface['interface_ip'],
+        interface['interface_subnet'],
+        interface['name'],
+        interface['vnic']
+    )
     ctx.instance.runtime_properties['resource_id'] = resource_id
+    ctx.instance.runtime_properties['ifindex'] = ifindex
     ctx.logger.info("created %s" % resource_id)
 
 
@@ -78,12 +78,14 @@ def delete(**kwargs):
 
     if use_existing:
         common.remove_properties('interface')
+        common.remove_properties('ifindex')
         ctx.logger.info("Used existed")
         return
 
     resource_id = ctx.instance.runtime_properties.get('resource_id')
     if not resource_id:
         common.remove_properties('interface')
+        common.remove_properties('ifindex')
         ctx.logger.info("Not fully created, skip")
         return
 
@@ -93,10 +95,10 @@ def delete(**kwargs):
     common.attempt_with_rerun(
         cfy_dlr.dlr_del_interface,
         client_session=client_session,
-        dlr_id=ctx.instance.runtime_properties['resource_dlr_id'],
         resource_id=resource_id
     )
 
     ctx.logger.info("delete %s" % resource_id)
 
     common.remove_properties('interface')
+    common.remove_properties('ifindex')

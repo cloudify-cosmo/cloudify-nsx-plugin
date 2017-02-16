@@ -53,12 +53,10 @@ def create(**kwargs):
     # credentials
     client_session = common.nsx_login(kwargs)
 
-    resource_id = gateway['dgw_ip']
-
-    nsx_esg.esg_dgw_set(
+    resource_id = nsx_esg.esg_dgw_set(
         client_session,
         gateway['esg_id'],
-        resource_id,
+        gateway['dgw_ip'],
         gateway['vnic'],
         gateway['mtu'],
         gateway['admin_distance'])
@@ -88,7 +86,7 @@ def delete(**kwargs):
     common.attempt_with_rerun(
         nsx_esg.esg_dgw_clear,
         client_session=client_session,
-        esg_id=gateway['esg_id']
+        resource_id=resource_id
     )
 
     ctx.logger.info("delete %s" % resource_id)

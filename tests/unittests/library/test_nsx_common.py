@@ -14,7 +14,9 @@
 import unittest
 import mock
 import pytest
+import copy
 import cloudify_nsx.library.nsx_common as common
+import cloudify_nsx.nsx_object as nsx_object_type
 from cloudify import exceptions as cfy_exc
 from cloudify.state import current_ctx
 import test_nsx_base
@@ -355,6 +357,23 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_get_properties_public_external_inputs_presaved(self):
+        """Check nsx_common.get_properties func:
+           use_external_resource in inputs, prestored"""
+        self._regen_ctx()
+        # case when in install we already set use_external_resource
+        # to input
+        runtime_properties = self.fake_ctx.instance.runtime_properties
+        runtime_properties['use_external_resource'] = True
+        self.assertEqual(
+            common.get_properties('some_name', {'some_name': {
+                'somevalue': False
+            }}),
+            (True, {'somevalue': False})
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_get_properties_and_validate(self):
         """Check nsx_common.get_properties_and_validate func"""
         self._regen_ctx()
@@ -396,10 +415,12 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
     def test_remove_properties(self):
         """Check nsx_common.remove_properties func"""
         self._regen_ctx()
-        self.fake_ctx.instance.runtime_properties['resource_id'] = '1'
-        self.fake_ctx.instance.runtime_properties['resource'] = '2'
-        self.fake_ctx.instance.runtime_properties['not_resource'] = '3'
-        self.fake_ctx.instance.runtime_properties['nsx_auth'] = '4'
+        runtime_properties = self.fake_ctx.instance.runtime_properties
+        runtime_properties['resource_id'] = '1'
+        runtime_properties['resource'] = '2'
+        runtime_properties['not_resource'] = '3'
+        runtime_properties['nsx_auth'] = '4'
+        runtime_properties['use_external_resource'] = '5'
         common.remove_properties('resource')
         self.assertEqual(
             self.fake_ctx.instance.runtime_properties,
@@ -891,6 +912,115 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
                     }]
                 }
             }
+        )
+
+    def test_delete_nsx_object_type(self):
+        """Check delete properties after delete nsx object type"""
+        self._regen_ctx()
+        runtime_properties = self.fake_ctx.instance.runtime_properties
+        runtime_properties['resource_id'] = 1
+        runtime_properties['use_external_resource'] = 2
+        runtime_properties['other'] = 3
+
+        nsx_object_type.delete(ctx=self.fake_ctx, nsx_object={'a': 'b'})
+
+        self.assertEqual(
+            self.fake_ctx.instance.runtime_properties,
+            {'other': 3}
+        )
+
+    def _test_nsx_object_type_common(self, func_kwargs, read_response,
+                                     resource_id):
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, func_kwargs
+        )
+        runtime_properties = self.fake_ctx.instance.runtime_properties
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            fake_cs_result.read = mock.Mock(
+                return_value=copy.deepcopy(read_response)
+            )
+            nsx_object_type.create(**kwargs)
+            self.assertEqual(
+                runtime_properties['use_external_resource'],
+                runtime_properties['resource_id'] is not None
+            )
+            self.assertEqual(
+                runtime_properties['resource_id'], resource_id
+            )
+
+    def test_create_nsx_object_type_group_withresult(self):
+        """Check delete properties after delete nsx object type:
+           group exist"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'name', 'type': 'group'}},
+            {
+                'status': 204,
+                'body': test_nsx_base.SEC_GROUP_LIST
+            },
+            'id'
+        )
+
+    def test_create_nsx_object_type_group_withoutresult(self):
+        """Check delete properties after delete nsx object type:
+           group not found"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'other', 'type': 'group'}},
+            {
+                'status': 204,
+                'body': test_nsx_base.SEC_GROUP_LIST
+            },
+            None
+        )
+
+    def test_create_nsx_object_type_policy_withresult(self):
+        """Check delete properties after delete nsx object type:
+           policy exist"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'name', 'type': 'policy'}},
+            {
+                'status': 204,
+                'body': test_nsx_base.SEC_POLICY_LIST
+            },
+            'id'
+        )
+
+    def test_create_nsx_object_type_policy_withoutresult(self):
+        """Check delete properties after delete nsx object type:
+           policy not found"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'other', 'type': 'policy'}},
+            {
+                'status': 204,
+                'body': test_nsx_base.SEC_POLICY_LIST
+            },
+            None
+        )
+
+    def test_create_nsx_object_type_tag_withresult(self):
+        """Check delete properties after delete nsx object type:
+           tag exist"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'name', 'type': 'tag'}},
+            {
+                'status': 204,
+                'body': test_nsx_base.SEC_TAG_LIST
+            },
+            'id'
+        )
+
+    def test_create_nsx_object_type_tag_withoutresult(self):
+        """Check delete properties after delete nsx object type:
+           tag not found"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'other', 'type': 'tag'}},
+            {
+                'status': 204,
+                'body': test_nsx_base.SEC_TAG_LIST
+            },
+            None
         )
 
 

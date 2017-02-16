@@ -228,11 +228,25 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: esg_interface
 
+  esg_check:
+    type: cloudify.nsx.nsx_object
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            nsx_object:
+              name: {concat:[{get_input: node_name_prefix}, real_edge]}
+              type: router
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: esg
+
   esg_reconfigure:
     type: cloudify.nsx.esg
     properties:
       nsx_auth: *nsx_auth
-      use_external_resource: true
       routing:
         enabled: true
         routingGlobalConfig:
@@ -247,7 +261,8 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            resource_id: { get_attribute: [ esg, resource_id ] }
+            use_external_resource: { get_attribute: [ esg_check, use_external_resource ] }
+            resource_id: { get_attribute: [ esg_check, resource_id ] }
         delete:
           inputs:
             routing:
@@ -259,6 +274,8 @@ node_templates:
                   enable: false
                 ecmp: false
     relationships:
+      - type: cloudify.relationships.depends_on
+        target: esg_check
       # we need interface before change routering
       - type: cloudify.relationships.depends_on
         target: esg_gateway
@@ -293,7 +310,7 @@ node_templates:
           inputs:
             interface:
               dlr_id: { get_attribute: [ esg_reconfigure, resource_id ] }
-              vnic: { get_attribute: [ esg_interface, resource_id ] }
+              vnic: { get_attribute: [ esg_interface, ifindex ] }
               areaId: { get_attribute: [ ospf_areas, area, areaId ] }
               helloInterval: 10
               priority: 128
