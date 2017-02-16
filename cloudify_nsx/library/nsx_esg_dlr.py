@@ -95,7 +95,13 @@ def dlr_del_interface(client_session, resource_id):
     This function deletes an interface gw to one dlr
     :param resource_id: response from dlr_add_interface
     """
-    ifindex, dlr_id = resource_id.split("|")
+    try:
+        ifindex, dlr_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
+
     result_raw = client_session.delete(
         'interfaces', uri_parameters={'edgeId': dlr_id},
         query_parameters_dict={
@@ -403,10 +409,14 @@ def del_edge(client_session, resource_id):
 
 
 def del_bgp_neighbour(client_session, resource_id):
+    try:
+        ids = resource_id.split("|")
 
-    ids = resource_id.split("|")
-
-    esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+        esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     current_bgp = common.nsx_read(
         client_session, 'body',
@@ -565,7 +575,10 @@ def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
 
 def del_bgp_neighbour_filter(client_session, resource_id):
     ids = resource_id.split("|")
-
+    if len(ids) != 6:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID'
+        )
     network = ids[0]
     esg_id = ids[1]
     ipAddress = ids[2]
@@ -820,8 +833,12 @@ def add_esg_ospf_interface(client_session, esg_id, area_id, vnic, use_existing,
 
 
 def del_esg_ospf_area(client_session, resource_id):
-
-    esg_id, area_id = resource_id.split("|")
+    try:
+        esg_id, area_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId': esg_id})
@@ -855,8 +872,12 @@ def del_esg_ospf_area(client_session, resource_id):
 
 
 def del_esg_ospf_interface(client_session, resource_id):
-
-    esg_id, area_id, vnic = resource_id.split("|")
+    try:
+        esg_id, area_id, vnic = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingOSPF', uri_parameters={'edgeId': esg_id})
@@ -972,7 +993,12 @@ def esg_clear_interface(client_session, resource_id):
     :param resource_id: response from esg_cfg_interface
     :return: Returns True on successful configuration of the Interface
     """
-    ifindex, esg_id = resource_id.split("|")
+    try:
+        ifindex, esg_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     vnic_config = client_session.read(
         'vnic', uri_parameters={'index': ifindex, 'edgeId': esg_id}
@@ -1310,8 +1336,12 @@ def add_routing_prefix(client_session, use_existing, esg_id, name, ipAddress):
 
 
 def del_routing_prefix(client_session, resource_id):
-
-    esg_id, name = resource_id.split("|")
+    try:
+        esg_id, name = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingConfig', uri_parameters={'edgeId': str(esg_id)})
@@ -1447,8 +1477,12 @@ def add_routing_rule(client_session, use_existing, esg_id, routing_type,
 
 
 def del_routing_rule(client_session, resource_id):
-
-    esg_id, routing_type, prefixName = resource_id.split("|")
+    try:
+        esg_id, routing_type, prefixName = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.read(
         'routingConfig', uri_parameters={'edgeId': str(esg_id)})
@@ -1517,8 +1551,12 @@ def esg_dgw_clear(client_session, resource_id):
     :param resource_id: response from esg_dgw_set
     :return: True on success, False on failure
     """
-
-    esg_id, _ = resource_id.split("|")
+    try:
+        esg_id, _ = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     rtg_cfg = client_session.read(
         'routingConfigStatic', uri_parameters={'edgeId': esg_id}
@@ -1623,8 +1661,12 @@ def esg_route_del(client_session, resource_id):
     :param resource_id: response from esg_route_add
     :return: True on success, False on failure
     """
-
-    esg_id, network, next_hop = resource_id.split("|")
+    try:
+        esg_id, network, next_hop = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     rtg_cfg = client_session.read(
         'routingConfigStatic', uri_parameters={'edgeId': esg_id}
@@ -1727,8 +1769,12 @@ def delete_dhcp_pool(client_session, resource_id):
     :return: Returns None if Edge was not found or the operation failed,
         returns true on success
     """
-
-    esg_id, pool_id = resource_id.split("|")
+    try:
+        esg_id, pool_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     result = client_session.delete(
         'dhcpPoolID', uri_parameters={'edgeId': esg_id, 'poolID': pool_id})
@@ -1866,8 +1912,12 @@ def delete_dhcp_binding(client_session, resource_id):
     :return: Returns None if Edge was not found or the operation failed,
         returns true on success
     """
-
-    esg_id, bindingID = resource_id.split("|")
+    try:
+        esg_id, bindingID = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     result = client_session.delete(
         'dhcpStaticBindingID',

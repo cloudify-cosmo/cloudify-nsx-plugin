@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import nsx_common as common
+from cloudify import exceptions as cfy_exc
 
 
 def add_firewall_rule(client_session, esg_id, application='any',
@@ -67,7 +68,13 @@ def add_firewall_rule(client_session, esg_id, application='any',
 def delete_firewall_rule(client_session, resource_id):
     """Delete firewall rule, as resource_id used response
        from add_firewall_rule"""
-    esg_id, rule_id = resource_id.split("|")
+    try:
+        esg_id, rule_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
+
     result = client_session.delete(
         'firewallRule', uri_parameters={
             'edgeId': esg_id, 'ruleId': rule_id
