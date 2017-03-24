@@ -16,6 +16,9 @@ import library.test_nsx_base as test_nsx_base
 import pytest
 import mock
 import cloudify_nsx.network.esg_nat as esg_nat
+import cloudify_nsx.network.relay as relay
+import cloudify_nsx.network.routing_ip_prefix as routing_ip_prefix
+import cloudify_nsx.network.routing_redistribution as routing_redistribution
 from cloudify.state import current_ctx
 
 
@@ -84,6 +87,78 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
         self.assertEqual(
             self.fake_ctx.instance.runtime_properties['resource_id'],
             "some_id"
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dhcp_relay_install(self):
+        """Check create dhcp relay(dlr)"""
+        self._common_install(
+            "some_id", relay.create,
+            {
+                'relay': {
+                    "dlr_id": "dlr_id"
+                }
+            }
+        )
+
+        # without resource_id
+        self._regen_ctx()
+        fake_client = mock.Mock()
+        fake_dlr_esg = mock.Mock()
+        fake_dlr_esg.update_dhcp_relay = mock.MagicMock()
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            mock.MagicMock(return_value=fake_client)
+        ):
+            with mock.patch(
+                'cloudify_nsx.network.relay.cfy_dlr',
+                fake_dlr_esg
+            ):
+                relay.create(
+                    ctx=self.fake_ctx,
+                    relay={
+                        "dlr_id": "dlr_id"
+                    },
+                    nsx_auth={
+                        'username': 'username',
+                        'password': 'password',
+                        'host': 'host'
+                    }
+                )
+
+        fake_dlr_esg.update_dhcp_relay.assert_called_with(
+            fake_client, 'dlr_id', {}, {}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_routing_ip_install(self):
+        """Check create routing ip prefix"""
+        self._common_install(
+            "some_id", routing_ip_prefix.create,
+            {
+                'prefix': {
+                    "dlr_id": "dlr_id",
+                    "name": "name",
+                    "ipAddress": "ipAddress"
+                }
+            }
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_routing_redistribution_install(self):
+        """Check create routing redistribution rule"""
+        self._common_install(
+            "some_id", routing_redistribution.create,
+            {
+                'rule': {
+                    "action": "deny",
+                    "type": "bgp",
+                    "dlr_id": "dlr_id"
+                }
+            }
         )
 
 

@@ -111,7 +111,12 @@ def add_policy_section(client_session, security_policy_id, category, action):
 
 
 def del_policy_section(client_session, resource_id):
-    category, security_policy_id = resource_id.split("|")
+    try:
+        category, security_policy_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     security_policy = common.nsx_read(
         client_session, 'body',
@@ -138,8 +143,12 @@ def del_policy_section(client_session, resource_id):
 
 
 def del_policy_group_bind(client_session, resource_id):
-
-    security_group_id, security_policy_id = resource_id.split("|")
+    try:
+        security_group_id, security_policy_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     security_policy = common.nsx_read(
         client_session, 'body',

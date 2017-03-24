@@ -14,17 +14,25 @@
 import unittest
 import library.test_nsx_base as test_nsx_base
 import pytest
+import cloudify_nsx.network.dlr as dlr
 import cloudify_nsx.network.dlr_bgp_neighbour as dlr_bgp_neighbour
+import cloudify_nsx.network.dlr_dgw as dlr_dgw
+import cloudify_nsx.network.dlr_interface as dlr_interface
 import cloudify_nsx.network.bgp_neighbour_filter as bgp_neighbour_filter
 import cloudify_nsx.network.dhcp_bind as dhcp_bind
 import cloudify_nsx.network.dhcp_pool as dhcp_pool
-import cloudify_nsx.network.dlr_interface as dlr_interface
 import cloudify_nsx.network.esg_firewall as esg_firewall
 import cloudify_nsx.network.lswitch as lswitch
+import cloudify_nsx.network.esg as esg
 import cloudify_nsx.network.esg_gateway as esg_gateway
 import cloudify_nsx.network.esg_interface as esg_interface
 import cloudify_nsx.network.esg_nat as esg_nat
 import cloudify_nsx.network.esg_route as esg_route
+import cloudify_nsx.network.ospf_area as ospf_area
+import cloudify_nsx.network.ospf_interface as ospf_interface
+import cloudify_nsx.network.relay as relay
+import cloudify_nsx.network.routing_ip_prefix as routing_ip_prefix
+import cloudify_nsx.network.routing_redistribution as routing_redistribution
 from cloudify.state import current_ctx
 
 
@@ -166,6 +174,24 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_dlr_uninstall(self):
+        """Check delete dlr"""
+        self._common_uninstall_external_and_unintialized(
+            'some_id', dlr.delete,
+            {'router': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dlr_dgw_uninstall(self):
+        """Check delete dlr dgw"""
+        self._common_uninstall_external_and_unintialized(
+            'some_id', dlr_dgw.delete,
+            {'gateway': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_dlr_interface_uninstall(self):
         """Check delete dlr interface"""
         self._common_uninstall_external_and_unintialized(
@@ -189,6 +215,15 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
         self._common_uninstall_external_and_unintialized(
             'esg_id|pool_id', dhcp_pool.delete,
             {'pool': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_uninstall(self):
+        """Check delete esg"""
+        self._common_uninstall_external_and_unintialized(
+            'esg_id', esg.delete,
+            {'edge': {}}
         )
 
     @pytest.mark.internal
@@ -258,6 +293,51 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
         self._common_uninstall_external_and_unintialized(
             'esg_id|rule_id|next_hop', esg_route.delete,
             {'route': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_ospf_area_uninstall(self):
+        """Check delete ospf area"""
+        self._common_uninstall_external_and_unintialized(
+            'some_id', ospf_area.delete,
+            {'area': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_ospf_interface_uninstall(self):
+        """Check delete ospf interface"""
+        self._common_uninstall_external_and_unintialized(
+            'some_id', ospf_interface.delete,
+            {'interface': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_relay_uninstall(self):
+        """Check delete dhcop relay(dlr)"""
+        self._common_uninstall_external_and_unintialized(
+            'some_id', relay.delete,
+            {'relay': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_routing_ip_prefix_uninstall(self):
+        """Check delete routing ip prefix"""
+        self._common_uninstall_external_and_unintialized(
+            'some_id', routing_ip_prefix.delete,
+            {'prefix': {}}
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_routing_redistribution_uninstall(self):
+        """Check delete routing redistribution rule"""
+        self._common_uninstall_external_and_unintialized(
+            'some_id', routing_redistribution.delete,
+            {'rule': {}}
         )
 
 
