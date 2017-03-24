@@ -469,9 +469,14 @@ def del_bgp_neighbour(client_session, resource_id):
 def add_bgp_neighbour_filter(client_session, use_existing, neighbour_id,
                              action, ipPrefixGe, ipPrefixLe, direction,
                              network):
-    ids = neighbour_id.split("|")
+    try:
+        ids = neighbour_id.split("|")
 
-    esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+        esg_id, ipAddress, remoteAS, protocolAddress, forwardingAddress = ids
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     current_bgp = common.nsx_read(
         client_session, 'body',
@@ -1389,11 +1394,12 @@ def add_routing_rule(client_session, use_existing, esg_id, routing_type,
                      prefixName, routing_from, action):
 
     # convert boolean to 'correct' string values for routing
-    for key in routing_from:
-        if routing_from[key]:
-            routing_from[key] = "true"
-        else:
-            routing_from[key] = "false"
+    if routing_from:
+        for key in routing_from:
+            if routing_from[key]:
+                routing_from[key] = "true"
+            else:
+                routing_from[key] = "false"
 
     raw_result = client_session.read(
         'routingConfig', uri_parameters={'edgeId': str(esg_id)})

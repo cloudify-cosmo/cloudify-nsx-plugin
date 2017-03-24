@@ -132,7 +132,12 @@ def del_dynamic_member(client_session, security_group_id):
 
 
 def del_group_member(client_session, resource_id):
-    security_group_id, member_id = resource_id.split("|")
+    try:
+        security_group_id, member_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     raw_result = client_session.delete(
         'secGroupMember', uri_parameters={
@@ -144,7 +149,12 @@ def del_group_member(client_session, resource_id):
 
 
 def del_group_exclude_member(client_session, resource_id):
-    security_group_id, member_id = resource_id.split("|")
+    try:
+        security_group_id, member_id = resource_id.split("|")
+    except Exception as ex:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID: %s' % str(ex)
+        )
 
     security_group = common.nsx_read(
         client_session, 'body',

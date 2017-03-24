@@ -175,6 +175,23 @@ class NSXBaseTest(unittest.TestCase):
         func_call(**kwargs)
         self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
+        # wrong count of | in resource_id
+        if resource_id.find('|') >= 0:
+            new_resource_id = resource_id + "|_"
+            fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+                new_resource_id, func_kwargs
+            )
+            with mock.patch(
+                'cloudify_nsx.library.nsx_common.NsxClient',
+                fake_client
+            ):
+                with self.assertRaises(cfy_exc.NonRecoverableError) as error:
+                    func_call(**kwargs)
+
+                self.assertTrue(str(error.exception).find(
+                    'Unexpected error retrieving resource ID'
+                ) == 0)
+
         # delete check with exeption
         fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
             resource_id, func_kwargs

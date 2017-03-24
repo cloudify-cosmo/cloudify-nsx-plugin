@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import nsx_common as common
+from cloudify import exceptions as cfy_exc
 
 
 def get_tag(client_session, name):
@@ -65,6 +66,11 @@ def add_tag_vm(client_session, tag_id, vm_id):
 
 def delete_tag_vm(client_session, resource_id):
     ids = resource_id.split("|")
+
+    if len(ids) != 2:
+        raise cfy_exc.NonRecoverableError(
+            'Unexpected error retrieving resource ID'
+        )
 
     result_raw = client_session.delete(
         'securityTagVM',
