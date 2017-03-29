@@ -5,7 +5,7 @@ Cloudify Network Virtualization with VMware (NSX) plugin
 
 # Description
 
-The VMWare NSX plugin allows users to use a vCenter NSX based infrastructure for deploying services(both of network and secure) and applications.
+The VMWare NSX plugin allows users to use a vCenter NSX based infrastructure for deploying services (both network and security) and applications.
 
 # Plugin Requirements
 
@@ -24,33 +24,86 @@ If you want to use network functionality - also required to use vSphere plugin 2
 
 Each type has property `nsx_auth`. It can be used to pass parameters for authenticating.
 
-## nsx_auth fields:
+## nsx_auth:
+
+Provides structure with credentials for authenticating in NSX.
+
 * `username`: user name for NSX
 * `password`: user password for nsx
 * `host`: nsx host
 * `raml`: optional, path to raml file, if not defined will be used embedded version from plugin.
 
-You can provide all properties described in node also as inputs for workflow action. E.g. if you don’t have nsx_auth as static properties values or can't provide it as inputs of blueprint,
+You can provide all properties described in node also as inputs for workflow action.
+E.g. if you don’t have nsx_auth as static properties values or can't provide it as inputs of blueprint,
 you also can use get_attributes call in place value in workflow input.
 
 ```
-node_templates:
-  security_policy:
-    type: cloudify.nsx.security_policy
-    properties:
-      nsx_auth: <authentication credentials for nsx>
-         ....
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          inputs:
-            nsx_auth: <place for optional overwrite nsx_auth>
-              ...
+    node_templates:
+      security_policy:
+        type: cloudify.nsx.security_policy
+        properties:
+          nsx_auth: <authentication credentials for nsx>
+             ....
+        interfaces:
+          cloudify.interfaces.lifecycle:
+            create:
+              inputs:
+                nsx_auth: <place for optional overwrite nsx_auth>
+                  ...
 ```
 
-General rules for properties - plugin always merge properties, inputs and overwrite if exist by values from runtime properties.
+General rules for properties - the plugin always merges properties and inputs,
+and will be overwritten by any existing runtime properties.
 
-As description for advanced properties please use [nsx pdf](https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf).
+Such structure:
+
+```
+    node_templates:
+      security_policy:
+        type: cloudify.nsx.security_policy
+        properties:
+          nsx_auth:
+             username: nsx_user
+        interfaces:
+          cloudify.interfaces.lifecycle:
+            create:
+              inputs:
+                nsx_auth:
+                  password: nsx_secret
+                  host: nsx_host
+```
+
+will produce such in runtime properties and will be used for login to NSX:
+
+```
+    runtime_properties:
+      nsx_auth:
+        username: nsx_user
+        password: nsx_secret
+        host: nsx_host
+```
+
+As result in you can provide nsx_auth only once in create and in delete action values will be reused without explicit provide such.
+
+Advanced properties are defined in [nsx pdf](https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf).
+
+## resource_id
+
+Each node type that has direct mapping to NSX objects, has `resource_id` property
+(in node properties as input and in runtime_properties as store of such)
+and contain NSX internal id. Please, be careful its not `name` of object.
+
+E.g:
+* `group` has something like: `securitygroup-426`.
+* `policy` has something like: `policy-108`.
+* `tag` has something like: `securitytag-143`.
+* `vcenter vm id` has something like: `vm-438`.
+
+### use_external_resource
+
+Each node type that has direct mapping to NSX objects, has `use_external_resource` property
+(in node properties as input and in runtime_properties as store of such) and
+save as flag that plugin has reused external resource.
 
 ## Security related functionality
 ### cloudify.nsx.security_group
@@ -60,20 +113,20 @@ A security group is a collection of assets or grouping objects from your vSphere
 **Derived From:** cloudify.nodes.ApplicationServer
 
 **Properties:**
-* `nsx_auth`: look above for information;
-* `use_external_resource`: optional, use external object, by default false;
-* `resource_id`: optional, resource nsx id;
-* `group`: properties for group;
-    * `scopeId`: Scope ID(be default: globalroot‐0) or datacenterId or portgroupId in upgrade use cases;
-    * `name`: Object name;
-    * `member`: optional, list of members, , also can be updated as [cloudify.nsx.security_group_member](README.md#cloudifynsxsecurity_group_member) node;
-    * `excludeMember`: optional, list of excluded members, , also can be updated as [cloudify.nsx.security_group_exclude_member](README.md#cloudifynsxsecurity_group_exclude_member) node;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
+* `use_external_resource`: optional, use external object, by default false.
+* `resource_id`: optional, [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
+* `group`: properties for group.
+    * `scopeId`: Scope ID (by default: `globalroot‐0`) or datacenterId or portgroupId in upgrade use cases.
+    * `name`: Object name.
+    * `member`: optional, list of members, also can be updated as [cloudify.nsx.security_group_member](README.md#cloudifynsxsecurity_group_member) node.
+    * `excludeMember`: optional, list of excluded members, , also can be updated as [cloudify.nsx.security_group_exclude_member](README.md#cloudifynsxsecurity_group_exclude_member) node.
     * `dynamicMemberDefinition`: optional, list of rules for attach new members, , also can be updated as [cloudify.nsx.security_group_dynamic_member](README.md#cloudifynsxsecurity_group_dynamic_member) node.
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `use_external_resource`: merged copy of `use_external_resource`;
-* `resource_id`: merged copy of `resource_id` if use_external_resource or `id` of newly created object;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: merged copy of `use_external_resource`.
+* `resource_id`: merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly created object.
 * `group`: merged copy of `group`.
 
 **Examples:**
@@ -102,15 +155,16 @@ A security group is a collection of assets or grouping objects from your vSphere
 Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new dynamic members rules.
 
 **Derived From:** cloudify.nodes.ApplicationModule
+
 **Properties:**
-* `nsx_auth`: look above for information;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `dynamic_member`:
-    * `dynamic_set`: represents a rule set as represented on the UI. There can be multiple dynamic sets inside dynamic member definition;
-    * `security_group_id`: security group id.
+    * `dynamic_set`: represents a rule set as represented on the UI. There can be multiple dynamic sets inside dynamic member definition.
+    * `security_group_id`: `resource_id` from parent [security group](README.md#cloudifynsxsecurity_group).
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `resource_id`: Internal id used in plugin for work with `dynamic_set`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `resource_id`: Internal id used in plugin for work with `dynamic_set`.
 * `dynamic_member`: merged copy of `dynamic_member`.
 
 **Examples:**
@@ -151,14 +205,14 @@ Attach member to [Security Group](README.md#cloudifynsxsecurity_group).
 
 **Derived From:** cloudify.nodes.ApplicationModule
 **Properties:**
-* `nsx_auth`: look above for information;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `group_member`:
-    * `objectId`: member id, can be other security group or vm;
-    * `security_group_id`: security group id.
+    * `objectId`: member id, can be other security group or [vm](README.md#resource_id).
+    * `security_group_id`: `resource_id` from parent [security group](README.md#cloudifynsxsecurity_group).
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `resource_id`: Internal id used in plugin for work with `group_member`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `resource_id`: Internal id used in plugin for work with `group_member`.
 * `group_member`: merged copy of `group_member`.
 
 **Examples:**
@@ -186,14 +240,14 @@ Set some object as explicitly excluded from [Security Group](README.md#cloudifyn
 
 **Derived From:** cloudify.nodes.ApplicationModule
 **Properties:**
-* `nsx_auth`: look above for information;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `group_exclude_member`:
-    * `objectId`: member id, can be other security group or vm;
-    * `security_group_id`: security group id.
+    * `objectId`: member id, can be other security group or [vm](README.md#resource_id).
+    * `security_group_id`: `resource_id` from parent [security group](README.md#cloudifynsxsecurity_group).
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `resource_id`: Internal id used in plugin for work with `group_exclude_member`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `resource_id`: Internal id used in plugin for work with `group_exclude_member`.
 * `group_exclude_member`: merged copy of `group_exclude_member`.
 
 **Examples:**
@@ -217,8 +271,8 @@ Set some object as explicitly excluded from [Security Group](README.md#cloudifyn
 
 ### cloudify.nsx.security_policy
 
-A [security policy](README.md#cloudifynsxsecurity_policy) is a set of Endpoint, firewall,
-and network introspection services that can be applied to a security group.
+A [security policy](README.md#cloudifynsxsecurity_policy) is a set of endpoint, firewall
+and network introspection services that can be applied to a [security group](README.md#cloudifynsxsecurity_group).
 When creating a security policy, a parent security policy can be specified if required. The security policy inherits
 services from the parent security policy. [Security group](README.md#cloudifynsxsecurity_group) bindings and actions
 can also be specified while creating the policy. Note that execution order of actions in a category
@@ -227,21 +281,21 @@ is implied by their order in the list.
 **Derived From:** cloudify.nodes.ApplicationServer
 
 **Properties:**
-* `nsx_auth`: look above for information;
-* `use_external_resource`: optional, use external object, by default false;
-* `resource_id`: optional, resource nsx id;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
+* `use_external_resource`: optional, use external object, by default false.
+* `resource_id`: optional, [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
 * `policy`:
-    * `name`: name of security policy;
-    * `description`: optional, short description for policy;
-    * `precedence`: Sort order, place in list;
-    * `parent`: optional, parent security policy;
-    * `securityGroupBinding`: List of security groups, also can be updated as [separate node](README.md#cloudifynsxsecurity_policy_group_bind);
+    * `name`: name of security policy.
+    * `description`: optional, short description for policy.
+    * `precedence`: Sort order, place in list.
+    * `parent`: optional, parent security policy.
+    * `securityGroupBinding`: List of security groups, also can be updated as [separate node](README.md#cloudifynsxsecurity_policy_group_bind).
     * `actionsByCategory` : list of actions by category, also can be updated as [separate node](README.md#cloudifynsxsecurity_policy_section).
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `use_external_resource`: merged copy of `use_external_resource`;
-* `resource_id`: merged copy of `resource_id` if use_external_resource or `id` of newly created object;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: merged copy of `use_external_resource`.
+* `resource_id`: merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly created object.
 * `policy`: merged copy of `policy`.
 
 **Examples:**
@@ -282,14 +336,14 @@ Bind [security group](README.md#cloudifynsxsecurity_group) to [security policy](
 **Derived From:** cloudify.nodes.ApplicationModule
 
 **Properties:**
-* `nsx_auth`: look above for information;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `policy_group_bind`:
-    * `security_policy_id`: Security policy id;
-    * `security_group_id`: Secure Group id.
+    * `security_policy_id`: `resource_id` from [security policy](README.md#cloudifynsxsecurity_policy).
+    * `security_group_id`: `resource_id` from [security group](README.md#cloudifynsxsecurity_group).
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `resource_id`: Internal id used in plugin for work with `policy_group_bind`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `resource_id`: Internal id used in plugin for work with `policy_group_bind`.
 * `policy_group_bind`: merged copy of `policy_group_bind`.
 
 **Examples:**
@@ -320,15 +374,15 @@ If such section already exit - section will be replaced, otherwise inserted.
 **Derived From:** cloudify.nodes.ApplicationModule
 
 **Properties:**
-* `nsx_auth`: look above for information;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `policy_section`:
-    * `security_policy_id`: Security policy id,
-    * `category`: category name
+    * `security_policy_id`: `resource_id` from [security policy](README.md#cloudifynsxsecurity_policy).
+    * `category`: category name.
     * `action`: action structure, list of fields depends on category, look to [nsx pdf](https://pubs.vmware.com/NSX-62/topic/com.vmware.ICbase/PDF/nsx_62_api.pdf) for full list.
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `resource_id`: Internal id used in plugin for work with `policy_section`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `resource_id`: Internal id used in plugin for work with `policy_section`.
 * `policy_section`: merged copy of `policy_section`.
 
 **Examples:**
@@ -365,17 +419,17 @@ Security Tag.
 **Derived From:** cloudify.nodes.ApplicationServer
 
 **Properties:**
-* `nsx_auth`: look above for information;
-* `use_external_resource`: optional, use external object, by default false;
-* `resource_id`: optional, resource nsx id;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
+* `use_external_resource`: optional, use external object, by default false.
+* `resource_id`: optional, [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
 * `tag`:
-    * `name`: security tag name;
+    * `name`: security tag name.
     * `description`: security tag description.
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `use_external_resource`: merged copy of `use_external_resource`;
-* `resource_id`: merged copy of `resource_id` if use_external_resource or `id` of newly created object;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: merged copy of `use_external_resource`.
+* `resource_id`: merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly created object.
 * `tag`: merged copy of `tag`.
 
 **Examples:**
@@ -405,14 +459,14 @@ Apply [security tag](README.md#cloudifynsxsecurity_tag) to vm.
 **Derived From:** cloudify.nodes.ApplicationModule
 
 **Properties:**
-* `nsx_auth`: look above for information;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `vm_tag`:
-    * `tag_id`: security tag id;
+    * `tag_id`: security tag id.
     * `vm_id`: vCenter/vSphere vm id.
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `resource_id`: Internal id used in plugin for work with `vm_tag`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `resource_id`: Internal id used in plugin for work with `vm_tag`.
 * `vm_tag`: merged copy of `vm_tag`.
 
 **Examples:**
@@ -442,19 +496,19 @@ Logical switches
 **Derived From:** cloudify.nodes.Network
 
 **Properties:**
-* `nsx_auth`: look above for information;
-* `use_external_resource`: optional, use external object, by default false;
-* `resource_id`: optional, resource nsx id;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
+* `use_external_resource`: optional, use external object, by default false.
+* `resource_id`: optional, [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
 * `switch`:
-  * `transport_zone`: The name of the Scope (Transport Zone);
-  * `name`: The name that will be assigned to the new logical switch;
-  * `mode`: Optional, control Plane Mode, uses the Transport Zone default if not specified
+  * `transport_zone`: The name of the Scope (Transport Zone).
+  * `name`: The name that will be assigned to the new logical switch.
+  * `mode`: Optional, control Plane Mode, uses the Transport Zone default if not specified.
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `use_external_resource`: merged copy of `use_external_resource`;
-* `resource_id`: merged copy of `resource_id` if use_external_resource or `id` of newly created object;
-* `switch`: merged copy of `switch`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: merged copy of `use_external_resource`.
+* `resource_id`: merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly created object.
+* `switch`: merged copy of `switch`.
 * `vsphere_network_id`: Network id in vSphere.
 
 **Examples:**
@@ -480,16 +534,16 @@ NSX object check. Search nsx object and set in runtime properties `resource_id` 
 **Derived From:** cloudify.nodes.Root
 
 **Properties:**
-* `nsx_auth`: look above for information;
+* `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `nsx_object`:
-    * `name`: name of nsx object to existing check;
-    * `type`: type of object, can be: [tag](README.md#cloudifynsxsecurity_tag), [policy](README.md#cloudifynsxsecurity_policy) and [group](README.md#cloudifynsxsecurity_group) or [lswitch](README.md#cloudifynsxlswitch);
+    * `name`: name of nsx object to existing check.
+    * `type`: type of object, can be: [tag](README.md#cloudifynsxsecurity_tag), [policy](README.md#cloudifynsxsecurity_policy) and [group](README.md#cloudifynsxsecurity_group) or [lswitch](README.md#cloudifynsxlswitch).
     * `scopeId`: optional, object scope, make sense for group search, be default: `globalroot-0`.
 
 
 **Runtime properties:**
-* `nsx_auth`: merged copy of `nsx_auth`;
-* `resource_id`: Exteranl resource id if object can be used as external, otherwise `None`;
+* `nsx_auth`: merged copy of [nsx_auth](README.md#nsx_auth).
+* `resource_id`: Exteranl resource id if object can be used as external, otherwise `None`.
 * `use_external_resource`: `True`, if we can reuse object.
 
 **Examples:**
