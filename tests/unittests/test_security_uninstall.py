@@ -203,7 +203,19 @@ class SecurityUninstallTest(test_nsx_base.NSXBaseTest):
             'ab|cd', tag_vm.delete,
             {"vm_tag": {"vm_id": "vm_id", "tag_id": "tag_id"}},
             ['securityTagVM'],
-            {'uri_parameters': {'tagId': 'ab', 'vmMoid': 'cd'}}
+            {'uri_parameters': {'tagId': 'ab', 'vmMoid': 'cd'}},
+            read_args=['securityTagVMsList'],
+            read_kwargs={"uri_parameters": {'tagId': 'ab'}},
+            read_response={
+                'body': {
+                    'basicinfolist': {
+                        'basicinfo': {
+                            'objectId': 'cd'
+                        }
+                    }
+                },
+                'status': 204
+            }
         )
 
 

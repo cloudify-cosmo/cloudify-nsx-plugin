@@ -6,7 +6,7 @@ description: >
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - http://www.getcloudify.org/spec/vsphere-plugin/2.1.0/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0/plugin.yaml
   - ../../../plugin.yaml
 
 inputs:
@@ -88,7 +88,7 @@ inputs:
   memory:
     type: integer
     description: RAM in MB
-    default: 1024
+    default: 256
 
   vsphere_centos_agent_install_method:
     type: string
