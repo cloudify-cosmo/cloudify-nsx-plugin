@@ -132,6 +132,14 @@ SEC_TAG_LIST = {
     }
 }
 
+LSWITCH_LIST = [{
+    'name': 'name',
+    'objectId': 'id',
+    'vdsContextWithBacking': {
+        'backingValue': "some_port_id"
+    }
+}]
+
 
 class NSXBaseTest(unittest.TestCase):
 
@@ -247,6 +255,10 @@ class NSXBaseTest(unittest.TestCase):
         )
 
         fake_cs_result.read = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
+        fake_cs_result.read_all_pages = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
 
@@ -477,7 +489,8 @@ class NSXBaseTest(unittest.TestCase):
 
     def _common_uninstall_delete(
         self, resource_id, func_call, func_kwargs, delete_args, delete_kwargs,
-        additional_params=None
+        additional_params=None, read_args=None, read_kwargs=None,
+        read_response=None
     ):
         """for functions when we only run delete directly"""
         self._common_uninstall_external_and_unintialized(
@@ -493,13 +506,28 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
+            if read_response:
+                fake_cs_result.read = mock.Mock(
+                    return_value=copy.deepcopy(read_response)
+                )
+
             fake_cs_result.delete = mock.Mock(
                 return_value=copy.deepcopy(SUCCESS_RESPONSE)
             )
             func_call(**kwargs)
+
             fake_cs_result.delete.assert_called_with(
                 *delete_args, **delete_kwargs
             )
+
+            if not read_response:
+                # doesn't need read at all
+                fake_cs_result.read.assert_not_called()
+            else:
+                fake_cs_result.read.assert_called_with(
+                    *read_args, **read_kwargs
+                )
+
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
     def _common_uninstall_read_update(

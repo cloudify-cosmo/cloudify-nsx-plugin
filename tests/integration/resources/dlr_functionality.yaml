@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
   - ../../../plugin.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0-m1/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0/plugin.yaml
 
 inputs:
 
@@ -123,7 +123,7 @@ node_templates:
       name: { get_input: vcenter_cluster }
       connection_config: { get_property: [connection_configuration, connection_config] }
 
-  master_lswith:
+  master_lswitch:
     type: cloudify.nsx.lswitch
     properties:
       nsx_auth: &nsx_auth
@@ -132,17 +132,17 @@ node_templates:
         host: { get_input: nsx_ip }
         raml: { get_input: nsx_raml }
       switch:
-        name: {concat:[{get_input: node_name_prefix}, master_swith]}
+        name: {concat:[{get_input: node_name_prefix}, master_switch]}
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
 
-  slave_lswith:
+  slave_lswitch:
     type: cloudify.nsx.lswitch
     properties:
       nsx_auth: *nsx_auth
       switch:
-        name: {concat:[{get_input: node_name_prefix}, slave_swith]}
+        name: {concat:[{get_input: node_name_prefix}, slave_switch]}
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -186,14 +186,14 @@ node_templates:
         create:
           inputs:
             router:
-              ha_ls_id: { get_attribute: [ master_lswith, resource_id ] }
-              uplink_ls_id: { get_attribute: [ master_lswith, resource_id ] }
+              ha_ls_id: { get_attribute: [ master_lswitch, resource_id ] }
+              uplink_ls_id: { get_attribute: [ master_lswitch, resource_id ] }
               uplink_ip: 192.168.1.11
               uplink_subnet: 255.255.255.0
               uplink_dgw: 192.168.1.1
     relationships:
       - type: cloudify.relationships.connected_to
-        target: master_lswith
+        target: master_lswitch
       - type: cloudify.nsx.relationships.deployed_on_datacenter
         target: datacenter
       - type: cloudify.nsx.relationships.deployed_on_datastore
@@ -211,7 +211,7 @@ node_templates:
           inputs:
             interface:
               dlr_id: { get_attribute: [ nsx_dlr, resource_id ] }
-              interface_ls_id: { get_attribute: [ slave_lswith, resource_id ] }
+              interface_ls_id: { get_attribute: [ slave_lswitch, resource_id ] }
               interface_ip: 192.168.2.11
               interface_subnet: 255.255.255.0
               name: {concat:[{get_input: node_name_prefix}, router_interface]}
@@ -219,7 +219,7 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: nsx_dlr
       - type: cloudify.relationships.connected_to
-        target: slave_lswith
+        target: slave_lswitch
 
   ospf_areas:
     type: cloudify.nsx.ospf_areas
@@ -315,9 +315,9 @@ node_templates:
       connection_config: { get_property: [connection_configuration, connection_config] }
       networking:
         connect_networks:
-          - name: slave_lswith
+          - name: slave_lswitch
             from_relationship: true
             switch_distributed: true
     relationships:
-      - target: slave_lswith
+      - target: slave_lswitch
         type: cloudify.relationships.connected_to

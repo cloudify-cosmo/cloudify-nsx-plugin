@@ -243,7 +243,7 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_lswith_uninstall(self):
+    def test_lswitch_uninstall(self):
         """Check delete for logical switch"""
         self._common_uninstall_delete(
             'id', lswitch.delete,
@@ -317,10 +317,13 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_relay_uninstall(self):
         """Check delete dhcop relay(dlr)"""
-        self._common_uninstall_external_and_unintialized(
-            'some_id', relay.delete,
-            {'relay': {}}
+        self._common_uninstall_delete(
+            "dlr_id", relay.delete,
+            {'relay': {"dlr_id": "dlr_id"}},
+            ['dhcpRelay'],
+            {'uri_parameters': {'edgeId': 'dlr_id'}}
         )
+
 
     @pytest.mark.internal
     @pytest.mark.unit

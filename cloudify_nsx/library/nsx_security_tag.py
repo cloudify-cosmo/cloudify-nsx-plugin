@@ -72,12 +72,26 @@ def delete_tag_vm(client_session, resource_id):
             'Unexpected error retrieving resource ID'
         )
 
-    result_raw = client_session.delete(
-        'securityTagVM',
-        uri_parameters={
-            'tagId': ids[0],
-            'vmMoid': ids[1]
-        }
+    # get list of attached
+    attached_vms_raw = common.nsx_read(
+        client_session, 'body',
+        'securityTagVMsList', uri_parameters={'tagId': ids[0]}
     )
 
-    common.check_raw_result(result_raw)
+    attached_vms = common.nsx_struct_get_list(
+        attached_vms_raw, 'basicinfolist/basicinfo'
+    )
+
+    # delete only attached
+    for vm in attached_vms:
+        if vm.get('objectId') == ids[1]:
+            result_raw = client_session.delete(
+                'securityTagVM',
+                uri_parameters={
+                    'tagId': ids[0],
+                    'vmMoid': ids[1]
+                }
+            )
+
+            common.check_raw_result(result_raw)
+            break

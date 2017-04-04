@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
   - ../../../plugin.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0-m1/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0/plugin.yaml
 
 inputs:
 
@@ -118,7 +118,7 @@ node_templates:
       name: { get_input: vcenter_cluster }
       connection_config: { get_property: [connection_configuration, connection_config] }
 
-  master_lswith:
+  master_lswitch:
     type: cloudify.nsx.lswitch
     properties:
       nsx_auth: &nsx_auth
@@ -127,7 +127,7 @@ node_templates:
         host: { get_input: nsx_ip }
         raml: { get_input: nsx_raml }
       switch:
-        name: {concat:[{get_input: node_name_prefix}, master_swith]}
+        name: {concat:[{get_input: node_name_prefix}, master_switch]}
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -156,11 +156,11 @@ node_templates:
         create:
           inputs:
             edge:
-              default_pg: { get_attribute: [ master_lswith, vsphere_network_id ] }
+              default_pg: { get_attribute: [ master_lswitch, vsphere_network_id ] }
     relationships:
       # connected as network link
       - type: cloudify.relationships.connected_to
-        target: master_lswith
+        target: master_lswitch
       - type: cloudify.nsx.relationships.deployed_on_datacenter
         target: datacenter
       - type: cloudify.nsx.relationships.deployed_on_datastore
@@ -168,12 +168,12 @@ node_templates:
       - type: cloudify.nsx.relationships.deployed_on_cluster
         target: cluster
 
-  slave_lswith:
+  slave_lswitch:
     type: cloudify.nsx.lswitch
     properties:
       nsx_auth: *nsx_auth
       switch:
-        name: {concat:[{get_input: node_name_prefix}, slave_swith]}
+        name: {concat:[{get_input: node_name_prefix}, slave_switch]}
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -200,12 +200,12 @@ node_templates:
           inputs:
             interface:
               esg_id: { get_attribute: [ esg, resource_id ] }
-              portgroup_id: { get_attribute: [ slave_lswith, resource_id ] }
+              portgroup_id: { get_attribute: [ slave_lswitch, resource_id ] }
     relationships:
       - type: cloudify.relationships.contained_in
         target: esg
       - type: cloudify.relationships.connected_to
-        target: slave_lswith
+        target: slave_lswitch
 
   esg_gateway:
     type: cloudify.nsx.esg_gateway

@@ -929,8 +929,8 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
             {'other': 3}
         )
 
-    def _test_nsx_object_type_common(self, func_kwargs, read_response,
-                                     resource_id):
+    def _test_nsx_object_type_common(self, func_kwargs, read_response=None,
+                                     resource_id=None, read_all_response=None):
         fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
             None, func_kwargs
         )
@@ -939,21 +939,37 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            fake_cs_result.read = mock.Mock(
-                return_value=copy.deepcopy(read_response)
-            )
+            if read_response:
+                fake_cs_result.read = mock.Mock(
+                    return_value=copy.deepcopy(read_response)
+                )
+
+            if read_all_response:
+                fake_cs_result.read_all_pages = mock.Mock(
+                    return_value=copy.deepcopy(read_all_response)
+                )
+
             nsx_object_type.create(**kwargs)
+
             self.assertEqual(
                 runtime_properties['use_external_resource'],
                 runtime_properties['resource_id'] is not None
             )
+
             self.assertEqual(
                 runtime_properties['resource_id'], resource_id
             )
 
+            if not read_response:
+                # doesn't need read at all
+                fake_cs_result.read.assert_not_called()
+
+            if not read_all_response:
+                # doesn't need read_all_pages at all
+                fake_cs_result.read_all_pages.assert_not_called()
+
     def test_create_nsx_object_type_group_withresult(self):
-        """Check delete properties after delete nsx object type:
-           group exist"""
+        """Check nsx object create type: group exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'group'}},
             {
@@ -964,8 +980,7 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
         )
 
     def test_create_nsx_object_type_group_withoutresult(self):
-        """Check delete properties after delete nsx object type:
-           group not found"""
+        """Check nsx object create type: group not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'group'}},
             {
@@ -976,8 +991,7 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
         )
 
     def test_create_nsx_object_type_policy_withresult(self):
-        """Check delete properties after delete nsx object type:
-           policy exist"""
+        """Check nsx object create type: policy exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'policy'}},
             {
@@ -988,8 +1002,7 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
         )
 
     def test_create_nsx_object_type_policy_withoutresult(self):
-        """Check delete properties after delete nsx object type:
-           policy not found"""
+        """Check nsx object create type: policy not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'policy'}},
             {
@@ -1000,8 +1013,7 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
         )
 
     def test_create_nsx_object_type_tag_withresult(self):
-        """Check delete properties after delete nsx object type:
-           tag exist"""
+        """Check nsx object create type: tag exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'tag'}},
             {
@@ -1012,8 +1024,7 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
         )
 
     def test_create_nsx_object_type_tag_withoutresult(self):
-        """Check delete properties after delete nsx object type:
-           tag not found"""
+        """Check nsx object create type: tag not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'tag'}},
             {
@@ -1023,6 +1034,23 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
             None
         )
 
+    def test_create_nsx_object_type_lswitch_withresult(self):
+        """Check nsx object create type: lswitch exist"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'name', 'type': 'lswitch'}},
+            None,
+            'id',
+            test_nsx_base.LSWITCH_LIST
+        )
+
+    def test_create_nsx_object_type_lswitch_withoutresult(self):
+        """Check nsx object create type: lswitch not found"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'other', 'type': 'lswitch'}},
+            None,
+            None,
+            test_nsx_base.LSWITCH_LIST
+        )
 
 if __name__ == '__main__':
     unittest.main()
