@@ -134,7 +134,10 @@ SEC_TAG_LIST = {
 
 LSWITCH_LIST = [{
     'name': 'name',
-    'objectId': 'id'
+    'objectId': 'id',
+    'vdsContextWithBacking': {
+        'backingValue': "some_port_id"
+    }
 }]
 
 

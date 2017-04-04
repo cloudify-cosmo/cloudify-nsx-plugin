@@ -58,8 +58,17 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
                              "translatedAddress": "translatedAddress"})
 
         # without resource_id
-        self._regen_ctx()
-        fake_client = mock.Mock()
+        fake_client, _, kwargs = self._kwargs_regen_client(
+            None, {
+                'rule': {
+                    "esg_id": "esg_id",
+                    "action": "action",
+                    "originalAddress": "originalAddress",
+                    "translatedAddress": "translatedAddress"
+                }
+            }
+        )
+
         fake_nsx_nat = mock.Mock()
         fake_nsx_nat.add_nat_rule = mock.MagicMock(
             return_value="some_id"
@@ -72,14 +81,7 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
                 'cloudify_nsx.network.esg_nat.nsx_nat',
                 fake_nsx_nat
             ):
-                esg_nat.create(ctx=self.fake_ctx,
-                               rule={"esg_id": "esg_id",
-                                     "action": "action",
-                                     "originalAddress": "originalAddress",
-                                     "translatedAddress": "translatedAddress"},
-                               nsx_auth={'username': 'username',
-                                         'password': 'password',
-                                         'host': 'host'})
+                esg_nat.create(**kwargs)
         fake_nsx_nat.add_nat_rule.assert_called_with(
             fake_client, 'esg_id', 'action', 'originalAddress',
             'translatedAddress', None, None, False, True, None, 'any',
@@ -94,8 +96,15 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_lswitch_install(self):
         """Check create logical swicth"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
-        fake_client = mock.Mock()
+        fake_client, _, kwargs = self._kwargs_regen_client(
+            "id", {
+                "switch": {
+                    "name": "name",
+                    "transport_zone": "transport_zone"
+                }
+            }
+        )
+
         fake_get_logical_switch = mock.MagicMock(return_value={
             'vdsContextWithBacking': {
                 'backingValue': "some_port_id"
@@ -110,14 +119,9 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
                 'cloudify_nsx.library.nsx_lswitch.get_logical_switch',
                 fake_get_logical_switch
             ):
-                lswitch.create(ctx=self.fake_ctx,
-                               switch={"name": "name",
-                                       "transport_zone": "transport_zone"},
-                               nsx_auth={'username': 'username',
-                                         'password': 'password',
-                                         'host': 'host'})
+                lswitch.create(**kwargs)
         fake_get_logical_switch.assert_called_with(
-            fake_client, 'some_id'
+            fake_client, 'id'
         )
         self.assertEqual(
             self.fake_ctx.instance.runtime_properties['vsphere_network_id'],
@@ -139,7 +143,14 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
 
         # without resource_id
         self._regen_ctx()
-        fake_client = mock.Mock()
+        fake_client, _, kwargs = self._kwargs_regen_client(
+            None, {
+                'relay': {
+                    "dlr_id": "dlr_id"
+                }
+            }
+        )
+
         fake_dlr_esg = mock.Mock()
         fake_dlr_esg.update_dhcp_relay = mock.MagicMock()
         with mock.patch(
@@ -150,17 +161,7 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
                 'cloudify_nsx.network.relay.cfy_dlr',
                 fake_dlr_esg
             ):
-                relay.create(
-                    ctx=self.fake_ctx,
-                    relay={
-                        "dlr_id": "dlr_id"
-                    },
-                    nsx_auth={
-                        'username': 'username',
-                        'password': 'password',
-                        'host': 'host'
-                    }
-                )
+                relay.create(**kwargs)
 
         fake_dlr_esg.update_dhcp_relay.assert_called_with(
             fake_client, 'dlr_id', {}, {}
