@@ -29,6 +29,7 @@ data_types:
 node_types:
 
   # SecurityGroup
+  # A security group is a collection of assets or grouping objects from your vSphere inventory
   cloudify.nsx.security_group:
     derived_from: cloudify.nodes.ApplicationServer
     properties:
@@ -43,10 +44,15 @@ node_types:
         required: false
       group:
         default:
+          # Scope ID(be default: globalroot‐0) or datacenterId or portgroupId in upgrade use cases.
           scopeId: globalroot-0
+          # Object name
           name: ""
+          # optional, list of members
           member: {}
+          # optional, list of excluded members
           excludeMember: {}
+          # optional, list of rules for attach new members
           dynamicMemberDefinition: {}
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -56,6 +62,7 @@ node_types:
           implementation: nsx.cloudify_nsx.security.group.delete
 
   # SecuriteGroup Dynamic Member Update
+  # Partially update Securite Group with new dynamic members rules
   cloudify.nsx.security_group_dynamic_member:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
@@ -70,6 +77,7 @@ node_types:
         required: false
       dynamic_member:
         default:
+          # Struct with decription dynamic membership
           dynamic_set: ""
           security_group_id: ""
     interfaces:
@@ -128,6 +136,10 @@ node_types:
           implementation: nsx.cloudify_nsx.security.group_exclude_member.delete
 
   # Security Group Policy
+  # A security policy is a set of Endpoint, firewall, and network introspection services that can be applied to a security group.
+  # When creating a security policy, a parent security policy can be specified ifrequired. The security policy inherits
+  # services from the parent security policy. Security group bindings and actions can also be specified while creating
+  # the policy. Note that execution order of actions in a category is implied by their order in the list
   cloudify.nsx.security_policy:
     derived_from: cloudify.nodes.ApplicationServer
     properties:
@@ -142,11 +154,17 @@ node_types:
         required: false
       policy:
         default:
+          # name of security policy
           name: ""
+          # optional, short description for policy
           description: ""
+          # Sort order, place in list
           precedence: ""
+          # optional, parent security policy
           parent: ""
+          # List of security groups
           securityGroupBinding: ""
+          # list of actions by category
           actionsByCategory: ""
     interfaces:
       cloudify.interfaces.lifecycle:
