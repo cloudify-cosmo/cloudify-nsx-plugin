@@ -1052,5 +1052,24 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
             test_nsx_base.LSWITCH_LIST
         )
 
+    def test_create_nsx_object_type_edge_withresult(self):
+        """Check nsx object create type: edge exist"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'name', 'type': 'router'}},
+            None,
+            'id',
+            test_nsx_base.EDGE_LIST
+        )
+
+    def test_create_nsx_object_type_edge_withoutresult(self):
+        """Check nsx object create type: egde not found"""
+        self._test_nsx_object_type_common(
+            {'nsx_object': {'name': 'other', 'type': 'router'}},
+            None,
+            None,
+            test_nsx_base.EDGE_LIST
+        )
+
+
 if __name__ == '__main__':
     unittest.main()

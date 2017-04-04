@@ -324,7 +324,6 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
             {'uri_parameters': {'edgeId': 'dlr_id'}}
         )
 
-
     @pytest.mark.internal
     @pytest.mark.unit
     def test_routing_ip_prefix_uninstall(self):

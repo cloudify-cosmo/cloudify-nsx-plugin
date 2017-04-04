@@ -132,12 +132,27 @@ SEC_TAG_LIST = {
     }
 }
 
+LSWITCH = {
+    'virtualWire': {
+        'name': 'name',
+        'objectId': 'id',
+        'vdsContextWithBacking': {
+            'backingValue': "some_port_id"
+        }
+    }
+}
+
 LSWITCH_LIST = [{
     'name': 'name',
     'objectId': 'id',
     'vdsContextWithBacking': {
         'backingValue': "some_port_id"
     }
+}]
+
+EDGE_LIST = [{
+    'name': 'name',
+    'objectId': 'id'
 }]
 
 
