@@ -514,12 +514,12 @@ Logical switches
 **Examples:**
 
 ```
-  slave_lswith:
+  slave_lswitch:
     type: cloudify.nsx.lswitch
     properties:
       nsx_auth: <authentication credentials for nsx>
       switch:
-        name:slave_swith
+        name:slave_switch
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE

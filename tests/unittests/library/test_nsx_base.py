@@ -132,6 +132,11 @@ SEC_TAG_LIST = {
     }
 }
 
+LSWITCH_LIST = [{
+    'name': 'name',
+    'objectId': 'id'
+}]
+
 
 class NSXBaseTest(unittest.TestCase):
 
@@ -247,6 +252,10 @@ class NSXBaseTest(unittest.TestCase):
         )
 
         fake_cs_result.read = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
+        fake_cs_result.read_all_pages = mock.Mock(
             side_effect=cfy_exc.NonRecoverableError()
         )
 

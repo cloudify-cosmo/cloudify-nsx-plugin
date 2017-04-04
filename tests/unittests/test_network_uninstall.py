@@ -243,7 +243,7 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_lswith_uninstall(self):
+    def test_lswitch_uninstall(self):
         """Check delete for logical switch"""
         self._common_uninstall_delete(
             'id', lswitch.delete,

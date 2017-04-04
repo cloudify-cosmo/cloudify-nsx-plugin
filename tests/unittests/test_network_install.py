@@ -16,6 +16,7 @@ import library.test_nsx_base as test_nsx_base
 import pytest
 import mock
 import cloudify_nsx.network.esg_nat as esg_nat
+import cloudify_nsx.network.lswitch as lswitch
 import cloudify_nsx.network.relay as relay
 import cloudify_nsx.network.routing_ip_prefix as routing_ip_prefix
 import cloudify_nsx.network.routing_redistribution as routing_redistribution
@@ -87,6 +88,40 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
         self.assertEqual(
             self.fake_ctx.instance.runtime_properties['resource_id'],
             "some_id"
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_lswitch_install(self):
+        """Check create logical swicth"""
+        self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
+        fake_client = mock.Mock()
+        fake_get_logical_switch = mock.MagicMock(return_value={
+            'vdsContextWithBacking': {
+                'backingValue': "some_port_id"
+            }
+        })
+
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            mock.MagicMock(return_value=fake_client)
+        ):
+            with mock.patch(
+                'cloudify_nsx.library.nsx_lswitch.get_logical_switch',
+                fake_get_logical_switch
+            ):
+                lswitch.create(ctx=self.fake_ctx,
+                               switch={"name": "name",
+                                       "transport_zone": "transport_zone"},
+                               nsx_auth={'username': 'username',
+                                         'password': 'password',
+                                         'host': 'host'})
+        fake_get_logical_switch.assert_called_with(
+            fake_client, 'some_id'
+        )
+        self.assertEqual(
+            self.fake_ctx.instance.runtime_properties['vsphere_network_id'],
+            "some_port_id"
         )
 
     @pytest.mark.internal
