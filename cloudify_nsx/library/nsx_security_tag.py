@@ -54,7 +54,7 @@ def delete_tag(client_session, resource_id):
 def tag_vm_to_resource_id(tag_id, vm_id):
     """Generate resource_id from tag_id/vm_id"""
     if not vm_id or not tag_id:
-        raise cfy_exc.RecoverableError(
+        raise cfy_exc.NonRecoverableError(
             "Please recheck tag_id/vm_id"
         )
 

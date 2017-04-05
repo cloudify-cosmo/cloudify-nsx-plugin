@@ -1297,7 +1297,7 @@ relationships:
     cloudify.nsx.relationships.deployed_on_cluster:
         derived_from: cloudify.relationships.connected_to
 
-    cloudify.nsx.relationships.attach_tag:
+    cloudify.nsx.relationships.is_tagged_by:
         derived_from: cloudify.relationships.connected_to
         target_interfaces:
             cloudify.interfaces.relationship_lifecycle:

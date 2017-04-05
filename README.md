@@ -454,9 +454,9 @@ Security Tag.
 
 **Relationships**
 
-#### cloudify.nsx.relationships.attach_tag
+#### cloudify.nsx.relationships.is_tagged_by
 
-You can use `attach_tag` for attach tag to several vm's without separate node for [each](README.md#cloudifynsxsecurity_tag_vm).
+You can use `is_tagged_by` for attach tag to several vm's without separate node for [each](README.md#cloudifynsxsecurity_tag_vm).
 
 ```
 
@@ -483,11 +483,11 @@ You can use `attach_tag` for attach tag to several vm's without separate node fo
         memory: 256
       agent_config:
         install_method: none
-    # can be used only with 'attach_tag' relationship
+    # can be used only with 'is_tagged_by' relationship
     instances:
       deploy: 2
     relationships:
-      - type: cloudify.nsx.relationships.attach_tag
+      - type: cloudify.nsx.relationships.is_tagged_by
         target: security_tag
 
 ```

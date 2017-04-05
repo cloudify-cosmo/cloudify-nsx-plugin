@@ -170,11 +170,11 @@ node_templates:
         memory: { get_input: memory }
       agent_config:
         install_method: none
-    # can be used only with 'attach_tag' relationship
+    # can be used only with 'is_tagged_by' relationship
     instances:
       deploy: 2
     relationships:
-      - type: cloudify.nsx.relationships.attach_tag
+      - type: cloudify.nsx.relationships.is_tagged_by
         target: security_tag
 
 ###############################################################################
