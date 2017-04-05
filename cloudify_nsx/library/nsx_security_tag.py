@@ -51,7 +51,20 @@ def delete_tag(client_session, resource_id):
     common.check_raw_result(result)
 
 
+def tag_vm_to_resource_id(tag_id, vm_id):
+    """Generate resource_id from tag_id/vm_id"""
+    if not vm_id or not tag_id:
+        raise cfy_exc.RecoverableError(
+            "Please recheck tag_id/vm_id"
+        )
+
+    return "%s|%s" % (tag_id, vm_id)
+
+
 def add_tag_vm(client_session, tag_id, vm_id):
+
+    resource_id = tag_vm_to_resource_id(tag_id, vm_id)
+
     result_raw = client_session.update(
         'securityTagVM',
         uri_parameters={
@@ -61,7 +74,7 @@ def add_tag_vm(client_session, tag_id, vm_id):
     )
     common.check_raw_result(result_raw)
 
-    return "%s|%s" % (tag_id, vm_id)
+    return resource_id
 
 
 def delete_tag_vm(client_session, resource_id):
@@ -77,6 +90,9 @@ def delete_tag_vm(client_session, resource_id):
         client_session, 'body',
         'securityTagVMsList', uri_parameters={'tagId': ids[0]}
     )
+
+    if not attached_vms_raw:
+        return
 
     attached_vms = common.nsx_struct_get_list(
         attached_vms_raw, 'basicinfolist/basicinfo'
