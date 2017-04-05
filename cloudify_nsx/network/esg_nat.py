@@ -94,28 +94,4 @@ def create(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existing, nat_dict = common.get_properties('rule', kwargs)
-
-    if use_existing:
-        common.remove_properties('rule')
-        ctx.logger.info("Used existed")
-        return
-
-    resource_id = ctx.instance.runtime_properties.get('resource_id')
-    if not resource_id:
-        common.remove_properties('rule')
-        ctx.logger.info("Not fully created, skip")
-        return
-
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
-    common.attempt_with_rerun(
-        nsx_nat.delete_nat_rule,
-        client_session=client_session,
-        resource_id=resource_id
-    )
-
-    ctx.logger.info("delete %s" % resource_id)
-
-    common.remove_properties('rule')
+    common.delete_object(nsx_nat.delete_nat_rule, 'rule', kwargs)

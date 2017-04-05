@@ -102,28 +102,4 @@ def create_esg(**kwargs):
 
 @operation
 def delete(**kwargs):
-    use_existing, neighbour = common.get_properties('neighbour', kwargs)
-
-    if use_existing:
-        common.remove_properties('neighbour')
-        ctx.logger.info("Used existed")
-        return
-
-    resource_id = ctx.instance.runtime_properties.get('resource_id')
-    if not resource_id:
-        common.remove_properties('neighbour')
-        ctx.logger.info("Not fully created, skip")
-        return
-
-    # credentials
-    client_session = common.nsx_login(kwargs)
-
-    common.attempt_with_rerun(
-        cfy_dlr.del_bgp_neighbour,
-        client_session=client_session,
-        resource_id=resource_id
-    )
-
-    ctx.logger.info("delete %s" % resource_id)
-
-    common.remove_properties('neighbour')
+    common.delete_object(cfy_dlr.del_bgp_neighbour, 'neighbour', kwargs)
