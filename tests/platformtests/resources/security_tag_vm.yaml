@@ -79,7 +79,7 @@ inputs:
     type: string
     description: >
       "CentOS 7 template name"
-    default: "CentOS-7.2-x86_64-tmpl"
+    default: "CentOS-7.2-x86_64-1511-tmpl"
 
   cpus:
     type: integer
@@ -152,12 +152,30 @@ node_templates:
     properties:
       connection_config: *connection_config
       server:
-        name: { concat: [ { get_input: node_name_prefix }, { get_input: vsphere_centos_name } ] }
+        name: { concat: [ { get_input: node_name_prefix }, { get_input: vsphere_centos_name }, "-explicit" ] }
         template: { get_input: template_name }
         cpus: { get_input: cpus }
         memory: { get_input: memory }
       agent_config:
         install_method: none
+
+  vsphere_vm_link:
+    type: cloudify.vsphere.nodes.Server
+    properties:
+      connection_config: *connection_config
+      server:
+        name: { concat: [ { get_input: node_name_prefix }, { get_input: vsphere_centos_name }, "-implicit" ] }
+        template: { get_input: template_name }
+        cpus: { get_input: cpus }
+        memory: { get_input: memory }
+      agent_config:
+        install_method: none
+    # can be used only with 'is_tagged_by' relationship
+    instances:
+      deploy: 2
+    relationships:
+      - type: cloudify.nsx.relationships.is_tagged_by
+        target: security_tag
 
 ###############################################################################
 # NSX section

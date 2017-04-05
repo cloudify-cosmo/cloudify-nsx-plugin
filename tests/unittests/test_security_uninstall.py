@@ -218,6 +218,21 @@ class SecurityUninstallTest(test_nsx_base.NSXBaseTest):
             }
         )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_tag_vm_uninstall_by_relationship(self):
+        """Check bind security tag to vm by relationship"""
+        self._common_run_relationship_read_update(
+            tag_vm.unlink,
+            {'vsphere_server_id': 'vm_id'}, {'resource_id': 'ab'},
+            read_args=['securityTagVMsList'],
+            read_kwargs={"uri_parameters": {'tagId': 'ab'}},
+            read_response={
+                'body': {},
+                'status': 204
+            }
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

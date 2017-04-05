@@ -15,6 +15,7 @@ import unittest
 import library.test_nsx_base as test_nsx_base
 import pytest
 import mock
+import copy
 import cloudify_nsx.network.esg_nat as esg_nat
 import cloudify_nsx.network.lswitch as lswitch
 import cloudify_nsx.network.relay as relay
@@ -105,24 +106,18 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
             }
         )
 
-        fake_get_logical_switch = mock.MagicMock(return_value={
-            'vdsContextWithBacking': {
-                'backingValue': "some_port_id"
-            }
-        })
+        fake_client.read = mock.Mock(
+            return_value=copy.deepcopy({
+                'status': 204,
+                'body': test_nsx_base.LSWITCH
+            })
+        )
 
         with mock.patch(
             'cloudify_nsx.library.nsx_common.NsxClient',
             mock.MagicMock(return_value=fake_client)
         ):
-            with mock.patch(
-                'cloudify_nsx.library.nsx_lswitch.get_logical_switch',
-                fake_get_logical_switch
-            ):
-                lswitch.create(**kwargs)
-        fake_get_logical_switch.assert_called_with(
-            fake_client, 'id'
-        )
+            lswitch.create(**kwargs)
         self.assertEqual(
             self.fake_ctx.instance.runtime_properties['vsphere_network_id'],
             "some_port_id"

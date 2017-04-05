@@ -57,3 +57,40 @@ def delete(**kwargs):
         nsx_security_tag.delete_tag_vm, 'vm_tag',
         kwargs
     )
+
+
+@operation
+def link(**kwargs):
+    vm_id = ctx.source.instance.runtime_properties.get('vsphere_server_id')
+    tag_id = ctx.target.instance.runtime_properties.get('resource_id')
+    ctx.logger.info("Attach %s to %s" % (str(tag_id), str(vm_id)))
+
+    # credentials reused from target
+    kwargs.update(ctx.target.instance.runtime_properties)
+    client_session = common.nsx_login(kwargs)
+
+    resource_id = nsx_security_tag.add_tag_vm(
+        client_session,
+        tag_id,
+        vm_id,
+    )
+    ctx.logger.info("created %s" % resource_id)
+
+
+@operation
+def unlink(**kwargs):
+    vm_id = ctx.source.instance.runtime_properties.get('vsphere_server_id')
+    tag_id = ctx.target.instance.runtime_properties.get('resource_id')
+    ctx.logger.info("Deattach %s from %s" % (str(tag_id), str(vm_id)))
+
+    # credentials reused from target
+    kwargs.update(ctx.target.instance.runtime_properties)
+    client_session = common.nsx_login(kwargs)
+
+    resource_id = nsx_security_tag.tag_vm_to_resource_id(tag_id, vm_id)
+
+    nsx_security_tag.delete_tag_vm(
+        client_session,
+        resource_id
+    )
+    ctx.logger.info("delete %s" % resource_id)

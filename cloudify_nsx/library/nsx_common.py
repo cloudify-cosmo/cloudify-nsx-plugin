@@ -13,6 +13,7 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 from cloudify import ctx
+from cloudify.context import NODE_INSTANCE
 from pkg_resources import resource_filename
 from nsxramlclient.client import NsxClient
 from cloudify import exceptions as cfy_exc
@@ -246,14 +247,17 @@ def attempt_with_rerun(func, **kwargs):
 
 
 def nsx_login(kwargs):
-    nsx_auth = _get_properties('nsx_auth', kwargs)
+    if ctx.type == NODE_INSTANCE:
+        nsx_auth = _get_properties('nsx_auth', kwargs)
+    else:
+        nsx_auth = kwargs.get('nsx_auth')
 
     ctx.logger.info("NSX login...")
     user = nsx_auth.get('username')
     password = nsx_auth.get('password')
     ip = nsx_auth.get('host')
     # if node contained in some other node, try to overwrite ip
-    if not ip:
+    if not ip and ctx.type == NODE_INSTANCE:
         ip = ctx.instance.host_ip
         ctx.logger.info("Used host from container: %s" % ip)
     # check minimal amout of credentials
