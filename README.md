@@ -452,6 +452,46 @@ Security Tag.
 * [Simple example](tests/platformtests/resources/security_tag.yaml):
 * For more complicated example look to [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
+**Relationships**
+
+#### cloudify.nsx.relationships.attach_tag
+
+You can use `attach_tag` for attach tag to several vm's without separate node for [each](README.md#cloudifynsxsecurity_tag_vm).
+
+```
+
+  security_tag:
+    type: cloudify.nsx.security_tag
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            tag:
+              name: Secret tag name
+              description: What can i say?
+
+  vsphere_vm_link:
+    type: cloudify.vsphere.nodes.Server
+    properties:
+      connection_config: *connection_config
+      server:
+        name: several_servers
+        template: <template_name>
+        cpus: 1
+        memory: 256
+      agent_config:
+        install_method: none
+    # can be used only with 'attach_tag' relationship
+    instances:
+      deploy: 2
+    relationships:
+      - type: cloudify.nsx.relationships.attach_tag
+        target: security_tag
+
+```
+
 ### cloudify.nsx.security_tag_vm
 
 Apply [security tag](README.md#cloudifynsxsecurity_tag) to vm.
