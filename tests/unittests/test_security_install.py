@@ -292,6 +292,23 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
             update_response=test_nsx_base.SUCCESS_RESPONSE_ID
         )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_tag_vm_install_by_relationship(self):
+        """Check bind security tag to vm by relationship"""
+        self._common_run_relationship_read_update(
+            tag_vm.link,
+            {'vsphere_server_id': 'vm_id'}, {'resource_id': 'tag_id'},
+            update_args=['securityTagVM'],
+            update_kwargs={
+                'uri_parameters': {
+                    'tagId': 'tag_id',
+                    'vmMoid': 'vm_id'
+                }
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -66,7 +66,8 @@ def link(**kwargs):
     ctx.logger.info("Attach %s to %s" % (str(tag_id), str(vm_id)))
 
     # credentials reused from target
-    client_session = common.nsx_login(ctx.target.instance.runtime_properties)
+    kwargs.update(ctx.target.instance.runtime_properties)
+    client_session = common.nsx_login(kwargs)
 
     resource_id = nsx_security_tag.add_tag_vm(
         client_session,
@@ -83,7 +84,8 @@ def unlink(**kwargs):
     ctx.logger.info("Deattach %s from %s" % (str(tag_id), str(vm_id)))
 
     # credentials reused from target
-    client_session = common.nsx_login(ctx.target.instance.runtime_properties)
+    kwargs.update(ctx.target.instance.runtime_properties)
+    client_session = common.nsx_login(kwargs)
 
     resource_id = nsx_security_tag.tag_vm_to_resource_id(tag_id, vm_id)
 

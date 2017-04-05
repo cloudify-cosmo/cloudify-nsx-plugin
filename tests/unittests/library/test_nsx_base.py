@@ -169,8 +169,29 @@ class NSXBaseTest(unittest.TestCase):
         node.runtime_properties = {}
         current_ctx.set(self.fake_ctx)
 
-    def _kwargs_regen(self, func_kwargs):
-        self._regen_ctx()
+    def _regen_relationship_ctx(self):
+        # source
+        source_instance = mock.Mock()
+        source_instance.runtime_properties = {}
+        source = cfy_mocks.MockCloudifyContext()
+        source._instance = source_instance
+        # target
+        target_instance = mock.Mock()
+        target_instance.runtime_properties = {}
+        target = cfy_mocks.MockCloudifyContext()
+        target._instance = target_instance
+        # create context
+        self.fake_ctx = cfy_mocks.MockCloudifyContext(
+            target=target,
+            source=source
+        )
+        current_ctx.set(self.fake_ctx)
+
+    def _kwargs_regen(self, func_kwargs, node_context=True):
+        if node_context:
+            self._regen_ctx()
+        else:
+            self._regen_relationship_ctx()
         kwargs = {v: func_kwargs[v] for v in func_kwargs}
         kwargs['ctx'] = self.fake_ctx
         return kwargs
@@ -247,17 +268,24 @@ class NSXBaseTest(unittest.TestCase):
                 for i in additional_params:
                     self.assertEqual(runtime.get(i), i)
 
-    def _kwargs_regen_client(self, resource_id, func_kwargs):
-        kwargs = self._kwargs_regen(func_kwargs)
-        runtime = self.fake_ctx.instance.runtime_properties
+    def _kwargs_regen_client(self, resource_id, func_kwargs,
+                             node_context=True):
+        kwargs = self._kwargs_regen(func_kwargs, node_context)
+        if node_context:
+            runtime = self.fake_ctx.instance.runtime_properties
+        else:
+            runtime = self.fake_ctx.target.instance.runtime_properties
+
         if resource_id:
             runtime['resource_id'] = resource_id
+
         kwargs['nsx_auth'] = {
             'username': 'username',
             'password': 'password',
             'host': 'host',
             'raml': 'raml'
         }
+
         fake_cs_result = mock.Mock()
         fake_client = mock.MagicMock(return_value=fake_cs_result)
 
@@ -286,6 +314,66 @@ class NSXBaseTest(unittest.TestCase):
         )
 
         return fake_client, fake_cs_result, kwargs
+
+    def _common_run_relationship(self, func):
+        """check that we have RecoverableError with empty properties"""
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, {}, False
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            with self.assertRaises(cfy_exc.RecoverableError):
+                func(**kwargs)
+
+    def _common_run_relationship_read_update(
+        self, func, source_properties=None, target_properties=None,
+        read_args=None, read_kwargs=None, read_response=None,
+        update_args=None, update_kwargs=None, update_response=None
+    ):
+
+        self._common_run_relationship(func)
+
+        # regen
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, {}, False
+        )
+
+        # properties
+        if source_properties:
+            self.fake_ctx.source.instance.runtime_properties.update(
+                source_properties
+            )
+
+        if target_properties:
+            self.fake_ctx.target.instance.runtime_properties.update(
+                target_properties
+            )
+
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            self._update_fake_cs_result(
+                fake_cs_result,
+                # read
+                read_response=read_response,
+                # update
+                update_response=update_response
+            )
+
+            func(**kwargs)
+
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # read
+                read_response=read_response,
+                read_args=read_args, read_kwargs=read_kwargs,
+                # update
+                update_response=update_response,
+                update_args=update_args, update_kwargs=update_kwargs
+            )
 
     def _common_install(self, resource_id, func_call, func_kwargs):
         """Check skip install logic if we have resource_id
@@ -321,6 +409,59 @@ class NSXBaseTest(unittest.TestCase):
                 }
             )
 
+    def _update_fake_cs_result(
+        self, fake_cs_result,
+        extract_response=None, read_response=None, update_response=None
+    ):
+        """Set correct responses to calls"""
+        if extract_response:
+            fake_cs_result.extract_resource_body_example = mock.Mock(
+                return_value=copy.deepcopy(extract_response)
+            )
+
+        if read_response:
+            fake_cs_result.read = mock.Mock(
+                return_value=copy.deepcopy(read_response)
+            )
+
+        if update_response:
+            fake_cs_result.update = mock.Mock(
+                return_value=copy.deepcopy(update_response)
+            )
+
+    def _check_fake_cs_result(
+        self, fake_cs_result,
+        extract_response=None, extract_args=None, extract_kwargs=None,
+        read_response=None, read_args=None, read_kwargs=None,
+        update_response=None, update_args=None, update_kwargs=None
+    ):
+        """Check that correct calls called"""
+        if not extract_response:
+            # doesn't need extract at all
+            fake_cs_result.extract_resource_body_example.\
+                assert_not_called()
+        else:
+            fake_cs_result.extract_resource_body_example.\
+                assert_called_with(
+                    *extract_args, **extract_kwargs
+                )
+
+        if not read_response:
+            # doesn't need read at all
+            fake_cs_result.read.assert_not_called()
+        else:
+            fake_cs_result.read.assert_called_with(
+                *read_args, **read_kwargs
+            )
+
+        if not update_response:
+            # doesn't need update at all
+            fake_cs_result.update.assert_not_called()
+        else:
+            fake_cs_result.update.assert_called_with(
+                *update_args, **update_kwargs
+            )
+
     def _common_install_extract_or_read_and_update(
         self, resource_id, func_call, func_kwargs,
         extract_args=None, extract_kwargs=None, extract_response=None,
@@ -338,48 +479,27 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            if extract_response:
-                fake_cs_result.extract_resource_body_example = mock.Mock(
-                    return_value=copy.deepcopy(extract_response)
-                )
-
-            if read_response:
-                fake_cs_result.read = mock.Mock(
-                    return_value=copy.deepcopy(read_response)
-                )
-
-            if update_response:
-                fake_cs_result.update = mock.Mock(
-                    return_value=copy.deepcopy(update_response)
-                )
+            self._update_fake_cs_result(
+                fake_cs_result,
+                extract_response=extract_response,
+                read_response=read_response,
+                update_response=update_response
+            )
 
             func_call(**kwargs)
 
-            if not extract_response:
-                # doesn't need extract at all
-                fake_cs_result.extract_resource_body_example.\
-                    assert_not_called()
-            else:
-                fake_cs_result.extract_resource_body_example.\
-                    assert_called_with(
-                        *extract_args, **extract_kwargs
-                    )
-
-            if not read_response:
-                # doesn't need read at all
-                fake_cs_result.read.assert_not_called()
-            else:
-                fake_cs_result.read.assert_called_with(
-                    *read_args, **read_kwargs
-                )
-
-            if not update_response:
-                # doesn't need update at all
-                fake_cs_result.update.assert_not_called()
-            else:
-                fake_cs_result.update.assert_called_with(
-                    *update_args, **update_kwargs
-                )
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # extract
+                extract_response=extract_response,
+                extract_args=extract_args, extract_kwargs=extract_kwargs,
+                # read
+                read_response=read_response,
+                read_args=read_args, read_kwargs=read_kwargs,
+                # update
+                update_response=update_response,
+                update_args=update_args, update_kwargs=update_kwargs
+            )
 
             runtime = self.fake_ctx.instance.runtime_properties
             self.assertEqual(
