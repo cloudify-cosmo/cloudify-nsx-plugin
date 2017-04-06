@@ -24,10 +24,16 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_add_policy_group_bind_insert(self):
         """Check nsx_security_policy.add_policy_group_bind func: insert"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
 
         self.assertEqual(
             nsx_security_policy.add_policy_group_bind(
@@ -35,25 +41,35 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
             ),
             "security_group_id|security_policy_id"
         )
-
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
-        )
-
-        client_session.update.assert_called_with(
-            'securityPolicyID',
-            request_body_dict=test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER,
-            uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            # update
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_add_policy_group_bind_existing(self):
         """Check nsx_security_policy.add_policy_group_bind func existing"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
-        })
+        }
+
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response
+        )
 
         with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             nsx_security_policy.add_policy_group_bind(
@@ -64,62 +80,89 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
             "Group other already exists in name policy"
         )
 
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
         )
-
-        client_session.update.assert_not_called()
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_del_policy_group_bind_existing(self):
         """Check nsx_security_policy.del_policy_group_bind func: existing"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
 
         nsx_security_policy.del_policy_group_bind(
             client_session, "security_group_id|security_policy_id"
         )
 
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
-        )
-
-        client_session.update.assert_called_with(
-            'securityPolicyID',
-            request_body_dict=test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE,
-            uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            # update
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict':
+                    test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_del_policy_group_bind_unexisting(self):
         """Check nsx_security_policy.del_policy_group_bind func: unexisting"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response
+        )
 
         nsx_security_policy.del_policy_group_bind(
             client_session, "security_id|security_policy_id"
         )
 
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
         )
-
-        client_session.update.assert_not_called()
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_add_policy_section_insert(self):
         """Check nsx_security_policy.add_policy_section func: insert"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_POLICY_SECTION_BEFORE
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
 
         self.assertEqual(
             nsx_security_policy.add_policy_section(
@@ -128,24 +171,36 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
             "category|security_policy_id"
         )
 
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
-        )
-
-        client_session.update.assert_called_with(
-            'securityPolicyID',
-            request_body_dict=test_nsx_base.SEC_POLICY_SECTION_AFTER,
-            uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            # update
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.SEC_POLICY_SECTION_AFTER,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_add_policy_section_overwrite(self):
         """Check nsx_security_policy.add_policy_section func: overwrite"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_POLICY_SECTION_BEFORE
-        })
+        }
+
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
 
         self.assertEqual(
             nsx_security_policy.add_policy_section(
@@ -155,39 +210,57 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
             "other_category|security_policy_id"
         )
 
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
-        )
-
-        client_session.update.assert_called_with(
-            'securityPolicyID',
-            request_body_dict=test_nsx_base.SEC_POLICY_SECTION_OVERWRITE,
-            uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            # update
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict':
+                    test_nsx_base.SEC_POLICY_SECTION_OVERWRITE,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_del_policy_section_existing(self):
         """Check nsx_security_policy.del_policy_section func existing"""
-
-        # delete existed
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_POLICY_SECTION_AFTER
-        })
+        }
+
+        # delete existed
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
 
         nsx_security_policy.del_policy_section(
             client_session, "category|security_policy_id"
         )
 
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
-        )
-
-        client_session.update.assert_called_with(
-            'securityPolicyID',
-            request_body_dict=test_nsx_base.SEC_POLICY_SECTION_BEFORE,
-            uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            # update
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict':
+                    test_nsx_base.SEC_POLICY_SECTION_BEFORE,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            }
         )
 
     @pytest.mark.internal
@@ -195,21 +268,29 @@ class NsxSecurityPolicyTest(test_nsx_base.NSXBaseTest):
     def test_del_policy_section_unexisting(self):
         """Check nsx_security_policy.del_policy_section func: unexisting"""
 
-        # delete existed
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_POLICY_SECTION_AFTER
-        })
+        }
+
+        # delete existed
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response
+        )
 
         nsx_security_policy.del_policy_section(
             client_session, "unknown|security_policy_id"
         )
 
-        client_session.read.assert_called_with(
-            'securityPolicyID', uri_parameters={'ID': 'security_policy_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}}
         )
-
-        client_session.update.assert_not_called()
 
 
 if __name__ == '__main__':

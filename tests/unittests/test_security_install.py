@@ -220,6 +220,28 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_policy_group_bind_install_by_relationship(self):
+        """Check bind security tag to vm by relationship"""
+        self._common_run_relationship_read_update(
+            policy_group_bind.link,
+            {'resource_id': 'security_policy_id'},
+            {'resource_id': 'security_group_id'},
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            read_response={
+                'status': 204,
+                'body': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
+            },
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_policy_section_install(self):
         """Check replace security policy section"""
         self._common_install_extract_or_read_and_update(

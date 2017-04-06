@@ -1307,3 +1307,14 @@ relationships:
                 unlink:
                     implementation: nsx.cloudify_nsx.security.tag_vm.unlink
                     inputs: {}
+
+    cloudify.nsx.relationships.is_applied_to:
+        derived_from: cloudify.relationships.connected_to
+        target_interfaces:
+            cloudify.interfaces.relationship_lifecycle:
+                establish:
+                    implementation: nsx.cloudify_nsx.security.policy_group_bind.link
+                    inputs: {}
+                unlink:
+                    implementation: nsx.cloudify_nsx.security.policy_group_bind.unlink
+                    inputs: {}

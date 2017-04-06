@@ -59,3 +59,41 @@ def delete(**kwargs):
         nsx_security_policy.del_policy_group_bind, 'policy_group_bind',
         kwargs
     )
+
+
+@operation
+def link(**kwargs):
+    policy_id = ctx.source.instance.runtime_properties.get('resource_id')
+    group_id = ctx.target.instance.runtime_properties.get('resource_id')
+    ctx.logger.info("Attach %s to %s" % (str(policy_id), str(group_id)))
+
+    # credentials reused from target
+    kwargs.update(ctx.target.instance.runtime_properties)
+    client_session = common.nsx_login(kwargs)
+
+    resource_id = nsx_security_policy.add_policy_group_bind(
+        client_session,
+        policy_id,
+        group_id,
+    )
+    ctx.logger.info("created %s" % resource_id)
+
+
+@operation
+def unlink(**kwargs):
+    policy_id = ctx.source.instance.runtime_properties.get('resource_id')
+    group_id = ctx.target.instance.runtime_properties.get('resource_id')
+    ctx.logger.info("Deattach %s from %s" % (str(policy_id), str(group_id)))
+
+    # credentials reused from target
+    kwargs.update(ctx.target.instance.runtime_properties)
+    client_session = common.nsx_login(kwargs)
+
+    resource_id = nsx_security_policy.policy_group_to_resource_id(group_id,
+                                                                  policy_id)
+
+    nsx_security_policy.del_policy_group_bind(
+        client_session,
+        resource_id
+    )
+    ctx.logger.info("delete %s" % resource_id)

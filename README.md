@@ -52,7 +52,7 @@ you can also use the get_attributes call in place of a value in a workflow input
                   ...
 ```
 
-**General rules for properties** 
+**General rules for properties**
 
 The plugin always merges properties and inputs,
 and will be overwritten by any existing runtime properties.
@@ -95,13 +95,14 @@ Each node type that has a direct mapping to NSX objects, has a `resource_id` pro
 (in node properties as input and in runtime_properties as a store of such)
 and contains an NSX internal ID. Note that this is not the `name` of an object.
 
-####Example
+**Examples:**
+
 * `group` might have a `resource_id` such as `securitygroup-426`
 * `policy` might have a `resource_id` such as `policy-108`
 * `tag` might have a `resource_id` such as `securitytag-143`
 * `vcenter vm id` might have a `resource_id` such as `vm-438`
 
-### use_external_resource
+## use_external_resource
 
 Each node type that has direct mapping to NSX objects, has `use_external_resource` property
 (in node properties as input and in runtime_properties as store of such) and
@@ -330,6 +331,43 @@ is implied by their order in the list.
 
 * [Simple example](tests/platformtests/resources/security_policy.yaml):
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+
+**Relationships**
+
+#### cloudify.nsx.relationships.is_applied_to
+
+You can use `is_applied_to` for apply policy to security group without [separate node](README.md#cloudifynsxsecurity_policy_group_bind).
+
+```
+
+  master_security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group:
+              name: <some name>
+
+  empty_policy:
+    type: cloudify.nsx.security_policy
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy:
+              name: <policy name>
+              description: "Policy description"
+              precedence: 6301
+    relationships:
+      - type: cloudify.nsx.relationships.is_applied_to
+        target: security_group
+
+```
 
 ### cloudify.nsx.security_policy_group_bind
 
