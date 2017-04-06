@@ -555,6 +555,40 @@ class NSXBaseTest(unittest.TestCase):
                 resource_id
             )
 
+    def _common_install_create(
+        self, resource_id, func_call, func_kwargs,
+        create_args, create_kwargs, create_response
+    ):
+        """check install logic run create only"""
+        self._common_install(resource_id, func_call, func_kwargs)
+        # create use_external_resource=False
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, func_kwargs
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            self._update_fake_cs_result(
+                fake_cs_result,
+                create_response=create_response
+            )
+
+            func_call(**kwargs)
+
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # create
+                create_response=create_response,
+                create_args=create_args, create_kwargs=create_kwargs
+            )
+
+            runtime = self.fake_ctx.instance.runtime_properties
+            self.assertEqual(
+                runtime['resource_id'],
+                resource_id
+            )
+
     def _common_install_read_and_create(
         self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
         read_response, create_args, create_kwargs, create_response,

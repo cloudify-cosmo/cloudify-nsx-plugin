@@ -16,6 +16,7 @@ import library.test_nsx_base as test_nsx_base
 import pytest
 import mock
 import copy
+import cloudify_nsx.network.esg_firewall as esg_firewall
 import cloudify_nsx.network.esg_nat as esg_nat
 import cloudify_nsx.network.lswitch as lswitch
 import cloudify_nsx.network.relay as relay
@@ -33,6 +34,76 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
     def tearDown(self):
         current_ctx.clear()
         super(NetworkInstallTest, self).tearDown()
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_firewall_install(self):
+        """Check create esg firewall rule"""
+        # everything by default
+        self._common_install_create(
+            "esg_id|id", esg_firewall.create,
+            {"rule": {"esg_id": "esg_id", "action": "deny"}},
+            create_args=['firewallRules'],
+            create_kwargs={
+                "request_body_dict": {
+                    'firewallRules': {
+                        'firewallRule': {
+                            'direction': None,
+                            'name': None,
+                            'application': None,
+                            'loggingEnabled': 'false',
+                            'matchTranslated': 'false',
+                            'destination': None,
+                            'enabled': 'true',
+                            'source': None,
+                            'action': 'deny'
+                        }
+                    }
+                },
+                "uri_parameters": {'edgeId': 'esg_id'}
+            },
+            create_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
+
+        # Additional values(non default)
+        self._common_install_create(
+            "other_esg_id|id", esg_firewall.create,
+            {"rule": {
+                "esg_id": "other_esg_id",
+                "action": "accept",
+                'loggingEnabled': True,
+                'matchTranslated': True,
+                'enabled': False,
+                'ruleTag': 42,
+                'description': 'Some Rule',
+                'source': 'any',
+                'direction': 'in',
+                'destination': '8.8.8.8',
+                'name': 'rule'
+            }},
+            create_args=['firewallRules'],
+            create_kwargs={
+                "request_body_dict": {
+                    'firewallRules': {
+                        'firewallRule': {
+                            'direction': 'in',
+                            'name': 'rule',
+                            'application': None,
+                            'loggingEnabled': 'true',
+                            'matchTranslated': 'true',
+                            'destination': '8.8.8.8',
+                            'enabled': 'false',
+                            'source': 'any',
+                            'action': 'accept',
+                            'ruleTag': '42',
+                            'description': 'Some Rule'
+                        }
+                    }
+                },
+                "uri_parameters": {'edgeId': 'other_esg_id'}
+            },
+            create_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
