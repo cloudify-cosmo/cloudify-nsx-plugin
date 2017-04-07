@@ -14,7 +14,6 @@
 import unittest
 import mock
 import pytest
-import copy
 import cloudify_nsx.library.nsx_common as common
 import cloudify_nsx.nsx_object as nsx_object_type
 from cloudify import exceptions as cfy_exc
@@ -693,7 +692,7 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
     def test_nsx_read(self):
         """Check nsx_common.nsx_read func"""
         self._regen_ctx()
-        client_session = mock.Mock()
+        client_session = self._create_fake_cs_result()
 
         # we raise error?
         client_session.read = mock.Mock(return_value={
@@ -708,16 +707,25 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
         )
 
         # return None for not existed
-        client_session.read = mock.Mock(return_value={
+        read_response = {
             'body': {'b': 'c'}, 'status': 204
-        })
+        }
+
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response
+        )
+
         self.assertEqual(
             common.nsx_read(client_session, 'body/a', 'secret',
                             uri_parameters={'scopeId': 'scopeId'}),
             None
         )
-        client_session.read.assert_called_with(
-            'secret', uri_parameters={'scopeId': 'scopeId'}
+        self._check_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            read_args=['secret'],
+            read_kwargs={'uri_parameters': {'scopeId': 'scopeId'}}
         )
 
         # return real value
@@ -929,8 +937,11 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
             {'other': 3}
         )
 
-    def _test_nsx_object_type_common(self, func_kwargs, read_response=None,
-                                     resource_id=None, read_all_response=None):
+    def _test_nsx_object_type_common(
+        self, func_kwargs, resource_id=None,
+        read_response=None, read_args=None, read_kwargs=None,
+        read_all_response=None, read_all_args=None, read_all_kwargs=None
+    ):
         fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
             None, func_kwargs
         )
@@ -939,15 +950,11 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            if read_response:
-                fake_cs_result.read = mock.Mock(
-                    return_value=copy.deepcopy(read_response)
-                )
-
-            if read_all_response:
-                fake_cs_result.read_all_pages = mock.Mock(
-                    return_value=copy.deepcopy(read_all_response)
-                )
+            self._update_fake_cs_result(
+                fake_cs_result,
+                read_response=read_response,
+                read_all_response=read_all_response
+            )
 
             nsx_object_type.create(**kwargs)
 
@@ -960,114 +967,124 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
                 runtime_properties['resource_id'], resource_id
             )
 
-            if not read_response:
-                # doesn't need read at all
-                fake_cs_result.read.assert_not_called()
-
-            if not read_all_response:
-                # doesn't need read_all_pages at all
-                fake_cs_result.read_all_pages.assert_not_called()
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # read
+                read_response=read_response,
+                read_args=read_args, read_kwargs=read_kwargs,
+                # read all
+                read_all_response=read_all_response,
+                read_all_args=read_all_args,
+                read_all_kwargs=read_all_kwargs
+            )
 
     def test_create_nsx_object_type_group_withresult(self):
         """Check nsx object create type: group exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'group'}},
-            {
+            resource_id='id',
+            read_args=['secGroupScope'],
+            read_kwargs={'uri_parameters': {'scopeId': 'globalroot-0'}},
+            read_response={
                 'status': 204,
                 'body': test_nsx_base.SEC_GROUP_LIST
-            },
-            'id'
+            }
         )
 
     def test_create_nsx_object_type_group_withoutresult(self):
         """Check nsx object create type: group not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'group'}},
-            {
+            read_args=['secGroupScope'],
+            read_kwargs={'uri_parameters': {'scopeId': 'globalroot-0'}},
+            read_response={
                 'status': 204,
                 'body': test_nsx_base.SEC_GROUP_LIST
-            },
-            None
+            }
         )
 
     def test_create_nsx_object_type_policy_withresult(self):
         """Check nsx object create type: policy exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'policy'}},
-            {
+            resource_id='id',
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'all'}},
+            read_response={
                 'status': 204,
                 'body': test_nsx_base.SEC_POLICY_LIST
-            },
-            'id'
+            }
         )
 
     def test_create_nsx_object_type_policy_withoutresult(self):
         """Check nsx object create type: policy not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'policy'}},
-            {
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'all'}},
+            read_response={
                 'status': 204,
                 'body': test_nsx_base.SEC_POLICY_LIST
-            },
-            None
+            }
         )
 
     def test_create_nsx_object_type_tag_withresult(self):
         """Check nsx object create type: tag exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'tag'}},
-            {
+            resource_id='id',
+            read_args=['securityTag'], read_kwargs={},
+            read_response={
                 'status': 204,
                 'body': test_nsx_base.SEC_TAG_LIST
-            },
-            'id'
+            }
         )
 
     def test_create_nsx_object_type_tag_withoutresult(self):
         """Check nsx object create type: tag not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'tag'}},
-            {
+            read_args=['securityTag'], read_kwargs={},
+            read_response={
                 'status': 204,
                 'body': test_nsx_base.SEC_TAG_LIST
-            },
-            None
+            }
         )
 
     def test_create_nsx_object_type_lswitch_withresult(self):
         """Check nsx object create type: lswitch exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'lswitch'}},
-            None,
-            'id',
-            test_nsx_base.LSWITCH_LIST
+            resource_id='id',
+            read_all_args=['logicalSwitchesGlobal', 'read'],
+            read_all_kwargs={},
+            read_all_response=test_nsx_base.LSWITCH_LIST
         )
 
     def test_create_nsx_object_type_lswitch_withoutresult(self):
         """Check nsx object create type: lswitch not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'lswitch'}},
-            None,
-            None,
-            test_nsx_base.LSWITCH_LIST
+            read_all_args=['logicalSwitchesGlobal', 'read'],
+            read_all_kwargs={},
+            read_all_response=test_nsx_base.LSWITCH_LIST
         )
 
     def test_create_nsx_object_type_edge_withresult(self):
         """Check nsx object create type: edge exist"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'name', 'type': 'router'}},
-            None,
-            'id',
-            test_nsx_base.EDGE_LIST
+            resource_id='id',
+            read_all_args=['nsxEdges', 'read'], read_all_kwargs={},
+            read_all_response=test_nsx_base.EDGE_LIST
         )
 
     def test_create_nsx_object_type_edge_withoutresult(self):
         """Check nsx object create type: egde not found"""
         self._test_nsx_object_type_common(
             {'nsx_object': {'name': 'other', 'type': 'router'}},
-            None,
-            None,
-            test_nsx_base.EDGE_LIST
+            read_all_args=['nsxEdges', 'read'], read_all_kwargs={},
+            read_all_response=test_nsx_base.EDGE_LIST
         )
 
 

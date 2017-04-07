@@ -45,8 +45,21 @@ def add_policy(client_session, name, description, precedence, parent,
     return raw_result['objectId']
 
 
+def policy_group_to_resource_id(security_group_id, security_policy_id):
+    """Generate resource_id from security_policy_id/security_group_id)"""
+    if not security_group_id or not security_policy_id:
+        raise cfy_exc.NonRecoverableError(
+            "Please recheck security_policy_id/security_group_id."
+        )
+
+    return "%s|%s" % (security_group_id, security_policy_id)
+
+
 def add_policy_group_bind(client_session, security_policy_id,
                           security_group_id):
+
+    resource_id = policy_group_to_resource_id(security_group_id,
+                                              security_policy_id)
 
     security_policy = common.nsx_read(
         client_session, 'body',
@@ -77,7 +90,7 @@ def add_policy_group_bind(client_session, security_policy_id,
 
     common.check_raw_result(raw_result)
 
-    return "%s|%s" % (security_group_id, security_policy_id)
+    return resource_id
 
 
 def add_policy_section(client_session, security_policy_id, category, action):

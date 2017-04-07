@@ -24,10 +24,16 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_add_group_exclude_member_insert(self):
         """Check nsx_security_group.add_group_exclude_member func insert"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
 
         self.assertEqual(
             nsx_security_group.add_group_exclude_member(
@@ -36,24 +42,34 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
             "security_group_id|member_id"
         )
 
-        client_session.read.assert_called_with(
-            'secGroupObject', uri_parameters={'objectId': 'security_group_id'}
-        )
-
-        client_session.update.assert_called_with(
-            'secGroupObject',
-            request_body_dict=test_nsx_base.SEC_GROUP_EXCLUDE_AFTER,
-            uri_parameters={'objectId': 'security_group_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['secGroupObject'],
+            read_kwargs={'uri_parameters': {'objectId': 'security_group_id'}},
+            # update
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            update_args=['secGroupObject'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER,
+                'uri_parameters': {'objectId': 'security_group_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_add_group_exclude_member_existing(self):
         """Check nsx_security_group.add_group_exclude_member func existing"""
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response
+        )
 
         with self.assertRaises(cfy_exc.NonRecoverableError) as error:
             nsx_security_group.add_group_exclude_member(
@@ -64,56 +80,73 @@ class NsxSecurityGroupTest(test_nsx_base.NSXBaseTest):
             str(error.exception),
             "Member other_objectId already exists in some_name group"
         )
-
-        client_session.read.assert_called_with(
-            'secGroupObject', uri_parameters={'objectId': 'security_group_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['secGroupObject'],
+            read_kwargs={'uri_parameters': {'objectId': 'security_group_id'}},
         )
-
-        client_session.update.assert_not_called()
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_del_group_exclude_member_existing(self):
         """Check nsx_security_group.del_group_exclude_member func existing"""
-
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response,
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
 
         nsx_security_group.del_group_exclude_member(
             client_session, "security_group_id|member_id"
         )
 
-        client_session.read.assert_called_with(
-            'secGroupObject', uri_parameters={'objectId': 'security_group_id'}
-        )
-
-        client_session.update.assert_called_with(
-            'secGroupObject',
-            request_body_dict=test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE,
-            uri_parameters={'objectId': 'security_group_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['secGroupObject'],
+            read_kwargs={'uri_parameters': {'objectId': 'security_group_id'}},
+            # update
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            update_args=['secGroupObject'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE,
+                'uri_parameters': {'objectId': 'security_group_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_del_group_exclude_member_unexisting(self):
         """Check nsx_security_group.del_group_exclude_member func unexisting"""
-
-        client_session = self._prepare_check(read_response={
+        read_response = {
             'status': 204,
             'body': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER
-        })
+        }
+        client_session = self._create_fake_cs_result()
+        self._update_fake_cs_result(
+            client_session,
+            read_response=read_response
+        )
 
         nsx_security_group.del_group_exclude_member(
             client_session, "security_group_id|unknown"
         )
 
-        client_session.read.assert_called_with(
-            'secGroupObject', uri_parameters={'objectId': 'security_group_id'}
+        self._check_fake_cs_result(
+            client_session,
+            # read
+            read_response=read_response,
+            read_args=['secGroupObject'],
+            read_kwargs={'uri_parameters': {'objectId': 'security_group_id'}}
         )
-
-        client_session.update.assert_not_called()
 
 
 if __name__ == '__main__':

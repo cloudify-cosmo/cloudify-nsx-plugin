@@ -286,32 +286,8 @@ class NSXBaseTest(unittest.TestCase):
             'raml': 'raml'
         }
 
-        fake_cs_result = mock.Mock()
+        fake_cs_result = self._create_fake_cs_result()
         fake_client = mock.MagicMock(return_value=fake_cs_result)
-
-        fake_cs_result.create = mock.Mock(
-            side_effect=cfy_exc.NonRecoverableError()
-        )
-
-        fake_cs_result.delete = mock.Mock(
-            side_effect=cfy_exc.NonRecoverableError()
-        )
-
-        fake_cs_result.read = mock.Mock(
-            side_effect=cfy_exc.NonRecoverableError()
-        )
-
-        fake_cs_result.read_all_pages = mock.Mock(
-            side_effect=cfy_exc.NonRecoverableError()
-        )
-
-        fake_cs_result.update = mock.Mock(
-            side_effect=cfy_exc.NonRecoverableError()
-        )
-
-        fake_cs_result.extract_resource_body_example = mock.Mock(
-            side_effect=cfy_exc.NonRecoverableError()
-        )
 
         return fake_client, fake_cs_result, kwargs
 
@@ -324,7 +300,7 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            with self.assertRaises(cfy_exc.RecoverableError):
+            with self.assertRaises(cfy_exc.NonRecoverableError):
                 func(**kwargs)
 
     def _common_run_relationship_read_update(
@@ -409,9 +385,39 @@ class NSXBaseTest(unittest.TestCase):
                 }
             )
 
+    def _create_fake_cs_result(self):
+        fake_cs_result = mock.Mock()
+
+        fake_cs_result.create = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
+        fake_cs_result.delete = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
+        fake_cs_result.read = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
+        fake_cs_result.read_all_pages = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
+        fake_cs_result.update = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+
+        fake_cs_result.extract_resource_body_example = mock.Mock(
+            side_effect=cfy_exc.NonRecoverableError()
+        )
+        return fake_cs_result
+
     def _update_fake_cs_result(
         self, fake_cs_result,
-        extract_response=None, read_response=None, update_response=None
+        extract_response=None, create_response=None,
+        read_response=None, read_all_response=None,
+        update_response=None, delete_response=None
     ):
         """Set correct responses to calls"""
         if extract_response:
@@ -419,9 +425,19 @@ class NSXBaseTest(unittest.TestCase):
                 return_value=copy.deepcopy(extract_response)
             )
 
+        if create_response:
+            fake_cs_result.create = mock.Mock(
+                return_value=copy.deepcopy(create_response)
+            )
+
         if read_response:
             fake_cs_result.read = mock.Mock(
                 return_value=copy.deepcopy(read_response)
+            )
+
+        if read_all_response:
+            fake_cs_result.read_all_pages = mock.Mock(
+                return_value=copy.deepcopy(read_all_response)
             )
 
         if update_response:
@@ -429,11 +445,19 @@ class NSXBaseTest(unittest.TestCase):
                 return_value=copy.deepcopy(update_response)
             )
 
+        if delete_response:
+            fake_cs_result.delete = mock.Mock(
+                return_value=copy.deepcopy(delete_response)
+            )
+
     def _check_fake_cs_result(
         self, fake_cs_result,
         extract_response=None, extract_args=None, extract_kwargs=None,
         read_response=None, read_args=None, read_kwargs=None,
-        update_response=None, update_args=None, update_kwargs=None
+        read_all_response=None, read_all_args=None, read_all_kwargs=None,
+        create_response=None, create_args=None, create_kwargs=None,
+        update_response=None, update_args=None, update_kwargs=None,
+        delete_response=None, delete_args=None, delete_kwargs=None
     ):
         """Check that correct calls called"""
         if not extract_response:
@@ -454,12 +478,36 @@ class NSXBaseTest(unittest.TestCase):
                 *read_args, **read_kwargs
             )
 
+        if not read_all_response:
+            # doesn't need read_all_pages at all
+            fake_cs_result.read_all_pages.assert_not_called()
+        else:
+            fake_cs_result.read_all_pages.assert_called_with(
+                *read_all_args, **read_all_kwargs
+            )
+
         if not update_response:
             # doesn't need update at all
             fake_cs_result.update.assert_not_called()
         else:
             fake_cs_result.update.assert_called_with(
                 *update_args, **update_kwargs
+            )
+
+        if not create_response:
+            # doesn't need create at all
+            fake_cs_result.create.assert_not_called()
+        else:
+            fake_cs_result.create.assert_called_with(
+                *create_args, **create_kwargs
+            )
+
+        if not delete_response:
+            # doesn't need delete at all
+            fake_cs_result.delete.assert_not_called()
+        else:
+            fake_cs_result.delete.assert_called_with(
+                *delete_args, **delete_kwargs
             )
 
     def _common_install_extract_or_read_and_update(
@@ -507,6 +555,40 @@ class NSXBaseTest(unittest.TestCase):
                 resource_id
             )
 
+    def _common_install_create(
+        self, resource_id, func_call, func_kwargs,
+        create_args, create_kwargs, create_response
+    ):
+        """check install logic run create only"""
+        self._common_install(resource_id, func_call, func_kwargs)
+        # create use_external_resource=False
+        fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
+            None, func_kwargs
+        )
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            self._update_fake_cs_result(
+                fake_cs_result,
+                create_response=create_response
+            )
+
+            func_call(**kwargs)
+
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # create
+                create_response=create_response,
+                create_args=create_args, create_kwargs=create_kwargs
+            )
+
+            runtime = self.fake_ctx.instance.runtime_properties
+            self.assertEqual(
+                runtime['resource_id'],
+                resource_id
+            )
+
     def _common_install_read_and_create(
         self, resource_id, func_call, func_kwargs, read_args, read_kwargs,
         read_response, create_args, create_kwargs, create_response,
@@ -527,15 +609,20 @@ class NSXBaseTest(unittest.TestCase):
                 'cloudify_nsx.library.nsx_common.NsxClient',
                 fake_client
             ):
-
-                fake_cs_result.read = mock.Mock(
-                    return_value=copy.deepcopy(read_response)
+                self._update_fake_cs_result(
+                    fake_cs_result,
+                    read_response=read_response
                 )
+
                 func_call(**kwargs)
 
-                fake_cs_result.read.assert_called_with(
-                    *read_args, **read_kwargs
+                self._check_fake_cs_result(
+                    fake_cs_result,
+                    # read
+                    read_response=read_response,
+                    read_args=read_args, read_kwargs=read_kwargs,
                 )
+
                 runtime = self.fake_ctx.instance.runtime_properties
                 self.assertEqual(
                     runtime['resource_id'], resource_id
@@ -556,18 +643,21 @@ class NSXBaseTest(unittest.TestCase):
                 'cloudify_nsx.library.nsx_common.NsxClient',
                 fake_client
             ):
-
-                fake_cs_result.read = mock.Mock(
-                    return_value=copy.deepcopy(SUCCESS_RESPONSE)
+                self._update_fake_cs_result(
+                    fake_cs_result,
+                    read_response=SUCCESS_RESPONSE
                 )
+
                 with self.assertRaises(cfy_exc.NonRecoverableError):
                     func_call(**kwargs)
 
-                fake_cs_result.create.assert_not_called()
-
-                fake_cs_result.read.assert_called_with(
-                    *read_args, **read_kwargs
+                self._check_fake_cs_result(
+                    fake_cs_result,
+                    # read
+                    read_response=read_response,
+                    read_args=read_args, read_kwargs=read_kwargs,
                 )
+
                 self.assertFalse(
                     'resource_id' in self.fake_ctx.instance.runtime_properties
                 )
@@ -580,16 +670,21 @@ class NSXBaseTest(unittest.TestCase):
                 'cloudify_nsx.library.nsx_common.NsxClient',
                 fake_client
             ):
-                fake_cs_result.read = mock.Mock(
-                    return_value=copy.deepcopy(read_response)
+                self._update_fake_cs_result(
+                    fake_cs_result,
+                    read_response=read_response
                 )
 
                 with self.assertRaises(cfy_exc.NonRecoverableError):
                     func_call(**kwargs)
 
-                fake_cs_result.read.assert_called_with(
-                    *read_args, **read_kwargs
+                self._check_fake_cs_result(
+                    fake_cs_result,
+                    # read
+                    read_response=read_response,
+                    read_args=read_args, read_kwargs=read_kwargs,
                 )
+
                 self.assertFalse(
                     'resource_id' in self.fake_ctx.instance.runtime_properties
                 )
@@ -602,20 +697,24 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            fake_cs_result.read = mock.Mock(
-                return_value=copy.deepcopy(SUCCESS_RESPONSE)
+            self._update_fake_cs_result(
+                fake_cs_result,
+                read_response=SUCCESS_RESPONSE,
+                create_response=create_response
             )
-            fake_cs_result.create = mock.Mock(
-                return_value=copy.deepcopy(create_response)
-            )
+
             func_call(**kwargs)
 
-            fake_cs_result.read.assert_called_with(
-                *read_args, **read_kwargs
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # read
+                read_response=read_response,
+                read_args=read_args, read_kwargs=read_kwargs,
+                # create
+                create_response=create_response,
+                create_args=create_args, create_kwargs=create_kwargs
             )
-            fake_cs_result.create.assert_called_with(
-                *create_args, **create_kwargs
-            )
+
             runtime = self.fake_ctx.instance.runtime_properties
             self.assertEqual(
                 runtime['resource_id'],
@@ -641,27 +740,23 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            if read_response:
-                fake_cs_result.read = mock.Mock(
-                    return_value=copy.deepcopy(read_response)
-                )
-
-            fake_cs_result.delete = mock.Mock(
-                return_value=copy.deepcopy(SUCCESS_RESPONSE)
+            self._update_fake_cs_result(
+                fake_cs_result,
+                read_response=read_response,
+                delete_response=SUCCESS_RESPONSE
             )
+
             func_call(**kwargs)
 
-            fake_cs_result.delete.assert_called_with(
-                *delete_args, **delete_kwargs
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # read
+                read_response=read_response,
+                read_args=read_args, read_kwargs=read_kwargs,
+                # delete
+                delete_response=SUCCESS_RESPONSE,
+                delete_args=delete_args, delete_kwargs=delete_kwargs
             )
-
-            if not read_response:
-                # doesn't need read at all
-                fake_cs_result.read.assert_not_called()
-            else:
-                fake_cs_result.read.assert_called_with(
-                    *read_args, **read_kwargs
-                )
 
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
 
@@ -683,43 +778,22 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
-            # use custom response
-            if read_response:
-                fake_cs_result.read = mock.Mock(
-                    return_value=copy.deepcopy(read_response)
-                )
-
-            fake_cs_result.update = mock.Mock(
-                return_value=copy.deepcopy(SUCCESS_RESPONSE)
+            self._update_fake_cs_result(
+                fake_cs_result,
+                read_response=read_response,
+                update_response=SUCCESS_RESPONSE
             )
+
             func_call(**kwargs)
-            fake_cs_result.read.assert_called_with(
-                *read_args, **read_kwargs
+
+            self._check_fake_cs_result(
+                fake_cs_result,
+                # read
+                read_response=read_response,
+                read_args=read_args, read_kwargs=read_kwargs,
+                # update
+                update_response=SUCCESS_RESPONSE,
+                update_args=update_args, update_kwargs=update_kwargs
             )
-            fake_cs_result.update.assert_called_with(
-                *update_args, **update_kwargs
-            )
+
             self.assertEqual(self.fake_ctx.instance.runtime_properties, {})
-
-    def _prepare_check(self, read_response=None, update_response=None):
-        "prepare responses for read and update"
-        client_session = mock.Mock()
-        if read_response:
-            client_session.read = mock.Mock(
-                return_value=copy.deepcopy(read_response)
-            )
-        else:
-            client_session.read = mock.Mock(
-                return_value=copy.deepcopy(SUCCESS_RESPONSE)
-            )
-
-        if update_response:
-            client_session.update = mock.Mock(
-                return_value=copy.deepcopy(update_response)
-            )
-        else:
-            client_session.update = mock.Mock(
-                return_value=copy.deepcopy(SUCCESS_RESPONSE)
-            )
-
-        return client_session

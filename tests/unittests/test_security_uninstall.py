@@ -163,6 +163,29 @@ class SecurityUninstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_policy_group_bind_uninstall_by_relationship(self):
+        """Check unbind security policy from group by relationship"""
+        self._common_run_relationship_read_update(
+            policy_group_bind.unlink,
+            {'resource_id': 'security_policy_id'},
+            {'resource_id': 'security_group_id'},
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            read_response={
+                'body': test_nsx_base.SEC_GROUP_POLICY_BIND_AFTER,
+                'status': 204
+            },
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict':
+                    test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_policy_section_uninstall(self):
         """Check cleanup security policy section"""
         self._common_uninstall_read_update(
@@ -221,7 +244,7 @@ class SecurityUninstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.internal
     @pytest.mark.unit
     def test_tag_vm_uninstall_by_relationship(self):
-        """Check bind security tag to vm by relationship"""
+        """Check unbind security tag from vm by relationship"""
         self._common_run_relationship_read_update(
             tag_vm.unlink,
             {'vsphere_server_id': 'vm_id'}, {'resource_id': 'ab'},

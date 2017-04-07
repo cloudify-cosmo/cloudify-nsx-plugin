@@ -14,7 +14,6 @@
 #    * limitations under the License.
 from cloudify import ctx
 from cloudify.decorators import operation
-from cloudify import exceptions as cfy_exc
 import cloudify_nsx.library.nsx_firewall as nsx_firewall
 import cloudify_nsx.library.nsx_common as common
 
@@ -99,11 +98,6 @@ def create(**kwargs):
         firewall_dict["ruleTag"],
         firewall_dict["description"]
     )
-
-    if not resource_id:
-        raise cfy_exc.NonRecoverableError(
-            "Can't create firewall rule."
-        )
 
     ctx.instance.runtime_properties['resource_id'] = resource_id
     ctx.instance.runtime_properties['rule_id'] = rule_id

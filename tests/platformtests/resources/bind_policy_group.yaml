@@ -115,3 +115,19 @@ node_templates:
             policy_group_bind:
               security_policy_id: { get_attribute: [ security_policy, resource_id ] }
               security_group_id: { get_attribute: [ security_group, resource_id ] }
+
+  empty_policy:
+    type: cloudify.nsx.security_policy
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy:
+              name:  { concat: [ { get_input: node_name_prefix }, "EmptyPolicy" ] }
+              description: "Policy description"
+              precedence: 6500
+    relationships:
+      - type: cloudify.nsx.relationships.is_applied_to
+        target: security_group
