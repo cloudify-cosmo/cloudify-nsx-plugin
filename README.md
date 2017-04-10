@@ -55,12 +55,10 @@ you can also use the get_attributes call in place of a value in a workflow input
 For security reason - You can provide all the properties described in the node as static file `/etc/cloudify/nsx_pluginconnection_config.yaml` in yaml format:
 
 ```
-
 username: <nsx username>
 password: <nsx password>
 host: <nsx host>
 raml: <raml file>
-
 ```
 
 Credentials have provided by static file will be never available by properties in nodes.
