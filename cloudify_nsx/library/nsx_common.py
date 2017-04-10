@@ -12,12 +12,19 @@
 #    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
+import os
+import time
+import yaml
+
 from cloudify import ctx
 from cloudify.context import NODE_INSTANCE
 from pkg_resources import resource_filename
 from nsxramlclient.client import NsxClient
 from cloudify import exceptions as cfy_exc
-import time
+
+MANAGER_PLUGIN_FILES = os.path.join('/etc', 'cloudify', 'nsx_plugin')
+DEFAULT_CONFIG_PATH = os.path.join(MANAGER_PLUGIN_FILES,
+                                   'connection_config.yaml')
 
 
 def _cleanup_properties(value):
@@ -155,6 +162,7 @@ def _get_properties(name, kwargs):
 
 
 def get_properties(name, kwargs):
+    """get values from properties/inputs and runtime properties"""
     properties_dict = _get_properties(name, kwargs)
     # global properties
     use_existing = ctx.node.properties.get(
@@ -171,6 +179,7 @@ def get_properties(name, kwargs):
 
 
 def get_properties_and_validate(name, kwargs, validate_dict):
+    """get properties values and validate"""
     use_existing, properties_dict = get_properties(name, kwargs)
     ctx.logger.info("checking %s: %s" % (name, str(properties_dict)))
     return use_existing, _validate(
@@ -179,6 +188,7 @@ def get_properties_and_validate(name, kwargs, validate_dict):
 
 
 def remove_properties(name):
+    """remove name from runtime properties"""
     if 'resource_id' in ctx.instance.runtime_properties:
         del ctx.instance.runtime_properties['resource_id']
     if 'use_external_resource' in ctx.instance.runtime_properties:
@@ -246,27 +256,59 @@ def attempt_with_rerun(func, **kwargs):
         i -= 1
 
 
+def _nsx_login_file():
+    """Get login configs from default file"""
+    cfg = {}
+    if os.path.isfile(DEFAULT_CONFIG_PATH):
+        try:
+            with open(DEFAULT_CONFIG_PATH) as f:
+                cfg = yaml.load(f.read())
+        except Exception as e:
+            raise cfy_exc.NonRecoverableError(
+                "Unable to read %s configuration file %s." % (
+                    str(e),
+                    DEFAULT_CONFIG_PATH
+                )
+            )
+        if not isinstance(cfg, dict):
+            raise cfy_exc.NonRecoverableError(
+                "Unable to parse configuration file %s." % DEFAULT_CONFIG_PATH
+            )
+    return cfg
+
+
 def nsx_login(kwargs):
+    """Use values form properties/of file for login to nsx"""
     if ctx.type == NODE_INSTANCE:
         nsx_auth = _get_properties('nsx_auth', kwargs)
     else:
         nsx_auth = kwargs.get('nsx_auth')
 
     ctx.logger.info("NSX login...")
-    user = nsx_auth.get('username')
-    password = nsx_auth.get('password')
-    ip = nsx_auth.get('host')
+
+    # get file config
+    cfg_auth = _nsx_login_file()
+    cfg_auth.update(nsx_auth)
+
+    # check values
+    user = cfg_auth.get('username')
+    password = cfg_auth.get('password')
+    ip = cfg_auth.get('host')
+
     # if node contained in some other node, try to overwrite ip
     if not ip and ctx.type == NODE_INSTANCE:
         ip = ctx.instance.host_ip
         ctx.logger.info("Used host from container: %s" % ip)
+
+    ctx.logger.info("Used %s@%s" % (user, ip))
+
     # check minimal amout of credentials
     if not ip or not user or not password:
         raise cfy_exc.NonRecoverableError(
             "please check your credentials"
         )
 
-    raml_file = nsx_auth.get('raml')
+    raml_file = cfg_auth.get('raml')
     if not raml_file:
         resource_dir = resource_filename(__name__, 'api_spec')
         raml_file = '{}/nsxvapi.raml'.format(resource_dir)
@@ -400,6 +442,23 @@ def get_attribute_from_relationship(relationships,
                 target_property,
             )
     return result
+
+
+def get_properties_update(
+    name, source_property, kwargs, target_relationship, target_property
+):
+    possible_parent_id = get_attribute_from_relationship(
+        ctx.instance.relationships, target_relationship, target_property
+    )
+
+    if not possible_parent_id:
+        return kwargs
+
+    ctx.logger.info("Will be used %s as parent" % possible_parent_id)
+    properties_dict = _get_properties(name, kwargs)
+    properties_dict[source_property] = possible_parent_id
+    kwargs[name] = properties_dict
+    return kwargs
 
 
 def possibly_assign_vm_creation_props(properties_dict):

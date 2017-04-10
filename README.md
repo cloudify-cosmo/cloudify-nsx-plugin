@@ -52,6 +52,17 @@ you can also use the get_attributes call in place of a value in a workflow input
                   ...
 ```
 
+For security reason - You can provide all the properties described in the node as static file `/etc/cloudify/nsx_pluginconnection_config.yaml` in yaml format:
+
+```
+username: <nsx username>
+password: <nsx password>
+host: <nsx host>
+raml: <raml file>
+```
+
+Credentials have provided by static file will be never available by properties in nodes.
+
 **General rules for properties**
 
 The plugin always merges properties and inputs,
@@ -451,6 +462,43 @@ If such a section already exists, it will be replaced, otherwise it will be inse
 
 * [Simple example](tests/platformtests/resources/security_policy.yaml):
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+
+**Relationships**
+
+#### cloudify.nsx.relationships.contained_in
+
+Set security_policy_id from parent node:
+
+```
+  security_policy:
+    type: cloudify.nsx.security_policy
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy:
+              name: <policy name>
+              description: "Policy description"
+              precedence: 6301
+
+  update_security_policy:
+    type: cloudify.nsx.security_policy_section
+    relationships:
+      - type: cloudify.nsx.relationships.contained_in
+        target: security_policy
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            policy_section:
+              category: endpoint
+              action:
+                ....
+```
 
 ### cloudify.nsx.security_tag
 

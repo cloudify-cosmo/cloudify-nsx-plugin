@@ -161,6 +161,7 @@ class NSXBaseTest(unittest.TestCase):
     def _regen_ctx(self):
         self.fake_ctx = cfy_mocks.MockCloudifyContext()
         instance = mock.Mock()
+        instance.relationships = []
         instance.runtime_properties = {}
         self.fake_ctx._instance = instance
         node = mock.Mock()
@@ -186,6 +187,14 @@ class NSXBaseTest(unittest.TestCase):
             source=source
         )
         current_ctx.set(self.fake_ctx)
+
+    def _get_relationship_target(self, type_name, properties):
+        realtionship = mock.Mock()
+        realtionship.type = type_name
+        realtionship.target = mock.Mock()
+        realtionship.target.instance = mock.Mock()
+        realtionship.target.instance.runtime_properties = properties
+        return realtionship
 
     def _kwargs_regen(self, func_kwargs, node_context=True):
         if node_context:
@@ -351,12 +360,17 @@ class NSXBaseTest(unittest.TestCase):
                 update_args=update_args, update_kwargs=update_kwargs
             )
 
-    def _common_install(self, resource_id, func_call, func_kwargs):
+    def _common_install(self, resource_id, func_call, func_kwargs,
+                        relationships=None):
         """Check skip install logic if we have resource_id
            or have issues with session"""
         # check already existed
         kwargs = self._kwargs_regen(func_kwargs)
         self.fake_ctx.instance.runtime_properties['resource_id'] = resource_id
+
+        if relationships:
+            self.fake_ctx.instance.relationships = relationships
+
         func_call(**kwargs)
 
         # try to create but have issue with session connection
@@ -367,6 +381,8 @@ class NSXBaseTest(unittest.TestCase):
             'cloudify_nsx.library.nsx_common.NsxClient',
             fake_client
         ):
+            if relationships:
+                self.fake_ctx.instance.relationships = relationships
 
             with self.assertRaises(cfy_exc.NonRecoverableError):
                 func_call(**kwargs)
@@ -514,11 +530,13 @@ class NSXBaseTest(unittest.TestCase):
         self, resource_id, func_call, func_kwargs,
         extract_args=None, extract_kwargs=None, extract_response=None,
         read_args=None, read_kwargs=None, read_response=None,
-        update_args=None, update_kwargs=None, update_response=None
+        update_args=None, update_kwargs=None, update_response=None,
+        relationships=None
     ):
         """check install logic that read/extract current state and than send
            update request"""
-        self._common_install(resource_id, func_call, func_kwargs)
+        self._common_install(resource_id, func_call, func_kwargs,
+                             relationships=relationships)
 
         fake_client, fake_cs_result, kwargs = self._kwargs_regen_client(
             None, func_kwargs
@@ -533,6 +551,9 @@ class NSXBaseTest(unittest.TestCase):
                 read_response=read_response,
                 update_response=update_response
             )
+
+            if relationships:
+                self.fake_ctx.instance.relationships = relationships
 
             func_call(**kwargs)
 
