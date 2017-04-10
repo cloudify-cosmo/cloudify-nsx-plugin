@@ -562,6 +562,8 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
                         )
                     )
 
+                self.fake_ctx.instance.runtime_properties = {}
+
                 # correct file struct
                 fake_file = mock.mock_open(read_data="password: password")
                 with mock.patch(
@@ -576,9 +578,14 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
                         }), 'Called'
                     )
 
-            fake_client.assert_called_with(
-                'raml', 'instance_ip', 'username', 'password'
-            )
+                # no password in runtime properties
+                self.assertEqual(self.fake_ctx.instance.runtime_properties, {
+                    'nsx_auth': {'raml': 'raml', 'username': 'username'}
+                })
+
+                fake_client.assert_called_with(
+                    'raml', 'instance_ip', 'username', 'password'
+                )
 
     @pytest.mark.internal
     @pytest.mark.unit
