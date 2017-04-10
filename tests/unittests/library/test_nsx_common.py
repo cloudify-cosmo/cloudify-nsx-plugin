@@ -503,6 +503,85 @@ class NsxCommonTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_nsx_login_from_file(self):
+        """Check nsx_common.attempt_with_rerun func: ip from instance ip"""
+        self._regen_ctx()
+        fake_client = mock.MagicMock(return_value='Called')
+        with mock.patch(
+            'cloudify_nsx.library.nsx_common.NsxClient',
+            fake_client
+        ):
+            # instance ip
+            self.fake_ctx.instance.host_ip = "instance_ip"
+
+            fake_check_file = mock.Mock(return_value=True)
+            with mock.patch(
+                'os.path.isfile', fake_check_file
+            ):
+                fake_file = mock.mock_open(read_data="password:password")
+                with mock.patch(
+                    '__builtin__.open', fake_file
+                ):
+                    # broken configuration
+                    with self.assertRaises(
+                        cfy_exc.NonRecoverableError
+                    ) as error:
+                        common.nsx_login({
+                            'nsx_auth': {
+                                'username': 'username',
+                                'raml': 'raml'
+                            }
+                        })
+                    self.assertTrue(
+                        "Unable to parse configuration file" in str(
+                            error.exception
+                        )
+                    )
+
+                fake_check_file.assert_called_with(common.DEFAULT_CONFIG_PATH)
+                fake_file.assert_called_with(common.DEFAULT_CONFIG_PATH)
+
+                # any issue with parse yaml
+                fake_file = mock.mock_open(read_data="*")
+                with mock.patch(
+                    '__builtin__.open', fake_file
+                ):
+                    # broken configuration
+                    with self.assertRaises(
+                        cfy_exc.NonRecoverableError
+                    ) as error:
+                        common.nsx_login({
+                            'nsx_auth': {
+                                'username': 'username'
+                            }
+                        })
+
+                    self.assertTrue(
+                        "Unable to read" in str(
+                            error.exception
+                        )
+                    )
+
+                # correct file struct
+                fake_file = mock.mock_open(read_data="password: password")
+                with mock.patch(
+                    '__builtin__.open', fake_file
+                ):
+                    self.assertEqual(
+                        common.nsx_login({
+                            'nsx_auth': {
+                                'username': 'username',
+                                'raml': 'raml'
+                            }
+                        }), 'Called'
+                    )
+
+            fake_client.assert_called_with(
+                'raml', 'instance_ip', 'username', 'password'
+            )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_nsx_login_ip_from_inputs(self):
         """Check nsx_common.attempt_with_rerun func:ip from inputs"""
         self._regen_ctx()

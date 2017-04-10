@@ -84,7 +84,7 @@ node_templates:
   update_security_policy:
     type: cloudify.nsx.security_policy_section
     relationships:
-      - type: cloudify.relationships.contained_in
+      - type: cloudify.nsx.relationships.contained_in
         target: security_policy
     properties:
       nsx_auth: *nsx_auth
@@ -93,7 +93,6 @@ node_templates:
         create:
           inputs:
             policy_section:
-              security_policy_id: { get_attribute: [ security_policy, resource_id ] }
               category: endpoint
               action:
                 '@class': endpointSecurityAction

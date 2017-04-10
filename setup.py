@@ -34,6 +34,7 @@ setup(
         ]
     },
     install_requires=[
+        'PyYAML>=3.10',
         'cloudify-plugins-common>=3.3',
         'pynsxv==0.4.1',
     ],

@@ -1318,3 +1318,6 @@ relationships:
                 unlink:
                     implementation: nsx.cloudify_nsx.security.policy_group_bind.unlink
                     inputs: {}
+
+    cloudify.nsx.relationships.contained_in:
+        derived_from: cloudify.relationships.contained_in

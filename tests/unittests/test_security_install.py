@@ -244,6 +244,8 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_policy_section_install(self):
         """Check replace security policy section"""
+
+        # without relationship
         self._common_install_extract_or_read_and_update(
             "category|security_policy_id", policy_section.create,
             {'policy_section': {
@@ -263,6 +265,34 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
                 'uri_parameters': {'ID': 'security_policy_id'}
             },
             update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
+
+        # with relationship
+        parent = self._get_relationship_target(
+            "cloudify.nsx.relationships.contained_in", {
+                "resource_id": "security_policy_id"
+            }
+        )
+
+        self._common_install_extract_or_read_and_update(
+            "category|security_policy_id", policy_section.create,
+            {'policy_section': {
+                "category": "category",
+                "action": "action"
+            }},
+            read_args=['securityPolicyID'],
+            read_kwargs={'uri_parameters': {'ID': 'security_policy_id'}},
+            read_response={
+                'status': 204,
+                'body': test_nsx_base.SEC_POLICY_SECTION_BEFORE
+            },
+            update_args=['securityPolicyID'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.SEC_POLICY_SECTION_AFTER,
+                'uri_parameters': {'ID': 'security_policy_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            relationships=[parent]
         )
 
     @pytest.mark.internal
