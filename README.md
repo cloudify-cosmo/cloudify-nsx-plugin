@@ -847,6 +847,26 @@ Distributed Logical Routers
 * `bgp`: Merged copy of `bgp`.
 * `uplink_vnic`: vnic id for uplink.
 
+**Relationships**
+
+#### cloudify.nsx.relationships.deployed_on_datacenter
+
+**Derived From:** cloudify.relationships.connected_to
+
+Fill `datacentermoid` from `cloudify.vsphere.nodes.Datacenter` node type.
+
+#### cloudify.nsx.relationships.deployed_on_datastore
+
+**Derived From:** cloudify.relationships.connected_to
+
+Fill `datastoremoid` from `cloudify.vsphere.nodes.Datastore` node type.
+
+#### cloudify.nsx.relationships.deployed_on_cluster
+
+**Derived From:** cloudify.relationships.connected_to
+
+Fill `resourcepoolid` from `cloudify.vsphere.nodes.Cluster` node type.
+
 ### cloudify.nsx.ospf_areas
 
 Distributed Logical Routers interface OSPF areas. Use only after all interfaces creation!
