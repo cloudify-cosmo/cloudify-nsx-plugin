@@ -217,6 +217,8 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 
 #### cloudify.nsx.relationships.contained_in
 
+**Derived From:** cloudify.relationships.contained_in
+
 Set security_group_id from parent node:
 
 ```
@@ -299,6 +301,8 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 
 #### cloudify.nsx.relationships.contained_in
 
+**Derived From:** cloudify.relationships.contained_in
+
 Set security_group_id from parent node:
 
 ```
@@ -366,6 +370,8 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
 **Relationships**
 
 #### cloudify.nsx.relationships.contained_in
+
+**Derived From:** cloudify.relationships.contained_in
 
 Set security_group_id from parent node:
 
@@ -460,6 +466,8 @@ is implied by their order in the list.
 **Relationships**
 
 #### cloudify.nsx.relationships.is_applied_to
+
+**Derived From:** cloudify.relationships.connected_to
 
 You can use `is_applied_to` for apply policy to security group without [separate node](README.md#cloudifynsxsecurity_policy_group_bind).
 
@@ -581,6 +589,8 @@ If such a section already exists, it will be replaced, otherwise it will be inse
 
 #### cloudify.nsx.relationships.contained_in
 
+**Derived From:** cloudify.relationships.contained_in
+
 Set security_policy_id from parent node:
 
 ```
@@ -657,6 +667,8 @@ Security Tag.
 **Relationships**
 
 #### cloudify.nsx.relationships.is_tagged_by
+
+**Derived From:** cloudify.relationships.connected_to
 
 You can use `is_tagged_by` for attach tag to several vm's without separate node for [each](README.md#cloudifynsxsecurity_tag_vm).
 
