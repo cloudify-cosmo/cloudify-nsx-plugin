@@ -120,6 +120,9 @@ Each node type that has direct mapping to NSX objects, has `use_external_resourc
 save as flag that plugin has reused external resource.
 
 ## Security-related functionality
+
+***
+
 ### cloudify.nsx.security_group
 
 A security group is a collection of assets or objects group from your vSphere inventory.
@@ -163,6 +166,8 @@ A security group is a collection of assets or objects group from your vSphere in
 * [Simple example](tests/platformtests/resources/security_groups.yaml#L86) with one static child:
 
 * For more complicated example look to [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+
+***
 
 ### cloudify.nsx.security_group_dynamic_member
 
@@ -262,6 +267,8 @@ Set security_group_id from parent node:
                     criteria: contains
 ```
 
+***
+
 ### cloudify.nsx.security_group_member
 
 Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
@@ -331,6 +338,8 @@ Set security_group_id from parent node:
             group_member:
               objectId: <object Id>
 ```
+
+***
 
 ### cloudify.nsx.security_group_exclude_member
 
@@ -402,6 +411,8 @@ Set security_group_id from parent node:
               objectId: <object Id>
 
 ```
+
+***
 
 ### cloudify.nsx.security_policy
 
