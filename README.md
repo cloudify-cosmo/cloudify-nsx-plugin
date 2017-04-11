@@ -52,7 +52,7 @@ you can also use the get_attributes call in place of a value in a workflow input
                   ...
 ```
 
-For security reason - You can provide all the properties described in the node as static file `/etc/cloudify/nsx_pluginconnection_config.yaml` in yaml format:
+For security reason - You can provide all the properties described in the node as static file `/etc/cloudify/nsx_plugin/connection_config.yaml` in yaml format:
 
 ```
 username: <nsx username>
@@ -213,6 +213,53 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 * [Simple example](tests/platformtests/resources/security_groups.yaml):
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
+**Relationships**
+
+#### cloudify.nsx.relationships.contained_in
+
+Set security_group_id from parent node:
+
+```
+  security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group:
+              name: <some name>
+
+  update_dynamic_members:
+    type: cloudify.nsx.security_group_dynamic_member
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    relationships:
+      - type: cloudify.nsx.relationships.contained_in
+        target: security_group
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            dynamic_member:
+              dynamic_set:
+                - operator: OR
+                  dynamicCriteria:
+                    operator: AND
+                    isValid: true
+                    key: VM.GUEST_OS_FULL_NAME
+                    value: Server
+                    criteria: contains
+                - operator: OR
+                  dynamicCriteria:
+                    operator: AND
+                    isValid: true
+                    key: VM.GUEST_OS_FULL_NAME
+                    value: Teapot
+                    criteria: contains
+```
+
 ### cloudify.nsx.security_group_member
 
 Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
@@ -248,6 +295,39 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 * [Simple example](tests/platformtests/resources/security_groups.yaml):
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
+**Relationships**
+
+#### cloudify.nsx.relationships.contained_in
+
+Set security_group_id from parent node:
+
+```
+  security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group:
+              name: <some name>
+
+  slave_master_security_group_bind:
+    type: cloudify.nsx.security_group_member
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    relationships:
+      - type: cloudify.nsx.relationships.contained_in
+        target: security_group
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group_member:
+              objectId: <object Id>
+```
+
 ### cloudify.nsx.security_group_exclude_member
 
 Set an object as explicitly excluded from [Security Group](README.md#cloudifynsxsecurity_group).
@@ -282,6 +362,40 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
 
 * [Simple example](tests/platformtests/resources/security_groups.yaml):
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+
+**Relationships**
+
+#### cloudify.nsx.relationships.contained_in
+
+Set security_group_id from parent node:
+
+```
+  security_group:
+    type: cloudify.nsx.security_group
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group:
+              name: <some name>
+
+  slave_master_security_group_bind:
+    type: cloudify.nsx.security_group_exclude_member
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    relationships:
+      - type: cloudify.nsx.relationships.contained_in
+        target: security_group
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            group_exclude_member:
+              objectId: <object Id>
+
+```
 
 ### cloudify.nsx.security_policy
 

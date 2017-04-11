@@ -106,6 +106,24 @@ class ComulativeTest(unittest.TestCase):
         self.comulative_env = None
 
     @pytest.mark.external
+    def test_security(self):
+        """Dry run: Check security functionality"""
+        inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
+
+        if os.environ.get('VCENTER_DATASTORE'):
+            inputs['vcenter_datastore'] = os.environ.get('VCENTER_DATASTORE')
+        if os.environ.get('VCENTER_DATACENTER'):
+            inputs['vcenter_datacenter'] = os.environ.get('VCENTER_DATACENTER')
+        if os.environ.get('VCENTER_RESOURCE_POOL'):
+            inputs['vcenter_resource_pool'] = os.environ.get(
+                'VCENTER_RESOURCE_POOL'
+            )
+        if os.environ.get('VCENTER_TEMPLATE'):
+            inputs['template_name'] = os.environ.get('VCENTER_TEMPLATE')
+
+        self._common_run('security_functionality_implicit.yaml', inputs)
+
+    @pytest.mark.external
     def test_securitytag(self):
         """Dry run: Check security tag functionality"""
         inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}

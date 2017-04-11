@@ -20,6 +20,11 @@ import cloudify_nsx.library.nsx_common as common
 
 @operation
 def create(**kwargs):
+    kwargs = common.get_properties_update(
+        'dynamic_member', "security_group_id", kwargs,
+        target_relationship="cloudify.nsx.relationships.contained_in",
+        target_property="resource_id"
+    )
 
     validation_rules = {
         "security_group_id": {
