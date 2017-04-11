@@ -767,6 +767,126 @@ Logical switches
         mode: UNICAST_MODE
 ```
 
+### cloudify.nsx.dlr
+
+Distributed Logical Routers
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.ospf_areas
+
+Distributed Logical Routers interface OSPF areas. Use only after all
+
+interfaces creation!
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.ospf_interfaces
+
+Distributed Logical Routers interface OSPF interfaces.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.dlrBGPNeighbour
+
+BGP Neighbour.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esgBGPNeighbourFilter
+
+BGP Neighbour Filter.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.dlr_routing_ip_prefix
+
+Distributed logical routers interface routing ip prefixes.
+
+Optional. Required only if user wants to define redistribution rules in
+dynamic routing protocols like ospf, bgp.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.routing_redistribution_rule
+
+Distributed Logical Routers interface ospf redistribution rule.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.dlr_interface
+
+Distributed Logical Router interface.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.dlr_dhcp_relay
+
+Distributed Router dhcp relay, we need separate type because we can
+change it only after set all settings for interfaces.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.dlr_dgw
+
+Distributed Logical Router gateway.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esg
+
+Edge Services Gateway.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esgBGPNeighbour
+
+ESG BGP Neighbour.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esg_nat
+
+Edge Services Gateway NAT.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esg_firewall
+
+Edge Services Gateways firewall.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esg_interface
+
+Edge Services Gateway interface.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esg_gateway
+
+Edge Services Gateway settings.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.esg_route
+
+Edge Services Gateways route.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.dhcp_pool
+
+Edge DHCP pool.
+
+**Derived From:** cloudify.nodes.Root
+
+### cloudify.nsx.dhcp_binding
+
+Edge DHCP binding.
+
+**Derived From:** cloudify.nodes.Root
+
 ## Common/supplementary functionality
 
 ### cloudify.nsx.nsx_object

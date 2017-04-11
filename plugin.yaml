@@ -876,7 +876,7 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.network.dlr_bgp_neighbour.delete
 
-  # edge services gateways interfaces
+  # edge services gateway nat
   cloudify.nsx.esg_nat:
     derived_from: cloudify.nodes.Root
     properties:
@@ -1024,7 +1024,7 @@ node_types:
         delete:
           implementation: nsx.cloudify_nsx.network.esg_interface.delete
 
-  # edge services gateways interfaces
+  # edge services gateway settings
   cloudify.nsx.esg_gateway:
     derived_from: cloudify.nodes.Root
     properties:
