@@ -837,9 +837,7 @@ Distributed Logical Routers
 
 ### cloudify.nsx.ospf_areas
 
-Distributed Logical Routers interface OSPF areas. Use only after all
-
-interfaces creation!
+Distributed Logical Routers interface OSPF areas. Use only after all interfaces creation!
 
 **Derived From:** cloudify.nodes.Root
 
