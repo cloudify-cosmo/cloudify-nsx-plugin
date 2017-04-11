@@ -68,6 +68,7 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_group_dynamic_member_install(self):
         """Check update dynamic member in security group"""
+        # explicit set parent id
         self._common_install_extract_or_read_and_update(
             "security_group_id", group_dynamic_member.create,
             {'dynamic_member': {
@@ -105,8 +106,56 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_group_dynamic_member_relationship_install(self):
+        """Check update dynamic member in security group by relationship"""
+        # get parent_id from relationship
+        # with relationship
+        parent = self._get_relationship_target(
+            "cloudify.nsx.relationships.contained_in", {
+                "resource_id": 'security_group_id'
+            }
+        )
+
+        self._common_install_extract_or_read_and_update(
+            "security_group_id", group_dynamic_member.create,
+            {'dynamic_member': {
+                "dynamic_set": "dynamic_set"
+            }},
+            read_args=['secGroupObject'],
+            read_kwargs={'uri_parameters': {'objectId': 'security_group_id'}},
+            read_response={
+                'status': 204,
+                'body': {
+                    'securitygroup': {
+                        'dynamicMemberDefinition': {
+                            'dynamicSet': 'oldDynamicSet',
+                        }
+                    }
+                }
+            },
+            # for update need to use 'secGroupBulk'
+            update_args=['secGroupBulk'],
+            update_kwargs={
+                'request_body_dict': {
+                    'securitygroup': {
+                        'dynamicMemberDefinition': {
+                            'dynamicSet': 'dynamic_set'
+                        }
+                    }
+                },
+                'uri_parameters': {
+                    'scopeId': 'security_group_id'
+                }
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            relationships=[parent]
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_group_exclude_member_install(self):
         """Check insert member to exclude list in security group"""
+        # explicit set parent id
         self._common_install_extract_or_read_and_update(
             "security_group_id|member_id", group_exclude_member.create,
             {'group_exclude_member': {
@@ -125,6 +174,39 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
                 'uri_parameters': {'objectId': 'security_group_id'}
             },
             update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_group_exclude_member_relationship_install(self):
+        """Check insert member to exclude list in security group by
+           relationship"""
+        # get parent_id from relationship
+        # with relationship
+        parent = self._get_relationship_target(
+            "cloudify.nsx.relationships.contained_in", {
+                "resource_id": 'security_group_id'
+            }
+        )
+
+        self._common_install_extract_or_read_and_update(
+            "security_group_id|member_id", group_exclude_member.create,
+            {'group_exclude_member': {
+                "objectId": "member_id"
+            }},
+            read_args=['secGroupObject'],
+            read_kwargs={'uri_parameters': {'objectId': 'security_group_id'}},
+            read_response={
+                'status': 204,
+                'body': test_nsx_base.SEC_GROUP_EXCLUDE_BEFORE
+            },
+            update_args=['secGroupObject'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.SEC_GROUP_EXCLUDE_AFTER,
+                'uri_parameters': {'objectId': 'security_group_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE,
+            relationships=[parent]
         )
 
     @pytest.mark.internal
@@ -148,6 +230,37 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
                 }
             },
             update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_group_member_realtionship_install(self):
+        """Check insert member to include list in security group by
+           relationship"""
+
+        parent = self._get_relationship_target(
+            "cloudify.nsx.relationships.contained_in", {
+                "resource_id": 'security_group_id'
+            }
+        )
+
+        self._common_install_extract_or_read_and_update(
+            'security_group_id|objectId', group_member.create,
+            {'group_member': {
+                "objectId": "objectId"
+            }},
+            # group attach never run read
+            read_args=None, read_kwargs=None, read_response=None,
+            # but run update
+            update_args=['secGroupMember'],
+            update_kwargs={
+                'uri_parameters': {
+                    'memberMoref': 'objectId',
+                    'objectId': 'security_group_id'
+                }
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID,
+            relationships=[parent]
         )
 
     @pytest.mark.internal
@@ -220,7 +333,7 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_policy_group_bind_install_by_relationship(self):
+    def test_policy_group_bind_relationship_install(self):
         """Check bind security tag to vm by relationship"""
         self._common_run_relationship_read_update(
             policy_group_bind.link,
@@ -267,6 +380,10 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
             update_response=test_nsx_base.SUCCESS_RESPONSE
         )
 
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_policy_section_relationship_install(self):
+        """Check replace security policy section by realationship"""
         # with relationship
         parent = self._get_relationship_target(
             "cloudify.nsx.relationships.contained_in", {
@@ -346,7 +463,7 @@ class SecurityInstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
-    def test_tag_vm_install_by_relationship(self):
+    def test_tag_vm_relationship_install(self):
         """Check bind security tag to vm by relationship"""
         self._common_run_relationship_read_update(
             tag_vm.link,

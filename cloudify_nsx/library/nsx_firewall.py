@@ -31,7 +31,8 @@ def add_firewall_rule(client_session, esg_id, application='any',
     }
 
     common.set_boolean_property(firewallRule, 'loggingEnabled', loggingEnabled)
-    common.set_boolean_property(firewallRule, 'matchTranslated', matchTranslated)
+    common.set_boolean_property(firewallRule, 'matchTranslated',
+                                matchTranslated)
     common.set_boolean_property(firewallRule, 'enabled', enabled)
 
     if ruleTag:
