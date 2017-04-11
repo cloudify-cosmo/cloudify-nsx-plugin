@@ -773,6 +773,68 @@ Distributed Logical Routers
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. False by default.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
+* `router`:
+  * `name`: The name that will be assigned to the new dlr
+  * `dlr_pwd`: The admin password of new dlr
+  * `dlr_size`: The DLR Control VM size
+  * `datacentermoid`: The vCenter DataCenter ID where dlr control vm will be deployed
+  * `datastoremoid`: The vCenter datastore ID where dlr control vm will be deployed
+  * `resourcepoolid`: The vCenter Cluster where dlr control vm will be deployed
+  * `ha_ls_id`: New dlr ha logical switch id or vds port group
+  * `uplink_ls_id`: New dlr uplink logical switch id or vds port group
+  * `uplink_ip`: New dlr uplink ip@
+  * `uplink_subnet`: New dlr uplink subnet
+  * `uplink_dgw`: New dlr default gateway
+* `firewall`:
+  * `action`: Default action for firewall, possible: `accept` or `deny`, defaults to `accept`
+  * `logging`: Log packages, default `false`
+* `dhcp`:
+  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`, defaults to `true`
+  * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`, defaults to `false`
+  * `syslog_level`: The logging level for DHCP on this Edge (INFO/WARNING/etc.), defaults to `INFO`
+* `routing`:
+  * `enabled`: The desired state of the routing on device, possible `true` or `false`, defaults to `true`
+  * `staticRouting`:
+    * `defaultRoute`: Optional, if no default routes needs to be configured
+      * `gatewayAddress`: static ip
+      * `vnic`: uplink nic
+      * `mtu`: Optional. Valid value:smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured
+  * `routingGlobalConfig`:
+    * `routerId`: Required when dynamic routing protocols like OSPF, or BGP is configured
+    * `logging`: Optional. When absent, enable=false and logLevel=INFO
+      * `logLevel`: The logging level for routing on this Edge (INFO/WARNING/etc.), defaults to `INFO`
+      * `enabled`: The desired state of the routing logging, possible `true` or `false`, defaults to `false`
+      * `ecmp`: Optional. Defaults to false.
+* `ospf`: Only one of (OSPF/BGP) can be configured as the dynamic routing protocol for Logical Router.
+  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config
+  * `defaultOriginate`: default is false, user can configure edge router to publish default route by setting it to true.
+  * `gracefulRestart`: default is false, user can enable graceful restart by setting it to true. Its a newly added optional field.
+  * `redistribution`: Optional. Defaults to false.
+  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as ospf
+  * `forwardingAddress`: ipAddress on the same subnet as the forwardingAddress, only for enabled and use logical switch as ospf
+* `bgp`: Only one of (OSPF/BGP) can be configured as the dynamic routing protocol for Logical Router.
+  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config
+  * `defaultOriginate`: default is `false`, user can configure edge router to publish default route by setting it to `true`.
+  * `gracefulRestart`: default is `false`, user can enable graceful restart by setting it to true. Its a newly added optional field.
+  * `redistribution`: Optional. Defaults to `false`.
+  * `localAS`: Valid values are : 1-65534, For disabled it must be also some number
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly-created object.
+* `router`: Merged copy of `router`.
+* `firewall`: Merged copy of `firewall`.
+* `dhcp`: Merged copy of `dhcp`.
+* `routing`: Merged copy of `routing`.
+* `ospf`: Merged copy of `ospf`.
+* `bgp`: Merged copy of `bgp`.
+* `uplink_vnic`: vnic id for uplink.
+
 ### cloudify.nsx.ospf_areas
 
 Distributed Logical Routers interface OSPF areas. Use only after all
