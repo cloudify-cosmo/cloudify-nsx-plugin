@@ -222,7 +222,7 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 
 * With relationship reuse:
 
-```
+```yaml
   security_group:
     type: cloudify.nsx.security_group
     properties:
@@ -266,7 +266,6 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 * [Simple example](tests/platformtests/resources/security_groups.yaml):
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-
 ***
 
 ### cloudify.nsx.security_group_member
@@ -285,9 +284,14 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 * `resource_id`: Internal ID used in the plugin for working with `group_member`.
 * `group_member`: Merged copy of `group_member`.
 
-**Examples:**
+**Relationships**
 
-```
+* `cloudify.nsx.relationships.contained_in`: Set `security_group_id` from parent node.
+  Derived from: `cloudify.relationships.contained_in`.
+
+* Simple version:
+
+```yaml
   slave_master_security_group_bind:
     type: cloudify.nsx.security_group_member
     properties:
@@ -301,18 +305,9 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
               objectId: <object Id>
 ```
 
-* [Simple example](tests/platformtests/resources/security_groups.yaml):
-* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+* With relationship reuse:
 
-**Relationships**
-
-#### cloudify.nsx.relationships.contained_in
-
-**Derived From:** cloudify.relationships.contained_in
-
-Set security_group_id from parent node:
-
-```
+```yaml
   security_group:
     type: cloudify.nsx.security_group
     properties:
@@ -338,6 +333,9 @@ Set security_group_id from parent node:
             group_member:
               objectId: <object Id>
 ```
+
+* [Simple example](tests/platformtests/resources/security_groups.yaml):
+* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ***
 
