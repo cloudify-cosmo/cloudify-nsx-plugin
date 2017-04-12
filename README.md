@@ -120,9 +120,6 @@ Each node type that has direct mapping to NSX objects, has `use_external_resourc
 save as flag that plugin has reused external resource.
 
 ## Security-related functionality
-
-***
-
 ### cloudify.nsx.security_group
 
 A security group is a collection of assets or objects group from your vSphere inventory.
@@ -186,7 +183,17 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 * `resource_id`: Internal ID used in the plugin for working with `dynamic_set`.
 * `dynamic_member`: Merged copy of `dynamic_member`.
 
+**Relationships**
+
+#### cloudify.nsx.relationships.contained_in
+
+**Derived From:** cloudify.relationships.contained_in
+
+Provided ability for set security_group_id from parent node.
+
 **Examples:**
+
+Simple version:
 
 ```
   update_dynamic_members:
@@ -215,16 +222,8 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
                     value: Teapot
                     criteria: contains
 ```
-* [Simple example](tests/platformtests/resources/security_groups.yaml):
-* For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-**Relationships**
-
-#### cloudify.nsx.relationships.contained_in
-
-**Derived From:** cloudify.relationships.contained_in
-
-Set security_group_id from parent node:
+With relationship reuse:
 
 ```
   security_group:
@@ -266,6 +265,10 @@ Set security_group_id from parent node:
                     value: Teapot
                     criteria: contains
 ```
+
+* [Simple example](tests/platformtests/resources/security_groups.yaml):
+* For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+
 
 ***
 
