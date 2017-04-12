@@ -819,8 +819,8 @@ Distributed Logical Routers
   * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
-  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
-  * `forwardingAddress`: ipAddress on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as `OSPF`.
+  * `protocolAddress`: IP address on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
+  * `forwardingAddress`: IP address on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as `OSPF`.
 * `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
@@ -1038,8 +1038,8 @@ BGP Neighbour.
   * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
   * `keepAliveTimer`: (optional) Valid values are : 1-65534. The default is 60 seconds.
   * `password`: (optional) BGP neighbour password.
-  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
-  * `forwardingAddress`:   # ipAddress on the same subnet as the forwardingAddress, only for enabled and use logical switch as `OSPF`.
+  * `protocolAddress`: IP address on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
+  * `forwardingAddress`: IP address on the same subnet as the forwardingAddress, only for enabled and use logical switch as `OSPF`.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1128,11 +1128,37 @@ dynamic routing protocols like ospf, bgp.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `prifix`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
+  * `name`: All the defined IP prefixes must have unique names.
+  * `ipAddress`: IP address like 10.112.196.160/24
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `prefix`: Merged copy of `prefix`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  dlr_ip_prefix:
+    type: cloudify.nsx.dlr_routing_ip_prefix
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            prefix:
+              dlr_id: <dlr resource_id>
+              name: <routing prefix name>
+              ipAddress: 10.112.196.160/24
+```
+* For a more complex example see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
 
 ------
 
@@ -1144,11 +1170,48 @@ Distributed Logical Routers interface ospf redistribution rule.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `rule`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
+  * `type`: resdistribute section can be `ospf`/`bgp`.
+  * `prefixName`: (optional) [Prefix name](README.md#cloudifynsxdlr_routing_ip_prefix) used here should be defined in the routingGlobalConfig->ipPrefixes. The default is "any".
+  * `from`:
+    * `isis`: (optional) The default is `false`.
+    * `ospf`: (optional) The default is `false`.
+    * `bgp`: (optional) The default is `false`.
+    * `static`: (optional) The default is `false`.
+    * `connected`: (optional) The default is `false`.
+  * `action`: Mandatory. Valid values are `deny`/`permit`.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `rule`: Merged copy of `rule`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  dlr_bgp_redistribute:
+    type: cloudify.nsx.routing_redistribution_rule
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            rule:
+              dlr_id: <dlr resource_id>
+              prefixName: <prefix name>
+              type: bgp
+              from:
+                ospf: true
+                static: true
+              action: deny
+```
+* For a more complex example see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
 
 ------
 
