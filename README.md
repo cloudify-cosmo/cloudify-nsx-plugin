@@ -414,7 +414,7 @@ is implied by their order in the list.
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
 * `policy`:
     * `name`: Name of security policy.
     * `description`: (optional) Short description for the policy.
@@ -624,7 +624,7 @@ Security Tag.
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
 * `tag`:
     * `name`: Security tag name.
     * `description`: Security tag description.
@@ -737,7 +737,7 @@ Logical switches
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
 * `switch`:
   * `transport_zone`: The name of the Scope (Transport Zone).
   * `name`: The name that will be assigned to the new logical switch.
@@ -776,7 +776,7 @@ Distributed Logical Routers
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
 * `router`:
   * `name`: The name that will be assigned to the new dlr.
   * `dlr_pwd`: The admin password of new dlr.
@@ -790,38 +790,38 @@ Distributed Logical Routers
   * `uplink_subnet`: New dlr uplink subnet.
   * `uplink_dgw`: New dlr default gateway.
 * `firewall`:
-  * `action`: Default action for firewall, possible: `accept` or `deny`, defaults to `accept`.
+  * `action`: Default action for firewall, possible: `accept` or `deny`.. The default is `accept`.
   * `logging`: Log packages, default `false`.
 * `dhcp`:
-  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`, defaults to `true`.
-  * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`, defaults to `false`
-  * `syslog_level`: The logging level for DHCP on this Edge (INFO/WARNING/etc.), defaults to `INFO`
+  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`. The default is `true`.
+  * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`. The default is `false`.
+  * `syslog_level`: The logging level for DHCP on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
 * `routing`:
-  * `enabled`: The desired state of the routing on device, possible `true` or `false`, defaults to `true`
+  * `enabled`: The desired state of the routing on device, possible `true` or `false`. The default is `true`.
   * `staticRouting`:
-    * `defaultRoute`: Optional, if no default routes needs to be configured
-      * `gatewayAddress`: static ip
-      * `vnic`: uplink nic
-      * `mtu`: Optional. Valid value:smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured
+    * `defaultRoute`: (optional) If no default routes needs to be configured.
+      * `gatewayAddress`: static ip.
+      * `vnic`: uplink nic.
+      * `mtu`: (optional) Valid value:smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured.
   * `routingGlobalConfig`:
-    * `routerId`: Required when dynamic routing protocols like OSPF, or BGP is configured
-    * `logging`: Optional. When absent, enable=false and logLevel=INFO
-      * `logLevel`: The logging level for routing on this Edge (INFO/WARNING/etc.), defaults to `INFO`
-      * `enabled`: The desired state of the routing logging, possible `true` or `false`, defaults to `false`
-      * `ecmp`: Optional. Defaults to false.
+    * `routerId`: Required when dynamic routing protocols like OSPF, or BGP is configured.
+    * `logging`: (optional) When absent, enable=false and logLevel=INFO.
+      * `logLevel`: The logging level for routing on this Edge (INFO/WARNING/etc.). The default is `INFO`.
+      * `enabled`: The desired state of the routing logging, possible `true` or `false`. The default is `false`.
+      * `ecmp`: (optional) The default is `false`.
 * `ospf`: Only one of (OSPF/BGP) can be configured as the dynamic routing protocol for Logical Router.
-  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config
-  * `defaultOriginate`: default is false, user can configure edge router to publish default route by setting it to true.
-  * `gracefulRestart`: default is false, user can enable graceful restart by setting it to true. Its a newly added optional field.
-  * `redistribution`: Optional. Defaults to false.
-  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as ospf
-  * `forwardingAddress`: ipAddress on the same subnet as the forwardingAddress, only for enabled and use logical switch as ospf
+  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config.
+  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to true.
+  * `gracefulRestart`: The default is `false`, user can enable graceful restart by setting it to true. Its a newly added optional field.
+  * `redistribution`: (optional) The default is `false`.
+  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as ospf.
+  * `forwardingAddress`: ipAddress on the same subnet as the forwardingAddress, only for enabled and use logical switch as ospf.
 * `bgp`: Only one of (OSPF/BGP) can be configured as the dynamic routing protocol for Logical Router.
-  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config
-  * `defaultOriginate`: default is `false`, user can configure edge router to publish default route by setting it to `true`.
-  * `gracefulRestart`: default is `false`, user can enable graceful restart by setting it to true. Its a newly added optional field.
-  * `redistribution`: Optional. Defaults to `false`.
-  * `localAS`: Valid values are : 1-65534, For disabled it must be also some number
+  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config.
+  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
+  * `gracefulRestart`: The default is `false`, user can enable graceful restart by setting it to true. Its a newly added optional field.
+  * `redistribution`: (optional) The default is `false`.
+  * `localAS`: Valid values are : 1-65534, For disabled it must be also some number.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
