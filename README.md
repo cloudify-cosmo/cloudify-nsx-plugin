@@ -1028,11 +1028,45 @@ BGP Neighbour.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `neighbour`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
+  * `ipAddress`: IPv4 only. IPv6 support not supported.
+  * `remoteAS`: Valid values are 0-65535.
+  * `weight`: (optional) Valid values are 0-65535. The default is 60.
+  * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
+  * `keepAliveTimer`: (optional) Valid values are : 1-65534. The default is 60 seconds.
+  * `password`: (optional) BGP neighbour password.
+  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
+  * `forwardingAddress`:   # ipAddress on the same subnet as the forwardingAddress, only for enabled and use logical switch as `OSPF`.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `neighbour`: Merged copy of `neighbour`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  bgp_neighbour:
+    type: cloudify.nsx.dlrBGPNeighbour
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            neighbour:
+              dlr_id: <dlr resource_id>
+              ipAddress: 192.168.2.1
+              remoteAS: 64521
+              protocolAddress: 192.168.1.20
+              forwardingAddress: 192.168.1.11
+```
+* For a more complex example see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
 
 ------
 
