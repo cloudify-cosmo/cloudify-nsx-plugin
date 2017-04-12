@@ -920,7 +920,9 @@ Distributed Logical Routers
 
 ### cloudify.nsx.ospf_areas
 
-Distributed Logical Routers interface OSPF areas. Use only after all interfaces creation!
+Distributed Logical Routers interface OSPF areas.
+Use only after all [dlr](README.md#cloudifynsxdlrinterface) or [dlr](README.md#cloudifynsxesginterface)
+interfaces creation, in other case can be cleanuped.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -980,6 +982,29 @@ Distributed Logical Routers interface OSPF interfaces.
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 
 **Examples:**
+
+* Simple example:
+```yaml
+  ospf_interface:
+    type: cloudify.nsx.ospf_interfaces
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+              dlr_id: <dlr resource_id>
+              vnic: <dlr vnic>
+              areaId: <area id>
+              helloInterval: 10
+              priority: 128
+              cost: 1
+              deadInterval: 40
+              mtuIgnore: false
+```
+* For a more complex example with `DLR` see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
+* For a more complex example with `ESG` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
