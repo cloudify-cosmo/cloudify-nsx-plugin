@@ -115,8 +115,8 @@ and contains an NSX internal ID. Note that this is not the `name` of an object.
 * `dlr`/`esg` might have a `resource_id` such as `edge-75`.
 * `lswitch` might have a `resource_id` such as `virtualwire-136`.
 * `vCenter Cluster` might have a `vsphere_cluster_id` such as `domain-c123`.
-* 'vCenter DataCenter` might have a `vsphere_datacenter_id` such as `datacenter-2`.
-* 'vCenter DataStore` might have a `vsphere_datastore_id` such as `datastore-10`.
+* `vCenter DataCenter` might have a `vsphere_datacenter_id` such as `datacenter-2`.
+* `vCenter DataStore` might have a `vsphere_datastore_id` such as `datastore-10`.
 
 ## use_external_resource
 
