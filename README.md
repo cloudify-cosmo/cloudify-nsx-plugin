@@ -128,7 +128,7 @@ A security group is a collection of assets or objects group from your vSphere in
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
-* `use_external_resource`: (optional) Use external object, default is false.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id) Used to identify the object when `use_external_resource` is true.
 * `group`: Properties for group.
     * `scopeId`: Scope ID (by default: `globalroot‐0`) or datacenterId or portgroupId in upgrade use cases.
@@ -413,7 +413,7 @@ is implied by their order in the list.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
-* `use_external_resource`: (optional) Use external object. Default is false.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
 * `policy`:
     * `name`: Name of security policy.
@@ -623,7 +623,7 @@ Security Tag.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
-* `use_external_resource`: (optional) Use external object. The default is false.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
 * `tag`:
     * `name`: Security tag name.
@@ -736,7 +736,7 @@ Logical switches
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
-* `use_external_resource`: (optional) Use external object. False by default.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
 * `switch`:
   * `transport_zone`: The name of the Scope (Transport Zone).
@@ -775,25 +775,25 @@ Distributed Logical Routers
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
-* `use_external_resource`: (optional) Use external object. False by default.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is true.
 * `router`:
-  * `name`: The name that will be assigned to the new dlr
-  * `dlr_pwd`: The admin password of new dlr
-  * `dlr_size`: The DLR Control VM size
-  * `datacentermoid`: The vCenter DataCenter ID where dlr control vm will be deployed
-  * `datastoremoid`: The vCenter datastore ID where dlr control vm will be deployed
-  * `resourcepoolid`: The vCenter Cluster where dlr control vm will be deployed
-  * `ha_ls_id`: New dlr ha logical switch id or vds port group
-  * `uplink_ls_id`: New dlr uplink logical switch id or vds port group
-  * `uplink_ip`: New dlr uplink ip@
-  * `uplink_subnet`: New dlr uplink subnet
-  * `uplink_dgw`: New dlr default gateway
+  * `name`: The name that will be assigned to the new dlr.
+  * `dlr_pwd`: The admin password of new dlr.
+  * `dlr_size`: The DLR Control VM size.
+  * `datacentermoid`: The vCenter DataCenter ID where dlr control vm will be deployed.
+  * `datastoremoid`: The vCenter datastore ID where dlr control vm will be deployed.
+  * `resourcepoolid`: The vCenter Cluster where dlr control vm will be deployed.
+  * `ha_ls_id`: New dlr ha logical switch id or vds port group.
+  * `uplink_ls_id`: New dlr uplink logical switch id or vds port group.
+  * `uplink_ip`: New dlr uplink ip.
+  * `uplink_subnet`: New dlr uplink subnet.
+  * `uplink_dgw`: New dlr default gateway.
 * `firewall`:
-  * `action`: Default action for firewall, possible: `accept` or `deny`, defaults to `accept`
-  * `logging`: Log packages, default `false`
+  * `action`: Default action for firewall, possible: `accept` or `deny`, defaults to `accept`.
+  * `logging`: Log packages, default `false`.
 * `dhcp`:
-  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`, defaults to `true`
+  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`, defaults to `true`.
   * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`, defaults to `false`
   * `syslog_level`: The logging level for DHCP on this Edge (INFO/WARNING/etc.), defaults to `INFO`
 * `routing`:
