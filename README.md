@@ -493,6 +493,8 @@ is implied by their order in the list.
 ```
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
+***
+
 ### cloudify.nsx.security_policy_group_bind
 
 Bind [security group](README.md#cloudifynsxsecurity_group) to [security policy](README.md#cloudifynsxsecurity_policy).
@@ -528,6 +530,8 @@ Bind [security group](README.md#cloudifynsxsecurity_group) to [security policy](
 ```
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
+***
+
 ### cloudify.nsx.security_policy_section
 
 Update section in [security policy](README.md#cloudifynsxsecurity_policy).
@@ -546,6 +550,11 @@ If such a section already exists, it will be replaced, otherwise it will be inse
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `resource_id`: Internal ID used in the plugin for working with `policy_section`.
 * `policy_section`: Merged copy of `policy_section`.
+
+**Relationships**
+
+* `cloudify.nsx.relationships.contained_in`: `Set security_policy_id` from parent node.
+  Derived from: `cloudify.relationships.contained_in`.
 
 **Examples:**
 
@@ -571,16 +580,7 @@ If such a section already exists, it will be replaced, otherwise it will be inse
                 isEnabled: "true"
                 isActionEnforced: "false"
 ```
-* For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
-
-**Relationships**
-
-#### cloudify.nsx.relationships.contained_in
-
-**Derived From:** cloudify.relationships.contained_in
-
-Set security_policy_id from parent node:
-
+* With relationship reuse:
 ```yaml
   security_policy:
     type: cloudify.nsx.security_policy
@@ -611,6 +611,9 @@ Set security_policy_id from parent node:
               action:
                 ....
 ```
+* For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+
+***
 
 ### cloudify.nsx.security_tag
 
@@ -632,6 +635,10 @@ Security Tag.
 * `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly-created object.
 * `tag`: Merged copy of `tag`.
 
+**Relationships**
+* `cloudify.nsx.relationships.is_tagged_by`: You can use `is_tagged_by` for attach tag to several vm's without separate
+  node for [each](README.md#cloudifynsxsecurity_tag_vm). Derived from `cloudify.relationships.connected_to`.
+
 **Examples:**
 
 * [Simple example](tests/platformtests/resources/security_tag.yaml):
@@ -648,16 +655,7 @@ Security Tag.
               name: Secret tag name
               description: What can i say?
 ```
-* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
-
-**Relationships**
-
-#### cloudify.nsx.relationships.is_tagged_by
-
-**Derived From:** cloudify.relationships.connected_to
-
-You can use `is_tagged_by` for attach tag to several vm's without separate node for [each](README.md#cloudifynsxsecurity_tag_vm).
-
+* With relationship reuse:
 ```yaml
   security_tag:
     type: cloudify.nsx.security_tag
@@ -689,6 +687,9 @@ You can use `is_tagged_by` for attach tag to several vm's without separate node 
       - type: cloudify.nsx.relationships.is_tagged_by
         target: security_tag
 ```
+* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+
+***
 
 ### cloudify.nsx.security_tag_vm
 
@@ -764,6 +765,8 @@ Logical switches
         mode: UNICAST_MODE
 ```
 
+***
+
 ### cloudify.nsx.dlr
 
 Distributed Logical Routers
@@ -833,24 +836,14 @@ Distributed Logical Routers
 * `uplink_vnic`: vnic id for uplink.
 
 **Relationships**
+* `cloudify.nsx.relationships.deployed_on_datacenter`: Fill `datacentermoid` from `cloudify.vsphere.nodes.Datacenter` node type.
+  Derived from `cloudify.relationships.connected_to`.
+* `cloudify.nsx.relationships.deployed_on_datastore`: Fill `datastoremoid` from `cloudify.vsphere.nodes.Datastore` node type.
+  Derived from `cloudify.relationships.connected_to`.
+* `cloudify.nsx.relationships.deployed_on_cluster`: Fill `resourcepoolid` from `cloudify.vsphere.nodes.Cluster` node type.
+  Derived from `cloudify.relationships.connected_to`.
 
-#### cloudify.nsx.relationships.deployed_on_datacenter
-
-**Derived From:** cloudify.relationships.connected_to
-
-Fill `datacentermoid` from `cloudify.vsphere.nodes.Datacenter` node type.
-
-#### cloudify.nsx.relationships.deployed_on_datastore
-
-**Derived From:** cloudify.relationships.connected_to
-
-Fill `datastoremoid` from `cloudify.vsphere.nodes.Datastore` node type.
-
-#### cloudify.nsx.relationships.deployed_on_cluster
-
-**Derived From:** cloudify.relationships.connected_to
-
-Fill `resourcepoolid` from `cloudify.vsphere.nodes.Cluster` node type.
+***
 
 ### cloudify.nsx.ospf_areas
 
@@ -858,11 +851,15 @@ Distributed Logical Routers interface OSPF areas. Use only after all interfaces 
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.ospf_interfaces
 
 Distributed Logical Routers interface OSPF interfaces.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.dlrBGPNeighbour
 
@@ -870,11 +867,15 @@ BGP Neighbour.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.esgBGPNeighbourFilter
 
 BGP Neighbour Filter.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.dlr_routing_ip_prefix
 
@@ -885,17 +886,23 @@ dynamic routing protocols like ospf, bgp.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.routing_redistribution_rule
 
 Distributed Logical Routers interface ospf redistribution rule.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.dlr_interface
 
 Distributed Logical Router interface.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.dlr_dhcp_relay
 
@@ -904,11 +911,15 @@ change it only after set all settings for interfaces.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.dlr_dgw
 
 Distributed Logical Router gateway.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.esg
 
@@ -916,11 +927,15 @@ Edge Services Gateway.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.esgBGPNeighbour
 
 ESG BGP Neighbour.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.esg_nat
 
@@ -928,11 +943,15 @@ Edge Services Gateway NAT.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.esg_firewall
 
 Edge Services Gateways firewall.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.esg_interface
 
@@ -940,11 +959,15 @@ Edge Services Gateway interface.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.esg_gateway
 
 Edge Services Gateway settings.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.esg_route
 
@@ -952,11 +975,15 @@ Edge Services Gateways route.
 
 **Derived From:** cloudify.nodes.Root
 
+***
+
 ### cloudify.nsx.dhcp_pool
 
 Edge DHCP pool.
 
 **Derived From:** cloudify.nodes.Root
+
+***
 
 ### cloudify.nsx.dhcp_binding
 
