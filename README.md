@@ -1127,6 +1127,8 @@ Edge Services Gateway.
       - type: cloudify.nsx.relationships.deployed_on_cluster
         target: cluster
 ```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
+* For a more complex example with `OSPF` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
