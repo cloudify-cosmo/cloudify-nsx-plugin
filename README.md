@@ -145,6 +145,8 @@ A security group is a collection of assets or objects group from your vSphere in
 
 **Examples:**
 
+* [Simple example](tests/platformtests/resources/security_groups.yaml#L86) with one static child:
+
 ```yaml
   master_security_group:
     type: cloudify.nsx.security_group
@@ -159,8 +161,6 @@ A security group is a collection of assets or objects group from your vSphere in
               member:
                 objectId: <child id>
 ```
-
-* [Simple example](tests/platformtests/resources/security_groups.yaml#L86) with one static child:
 
 * For more complicated example look to [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
@@ -190,7 +190,7 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 
 **Examples:**
 
-* Simple version:
+* [Simple example](tests/platformtests/resources/security_groups.yaml):
 
 ```yaml
   update_dynamic_members:
@@ -263,7 +263,6 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
                     criteria: contains
 ```
 
-* [Simple example](tests/platformtests/resources/security_groups.yaml):
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ***
@@ -289,7 +288,9 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 * `cloudify.nsx.relationships.contained_in`: Set `security_group_id` from parent node.
   Derived from: `cloudify.relationships.contained_in`.
 
-* Simple version:
+**Examples:**
+
+* [Simple example](tests/platformtests/resources/security_groups.yaml):
 
 ```yaml
   slave_master_security_group_bind:
@@ -334,7 +335,6 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
               objectId: <object Id>
 ```
 
-* [Simple example](tests/platformtests/resources/security_groups.yaml):
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ***
@@ -355,9 +355,16 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
 * `resource_id`: Internal ID used in the plugin for working with `group_exclude_member`.
 * `group_exclude_member`: Merged copy of `group_exclude_member`.
 
+**Relationships**
+
+* `cloudify.nsx.relationships.contained_in`: Set `security_group_id` from parent node.
+  Derived from `cloudify.relationships.contained_in`.
+
 **Examples:**
 
-```
+* [Simple example](tests/platformtests/resources/security_groups.yaml):
+
+```yaml
   slave_master_security_group_bind:
     type: cloudify.nsx.security_group_exclude_member
     properties:
@@ -371,18 +378,9 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
               objectId: <object Id>
 ```
 
-* [Simple example](tests/platformtests/resources/security_groups.yaml):
-* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+* With relationship reuse:
 
-**Relationships**
-
-#### cloudify.nsx.relationships.contained_in
-
-**Derived From:** cloudify.relationships.contained_in
-
-Set security_group_id from parent node:
-
-```
+```yaml
   security_group:
     type: cloudify.nsx.security_group
     properties:
@@ -409,6 +407,8 @@ Set security_group_id from parent node:
               objectId: <object Id>
 
 ```
+
+* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ***
 
