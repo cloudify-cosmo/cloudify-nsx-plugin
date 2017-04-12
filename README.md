@@ -162,7 +162,7 @@ A security group is a collection of assets or objects group from your vSphere in
 ```
 * For more complicated example look to [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_group_dynamic_member
 
@@ -260,7 +260,7 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_group_member
 
@@ -329,7 +329,7 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_group_exclude_member
 
@@ -398,7 +398,7 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
 ```
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_policy
 
@@ -493,7 +493,7 @@ is implied by their order in the list.
 ```
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_policy_group_bind
 
@@ -530,7 +530,7 @@ Bind [security group](README.md#cloudifynsxsecurity_group) to [security policy](
 ```
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_policy_section
 
@@ -613,7 +613,7 @@ If such a section already exists, it will be replaced, otherwise it will be inse
 ```
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_tag
 
@@ -689,7 +689,7 @@ Security Tag.
 ```
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
-***
+------
 
 ### cloudify.nsx.security_tag_vm
 
@@ -765,7 +765,7 @@ Logical switches
         mode: UNICAST_MODE
 ```
 
-***
+------
 
 ### cloudify.nsx.dlr
 
@@ -843,7 +843,7 @@ Distributed Logical Routers
 * `cloudify.nsx.relationships.deployed_on_cluster`: Fill `resourcepoolid` from `cloudify.vsphere.nodes.Cluster` node type.
   Derived from `cloudify.relationships.connected_to`.
 
-***
+------
 
 ### cloudify.nsx.ospf_areas
 
@@ -851,7 +851,7 @@ Distributed Logical Routers interface OSPF areas. Use only after all interfaces 
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.ospf_interfaces
 
@@ -859,7 +859,7 @@ Distributed Logical Routers interface OSPF interfaces.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.dlrBGPNeighbour
 
@@ -867,7 +867,7 @@ BGP Neighbour.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esgBGPNeighbourFilter
 
@@ -875,7 +875,7 @@ BGP Neighbour Filter.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.dlr_routing_ip_prefix
 
@@ -886,7 +886,7 @@ dynamic routing protocols like ospf, bgp.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.routing_redistribution_rule
 
@@ -894,7 +894,7 @@ Distributed Logical Routers interface ospf redistribution rule.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.dlr_interface
 
@@ -902,7 +902,7 @@ Distributed Logical Router interface.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.dlr_dhcp_relay
 
@@ -911,7 +911,7 @@ change it only after set all settings for interfaces.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.dlr_dgw
 
@@ -919,7 +919,7 @@ Distributed Logical Router gateway.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esg
 
@@ -927,7 +927,7 @@ Edge Services Gateway.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esgBGPNeighbour
 
@@ -935,7 +935,7 @@ ESG BGP Neighbour.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esg_nat
 
@@ -943,7 +943,7 @@ Edge Services Gateway NAT.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esg_firewall
 
@@ -951,7 +951,7 @@ Edge Services Gateways firewall.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esg_interface
 
@@ -959,7 +959,7 @@ Edge Services Gateway interface.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esg_gateway
 
@@ -967,7 +967,7 @@ Edge Services Gateway settings.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.esg_route
 
@@ -975,7 +975,7 @@ Edge Services Gateways route.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.dhcp_pool
 
@@ -983,7 +983,7 @@ Edge DHCP pool.
 
 **Derived From:** cloudify.nodes.Root
 
-***
+------
 
 ### cloudify.nsx.dhcp_binding
 
