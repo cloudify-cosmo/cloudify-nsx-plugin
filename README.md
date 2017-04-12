@@ -848,7 +848,6 @@ Distributed Logical Routers
 * `cloudify.nsx.relationships.deployed_on_cluster`: Fill `resourcepoolid` from `cloudify.vsphere.nodes.Cluster` node type.
   Derived from `cloudify.relationships.connected_to`.
 
-
 **Examples:**
 
 * Simple example:
@@ -929,7 +928,7 @@ interfaces creation, in other case can be cleanuped.
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `area`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
   * `areaId`: Mandatory and unique. Valid values are 0-4294967295.
@@ -941,7 +940,7 @@ interfaces creation, in other case can be cleanuped.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Internal ID used in the plugin for working with `ospf_areas`.
 * `area`: Merged copy of `area`.
 
 **Examples:**
@@ -977,7 +976,7 @@ Distributed Logical Routers interface OSPF interfaces.
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `interface`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
   * `areaId`: Mandatory and unique. Valid values are 0-4294967295.
@@ -990,7 +989,7 @@ Distributed Logical Routers interface OSPF interfaces.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Internal ID used in the plugin for working with `ospf_interfaces`.
 * `interface`: Merged copy of `interface`.
 
 **Examples:**
@@ -1029,7 +1028,7 @@ BGP Neighbour.
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `neighbour`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
   * `ipAddress`: IPv4 only. IPv6 support not supported.
@@ -1044,7 +1043,7 @@ BGP Neighbour.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Internal ID used in the plugin for working with `dlrBGPNeighbour`.
 * `neighbour`: Merged copy of `neighbour`.
 
 **Examples:**
@@ -1079,7 +1078,7 @@ BGP Neighbour Filter.
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `filter`:
   * `neighbour_id`: `resource_id` from [BGP Neighbour](README.md#cloudifynsxdlrbgpneighbour).
   * `action`: Valid values are `permit`/`deny`.
@@ -1091,7 +1090,7 @@ BGP Neighbour Filter.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Internal ID used in the plugin for working with `esgBGPNeighbourFilter`.
 * `filter`: Merged copy of `filter`.
 
 **Examples:**
@@ -1129,7 +1128,7 @@ dynamic routing protocols like ospf, bgp.
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `prifix`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
   * `name`: All the defined IP prefixes must have unique names.
@@ -1138,7 +1137,7 @@ dynamic routing protocols like ospf, bgp.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Internal ID used in the plugin for working with `dlr_routing_ip_prefix`.
 * `prefix`: Merged copy of `prefix`.
 
 **Examples:**
@@ -1171,7 +1170,7 @@ Distributed Logical Routers interface ospf redistribution rule.
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
-* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `rule`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
   * `type`: resdistribute section can be `ospf`/`bgp`.
@@ -1187,7 +1186,7 @@ Distributed Logical Routers interface ospf redistribution rule.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Internal ID used in the plugin for working with `routing_redistribution_rule`.
 * `rule`: Merged copy of `rule`.
 
 **Examples:**
@@ -1223,11 +1222,43 @@ Distributed Logical Router interface.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `interface`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
+  * `interface_ls_id`: [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id)
+  * `interface_ip`: interface ip address
+  * `interface_subnet`: interface subnet
+  * `name`: name for interface
+  * `vnic`: (optional) vnic for interface
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `dlr_interface`.
+* `interface`: Merged copy of `interface`.
+* `ifindex`: vnic id of interface in DLR.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  interface:
+    type: cloudify.nsx.dlr_interface
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+              dlr_id: <dlr resource_id>
+              interface_ls_id: <lswitch resource_id>
+              interface_ip: 192.168.2.11
+              interface_subnet: 255.255.255.0
+              name: <interface name>
+```
+* For a more complex example see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
 
 ------
 
@@ -1240,11 +1271,41 @@ change it only after set all settings for interfaces.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `relay`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
+  * `relayServer`: relay servers settings.
+  * `relayAgents`: relay agents settings.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `dlr_dhcp_relay`.
+* `relay`: Merged copy of `relay`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  dhcp_relay:
+    type: cloudify.nsx.dlr_dhcp_relay
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            relay:
+              dlr_id: <dlr resource_id>
+              relayServer:
+                ipAddress: 8.8.8.8
+              relayAgents:
+                relayAgent:
+                  vnicIndex: <vnic id>
+                  giAddress: <interface ip>
+```
+* For a more complex example see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
 
 ------
 
@@ -1256,11 +1317,35 @@ Distributed Logical Router gateway.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `gateway`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
+  * `address`: default gateway ip address.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `dlr_dgw`.
+* `gateway`: Merged copy of `gateway`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  dlr_static_gateway:
+    type: cloudify.nsx.dlr_dgw
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            gateway:
+              dlr_id: <dlr resource_id>
+              address: 192.168.1.12
+```
+* For a more complex example see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
 
 ------
 
