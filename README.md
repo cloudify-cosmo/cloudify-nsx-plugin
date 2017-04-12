@@ -443,7 +443,9 @@ is implied by their order in the list.
 
 **Examples:**
 
-```
+* [Simple example](tests/platformtests/resources/security_policy.yaml):
+
+```yaml
   security_policy:
     type: cloudify.nsx.security_policy
     properties:
@@ -469,7 +471,6 @@ is implied by their order in the list.
 
 ```
 
-* [Simple example](tests/platformtests/resources/security_policy.yaml):
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 **Relationships**
@@ -480,8 +481,7 @@ is implied by their order in the list.
 
 You can use `is_applied_to` for apply policy to security group without [separate node](README.md#cloudifynsxsecurity_policy_group_bind).
 
-```
-
+```yaml
   master_security_group:
     type: cloudify.nsx.security_group
     properties:
@@ -508,7 +508,6 @@ You can use `is_applied_to` for apply policy to security group without [separate
     relationships:
       - type: cloudify.nsx.relationships.is_applied_to
         target: security_group
-
 ```
 
 ### cloudify.nsx.security_policy_group_bind
@@ -530,8 +529,7 @@ Bind [security group](README.md#cloudifynsxsecurity_group) to [security policy](
 
 **Examples:**
 
-```
-
+```yaml
   master_security_policy_bind:
     type: cloudify.nsx.security_policy_group_bind
     properties:
@@ -569,7 +567,7 @@ If such a section already exists, it will be replaced, otherwise it will be inse
 
 **Examples:**
 
-```
+```yaml
   update_security_policy:
     type: cloudify.nsx.security_policy_section
     properties:
@@ -602,7 +600,7 @@ If such a section already exists, it will be replaced, otherwise it will be inse
 
 Set security_policy_id from parent node:
 
-```
+```yaml
   security_policy:
     type: cloudify.nsx.security_policy
     properties:
@@ -655,7 +653,7 @@ Security Tag.
 
 **Examples:**
 
-```
+```yaml
   security_tag:
     type: cloudify.nsx.security_tag
     properties:
@@ -667,7 +665,6 @@ Security Tag.
             tag:
               name: Secret tag name
               description: What can i say?
-
 ```
 
 * [Simple example](tests/platformtests/resources/security_tag.yaml):
@@ -681,8 +678,7 @@ Security Tag.
 
 You can use `is_tagged_by` for attach tag to several vm's without separate node for [each](README.md#cloudifynsxsecurity_tag_vm).
 
-```
-
+```yaml
   security_tag:
     type: cloudify.nsx.security_tag
     properties:
@@ -712,7 +708,6 @@ You can use `is_tagged_by` for attach tag to several vm's without separate node 
     relationships:
       - type: cloudify.nsx.relationships.is_tagged_by
         target: security_tag
-
 ```
 
 ### cloudify.nsx.security_tag_vm
@@ -734,7 +729,7 @@ Apply [security tag](README.md#cloudifynsxsecurity_tag) to VM.
 
 **Examples:**
 
-```
+```yaml
   tag_vm:
     type: cloudify.nsx.security_tag_vm
     properties:
@@ -776,7 +771,7 @@ Logical switches
 
 **Examples:**
 
-```
+```yaml
   slave_lswitch:
     type: cloudify.nsx.lswitch
     properties:
@@ -1013,7 +1008,7 @@ NSX object check. Search NSX object and set `resource_id` in runtime properties 
 
 Create tag only in the event that it doesn't exist.
 
-```
+```yaml
   tag_check:
     type: cloudify.nsx.nsx_object
     properties:
@@ -1052,20 +1047,20 @@ Create tag only in the event that it doesn't exist.
 
 #### get plugin codebase
 
-```
+```shell
 git clone https://github.com/cloudify-cosmo/cloudify-nsx-plugin.git
 ```
 
 #### Install plugin locally
 
-```
+```shell
 pip install -e cloudify-nsx-plugin/
 pip install -r cloudify-nsx-plugin/test-requirements.txt
 ```
 
 #### Inputs for platform tests
 
-```
+```shell
 export NSX_IP="<nsx_ip>"
 export NSX_USER="<nsx_user>"
 export NSX_PASSWORD="<nsx_password>"
@@ -1074,13 +1069,13 @@ export NODE_NAME_PREFIX="<some_free_prefix_for_objects>"
 
 #### Cleanup previous results
 
-```
+```shell
 rm .coverage -rf
 ```
 
 #### Check state
 
-```
+```shell
 nosetests -v --with-coverage --cover-package=cloudify_nsx cloudify-nsx-plugin/tests/platformtests/ cloudify-nsx-plugin/tests/unittests/
 ```
 
@@ -1094,14 +1089,14 @@ An example of the test script is located in the ```tests/platformtests/windows_e
 ## Check total coverage and full functionality
 ### Get plugin codebase
 
-```
+```shell
 git clone https://github.com/cloudify-cosmo/cloudify-nsx-plugin.git
 git clone https://github.com/cloudify-cosmo/cloudify-vsphere-plugin.git
 ```
 
 ### Install plugin locally
 
-```
+```shell
 pip install -e cloudify-nsx-plugin/
 pip install -r cloudify-nsx-plugin/test-requirements.txt
 
@@ -1113,7 +1108,7 @@ pip install -r cloudify-vsphere-plugin/test-requirements.txt
 ### Inputs for platform tests
 #### NSX
 
-```
+```shell
 export NSX_IP="<nsx_ip>"
 export NSX_USER="<nsx_user>"
 export NSX_PASSWORD="<nsx_password>"
@@ -1121,7 +1116,7 @@ export NSX_PASSWORD="<nsx_password>"
 
 #### VCENTER
 
-```
+```shell
 export VCENTER_IP="<vcenter_ip>"
 export VCENTER_USER="<vcenter_user>"
 export VCENTER_PASSWORD="<vcenter_password>"
@@ -1129,7 +1124,7 @@ export VCENTER_PASSWORD="<vcenter_password>"
 
 #### Optional vCenter for network checks support
 
-```
+```shell
 export VCENTER_DATASTORE="<vcenter_datastore>"
 export VCENTER_DATACENTER="<vcenter_datacenter>"
 export VCENTER_TEMPLATE="<vcenter_linux_template>"
@@ -1139,18 +1134,18 @@ export VCENTER_RESOURCE_POOL="<vcenter_resource_pool>"
 
 #### Prefixes
 
-```
+```shell
 export NODE_NAME_PREFIX="<some_free_prefix_for_objects>"
 ```
 
 ### Cleanup previous results
 
-```
+```shell
 rm .coverage -rf
 ```
 
 ### Check state
 
-```
+```shell
 nosetests -v --with-coverage --cover-package=cloudify_nsx cloudify-nsx-plugin/tests/
 ```
