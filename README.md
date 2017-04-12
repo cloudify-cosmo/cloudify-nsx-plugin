@@ -785,7 +785,7 @@ Distributed Logical Routers
 * `router`:
   * `name`: The name that will be assigned to the new dlr.
   * `dlr_pwd`: The admin password of new dlr.
-  * `dlr_size`: The DLR Control VM size.
+  * `dlr_size`: The DLR Control VM size, possible values: `compact`, `large`, `quadlarge`, `xlarge`.
   * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where dlr control vm will be deployed.
   * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where dlr control vm will be deployed.
   * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where dlr control vm will be deployed.
@@ -848,6 +848,74 @@ Distributed Logical Routers
 * `cloudify.nsx.relationships.deployed_on_cluster`: Fill `resourcepoolid` from `cloudify.vsphere.nodes.Cluster` node type.
   Derived from `cloudify.relationships.connected_to`.
 
+
+**Examples:**
+
+* Simple example:
+```yaml
+
+  datacenter:
+    type: cloudify.vsphere.nodes.Datacenter
+    properties:
+      use_existing_resource: true
+      name: <vcenter_datacenter name>
+      connection_config: <vcenter connection config>
+
+  datastore:
+    type: cloudify.vsphere.nodes.Datastore
+    properties:
+      use_existing_resource: true
+      name: <vcenter_datastore name>
+      connection_config: <vcenter connection config>
+
+  cluster:
+    type: cloudify.vsphere.nodes.Cluster
+    properties:
+      use_existing_resource: true
+      name: <vcenter cluster name>
+      connection_config: <vcenter connection config>
+
+  slave_lswitch:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      switch:
+        name:slave_switch
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
+  nsx_dlr:
+    type: cloudify.nsx.dlr
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      router:
+        name: <router_name>
+        dlr_pwd: SeCrEt010203!
+        dlr_size: compact
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            router:
+              ha_ls_id: { get_attribute: [ slave_lswitch, resource_id ] }
+              uplink_ls_id: { get_attribute: [ slave_lswitch, resource_id ] }
+              uplink_ip: 192.168.1.11
+              uplink_subnet: 255.255.255.0
+              uplink_dgw: 192.168.1.1
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: master_lswitch
+      - type: cloudify.nsx.relationships.deployed_on_datacenter
+        target: datacenter
+      - type: cloudify.nsx.relationships.deployed_on_datastore
+        target: datastore
+      - type: cloudify.nsx.relationships.deployed_on_cluster
+        target: cluster
+
+```
+* For a more complex example see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
+* For a more complex example with `BGP` see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
 ------
 
 ### cloudify.nsx.ospf_areas
