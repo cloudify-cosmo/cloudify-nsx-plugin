@@ -54,11 +54,11 @@ you can also use the get_attributes call in place of a value in a workflow input
 
 For security reason - You can provide all the properties described in the node as static file `/etc/cloudify/nsx_plugin/connection_config.yaml` in yaml format:
 
-```
-username: <nsx username>
-password: <nsx password>
-host: <nsx host>
-raml: <raml file>
+```yaml
+    username: <nsx username>
+    password: <nsx password>
+    host: <nsx host>
+    raml: <raml file>
 ```
 
 Credentials have provided by static file will be never available by properties in nodes.
@@ -70,7 +70,7 @@ and will be overwritten by any existing runtime properties.
 
 The following structure:
 
-```
+```yaml
     node_templates:
       security_policy:
         type: cloudify.nsx.security_policy
@@ -88,7 +88,7 @@ The following structure:
 
 produces the following in runtime properties and will be used for login to NSX:
 
-```
+```yaml
     runtime_properties:
       nsx_auth:
         username: nsx_user
@@ -145,7 +145,7 @@ A security group is a collection of assets or objects group from your vSphere in
 
 **Examples:**
 
-```
+```yaml
   master_security_group:
     type: cloudify.nsx.security_group
     properties:
@@ -185,17 +185,15 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 
 **Relationships:**
 
-#### cloudify.nsx.relationships.contained_in
-
-**Derived From:** cloudify.relationships.contained_in
-
-Provided ability for set security_group_id from parent node.
+* `cloudify.nsx.relationships.contained_in`
+  * Derived From: cloudify.relationships.contained_in
+  * Provided ability for set security_group_id from parent node.
 
 **Examples:**
 
 * Simple version:
 
-```
+```yaml
   update_dynamic_members:
     type: cloudify.nsx.security_group_dynamic_member
     properties:
