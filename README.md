@@ -111,7 +111,7 @@ and contains an NSX internal ID. Note that this is not the `name` of an object.
 * `group` might have a `resource_id` such as `securitygroup-426`.
 * `policy` might have a `resource_id` such as `policy-108`.
 * `tag` might have a `resource_id` such as `securitytag-143`.
-* `vCenter Vm` might have a `vsphere_server_id` such as `vm-438`.
+* `vCenter VM` might have a `vsphere_server_id` such as `vm-438`.
 * `dlr`/`esg` might have a `resource_id` such as `edge-75`.
 * `lswitch` might have a `resource_id` such as `virtualwire-136`.
 * `vCenter Cluster` might have a `vsphere_cluster_id` such as `domain-c123`.
