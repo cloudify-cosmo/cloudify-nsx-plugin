@@ -1543,9 +1543,29 @@ Edge Services Gateway interface.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `interface`:
+  * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `ifindex`: The vnic index, e.g. vnic3 and the index 3
+  * `ipaddr`: (optional) The primary IP Address to be configured for this interface.
+  * `netmask`: (optional) The netmask in the x.x.x.x format.
+  * `prefixlen`: (optional) The prefix length, this takes precedence over the netmask.
+  * `name`: (optional) The name assigned to the vnic
+  * `mtu`: (optional) The vnic MTU.
+  * `is_connected`: (optional) The vnic connection state (true/false).
+  * `portgroup_id`: (optional) The portgroup id of logical switch id to connenct this vnic to.
+  * `vnic_type`: (optional) The vnic type (uplink/internal).
+  * `enable_send_redirects`: (optional) Whether the interface will send icmp redirects (true/false).
+  * `enable_proxy_arp`: (optional) Whether the interface will do proxy arp (true/false).
+  * `secondary_ips`: (optional) A list of additional secondary IP addresses in the primary IP's Subnet.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `esg_interface`.
+* `interface`: Merged copy of `interface`.
+* `ifindex`: vnic id of interface in `ESG`.
 
 **Examples:**
 
@@ -1559,9 +1579,20 @@ Edge Services Gateway settings.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `gateway`:
+  * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `dgw_ip`: The default gateway ip (next hop).
+  * `vnic`: (optional) The vnic index of were the default gateway is reachable on.
+  * `mtu`: (optional) The MTU of the defautl gateway (default=1500).
+  * `admin_distance`: (optional) Admin distance of the defautl route (default=1).
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `esg_gateway`.
+* `gateway`: Merged copy of `gateway`.
 
 **Examples:**
 
@@ -1575,9 +1606,22 @@ Edge Services Gateways route.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `route`:
+  * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `network`: The routes network in the x.x.x.x/yy format, e.g. 192.168.1.0/24.
+  * `next_hop`: The next hop ip.
+  * `vnic`: (optional) The vnic index of were this route is reachable on.
+  * `mtu`: (optional) The MTU of the route (default=1500).
+  * `admin_distance`: (optional) Admin distance of the defautl route (default=1).
+  * `description`: (optional) A description for this route.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `esg_route`.
+* `route`: Merged copy of `route`.
 
 **Examples:**
 
@@ -1591,9 +1635,24 @@ Edge DHCP pool.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `pool`:
+  * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `ip_range`: An IP range, e.g. 192.168.178.10-192.168.178.100 for this IP Pool.
+  * `default_gateway`: (optional) The default gateway for the specified subnet.
+  * `subnet_mask`: (optional) The subnet mask (e.g. 255.255.255.0) for the specified subnet.
+  * `domain_name`: (optional) The DNS domain name (e.g. vmware.com) for the specified subnet.
+  * `dns_server_1`: (optional) The primary DNS Server.
+  * `dns_server_2`: (optional) The secondary DNS Server.
+  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases.
+  * `auto_dns`: (optional) If set to `true`, the DNS servers and domain name set for NSX-Manager will be used.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `dhcp_pool`.
+* `pool`: Merged copy of `pool`.
 
 **Examples:**
 
@@ -1607,9 +1666,28 @@ Edge DHCP binding.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `bind`:
+  * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `vm_id`: (optional, case vm_id/vnic_id) The VM managed object Id in vCenter for the VM to be attached to this binding entry.
+  * `vnic_id`: (optional, case vm_id/vnic_id) The vnic index for the VM interface attached to this binding entry (e.g. vnic0 has index 0).
+  * `mac`: (optional, case without vm_id/vnic_id) The MAC Address of the static binding.
+  * `hostname`: The hostname for this static binding.
+  * `ip`: The IP Address for this static binding.
+  * `default_gateway`: (optional) The default gateway for the specified binding.
+  * `subnet_mask`: (optional) The subnet mask (e.g. 255.255.255.0) for the specified binding.
+  * `domain_name`: (optional) The DNS domain name (e.g. vmware.com) for the specified binding.
+  * `dns_server_1`: (optional) The primary DNS Server.
+  * `dns_server_2`: (optional) The secondary DNS Server.
+  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases.
+  * `auto_dns`: (optional) If set to `true`, the DNS servers and domain name set for NSX-Manager will be used.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `dhcp_binding`.
+* `bind`: Merged copy of `bind`.
 
 **Examples:**
 
