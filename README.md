@@ -764,7 +764,7 @@ Logical switches
     properties:
       nsx_auth: <authentication credentials for nsx>
       switch:
-        name:slave_switch
+        name: <switch name>
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -853,7 +853,6 @@ Distributed Logical Routers
 
 * Simple example:
 ```yaml
-
   datacenter:
     type: cloudify.vsphere.nodes.Datacenter
     properties:
@@ -880,7 +879,7 @@ Distributed Logical Routers
     properties:
       nsx_auth: <authentication credentials for nsx>
       switch:
-        name:slave_switch
+        name: slave_switch
         transport_zone: Main_Zone
         # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
         mode: UNICAST_MODE
@@ -916,6 +915,7 @@ Distributed Logical Routers
 ```
 * For a more complex example see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
 * For a more complex example with `BGP` see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
+
 ------
 
 ### cloudify.nsx.ospf_areas
@@ -999,6 +999,157 @@ Distributed Logical Router gateway.
 Edge Services Gateway.
 
 **Derived From:** cloudify.nodes.Root
+
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `edge`:
+  * `name`: The name of the ESG to be created.
+  * `esg_pwd`: The CLI password of the ESG.
+  * `esg_size`: The size of the ESG, possible values: `compact`, `large`, `quadlarge`, `xlarge`.
+  * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where dlr control vm will be deployed.
+  * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where dlr control vm will be deployed.
+  * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where dlr control vm will be deployed.
+  * `default_pg`: The managed object id of the port group for the first vnic (on creation the first vnic must be connected to a valid portgroup in NSX).
+  * `esg_username`: The Username for the CLI and SSH access. The default is `admin`.
+  * `esg_remote_access`: Enables / Disables SSH access to the Edge Host. The default is `false`.
+* `firewall`:
+  * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
+  * `logging`: Log packages, default `false`.
+* `dhcp`:
+  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`. The default is `true`.
+  * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`. The default is `false`.
+  * `syslog_level`: The logging level for DHCP on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
+* `nat`:
+  * `enabled`: The desired state of the NAT service, possible `true` or `false`. The default is `true`.
+
+```
+      routing:
+        default:
+          enabled: true
+          staticRouting:
+            # Optional, if no default routes needs to be configured
+            defaultRoute:
+              gatewayAddress: ''
+              # uplink nic
+              vnic: ''
+              # Optional. Valid value:smaller than the MTU set on the
+              # interface. Default will be the MTU of the interface on
+              # which this route is configured
+              mtu: ''
+          routingGlobalConfig:
+            # Required when dynamic routing protocols like OSPF,
+            # or BGP is configured
+            routerId: ''
+            # Optional. When absent, enable=false and logLevel=INFO
+            logging:
+              logLevel: INFO
+              enable: false
+            # Optional. Defaults to false.
+            ecmp: false
+      ospf:
+        default:
+          # When not specified, it will be treated as false, When false,
+          # it will delete the existing config
+          enabled: false
+          # default is false, user can configure edge router to publish
+          # default route by setting it to true.
+          defaultOriginate: false
+          # default is false, user can enable graceful restart by
+          # setting it to true. Its a newly added optional field.
+          gracefulRestart: false
+          # Optional. Defaults to false.
+          redistribution: false
+          # ForwardingAddress and protocolAddress are not usable for edge
+      # Only one of (OSPF/BGP) can be configured as the dynamic routing
+      # protocol for Logical Router.
+      bgp:
+        default:
+          # When not specified, it will be treated as false, When false,
+          # it will delete the existing config
+          enabled: false
+          # default is false, user can configure edge router to publish
+          # default route by setting it to true.
+          defaultOriginate: false
+          # default is false, user can enable graceful restart by
+          # setting it to true. Its a newly added optional field.
+          gracefulRestart: false
+          # Optional. Defaults to false.
+          redistribution: false
+          # Valid values are : 1-65534
+          # For disabled it must be also some number
+          localAS: 1
+```
+
+**Relationships**
+* `cloudify.nsx.relationships.deployed_on_datacenter`: Fill `datacentermoid` from `cloudify.vsphere.nodes.Datacenter` node type.
+  Derived from `cloudify.relationships.connected_to`.
+* `cloudify.nsx.relationships.deployed_on_datastore`: Fill `datastoremoid` from `cloudify.vsphere.nodes.Datastore` node type.
+  Derived from `cloudify.relationships.connected_to`.
+* `cloudify.nsx.relationships.deployed_on_cluster`: Fill `resourcepoolid` from `cloudify.vsphere.nodes.Cluster` node type.
+  Derived from `cloudify.relationships.connected_to`.
+
+**Examples:**
+
+* Simple example:
+```yaml
+  datacenter:
+    type: cloudify.vsphere.nodes.Datacenter
+    properties:
+      use_existing_resource: true
+      name: <vcenter_datacenter name>
+      connection_config: <vcenter connection config>
+
+  datastore:
+    type: cloudify.vsphere.nodes.Datastore
+    properties:
+      use_existing_resource: true
+      name: <vcenter_datastore name>
+      connection_config: <vcenter connection config>
+
+  cluster:
+    type: cloudify.vsphere.nodes.Cluster
+    properties:
+      use_existing_resource: true
+      name: <vcenter cluster name>
+      connection_config: <vcenter connection config>
+
+  slave_lswitch:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      switch:
+        name: slave_switch
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
+  esg:
+    type: cloudify.nsx.esg
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      edge:
+        name: name: <edge_name>
+        esg_pwd: SeCrEt010203!
+        esg_remote_access: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            edge:
+              default_pg: { get_attribute: [ master_lswitch, vsphere_network_id ] }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: master_lswitch
+      - type: cloudify.nsx.relationships.deployed_on_datacenter
+        target: datacenter
+      - type: cloudify.nsx.relationships.deployed_on_datastore
+        target: datastore
+      - type: cloudify.nsx.relationships.deployed_on_cluster
+        target: cluster
+```
 
 ------
 

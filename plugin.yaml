@@ -776,7 +776,7 @@ node_types:
           syslog_level: INFO
       nat:
         default:
-          # The display name of a Edge Service Gateway used for NAT
+          # True/False The desired state of the NAT service
           enabled: true
       routing:
         default:
