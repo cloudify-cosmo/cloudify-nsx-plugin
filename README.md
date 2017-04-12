@@ -146,7 +146,6 @@ A security group is a collection of assets or objects group from your vSphere in
 **Examples:**
 
 * [Simple example](tests/platformtests/resources/security_groups.yaml#L86) with one static child:
-
 ```yaml
   master_security_group:
     type: cloudify.nsx.security_group
@@ -161,7 +160,6 @@ A security group is a collection of assets or objects group from your vSphere in
               member:
                 objectId: <child id>
 ```
-
 * For more complicated example look to [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ***
@@ -191,7 +189,6 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 **Examples:**
 
 * [Simple example](tests/platformtests/resources/security_groups.yaml):
-
 ```yaml
   update_dynamic_members:
     type: cloudify.nsx.security_group_dynamic_member
@@ -219,9 +216,7 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
                     value: Teapot
                     criteria: contains
 ```
-
 * With relationship reuse:
-
 ```yaml
   security_group:
     type: cloudify.nsx.security_group
@@ -291,7 +286,6 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 **Examples:**
 
 * [Simple example](tests/platformtests/resources/security_groups.yaml):
-
 ```yaml
   slave_master_security_group_bind:
     type: cloudify.nsx.security_group_member
@@ -305,9 +299,7 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
               security_group_id: <security group id>
               objectId: <object Id>
 ```
-
 * With relationship reuse:
-
 ```yaml
   security_group:
     type: cloudify.nsx.security_group
@@ -363,7 +355,6 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
 **Examples:**
 
 * [Simple example](tests/platformtests/resources/security_groups.yaml):
-
 ```yaml
   slave_master_security_group_bind:
     type: cloudify.nsx.security_group_exclude_member
@@ -377,9 +368,7 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
               security_group_id: <security group id>
               objectId: <object Id>
 ```
-
 * With relationship reuse:
-
 ```yaml
   security_group:
     type: cloudify.nsx.security_group
@@ -407,7 +396,6 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
               objectId: <object Id>
 
 ```
-
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ***
@@ -441,10 +429,14 @@ is implied by their order in the list.
 * `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly created object.
 * `policy`: Merged copy of `policy`.
 
+**Relationships**
+
+* `cloudify.nsx.relationships.is_applied_to`: You can use `is_applied_to` for apply policy to [security group](README.md#cloudifynsxsecurity_group)
+  without [separate node](README.md#cloudifynsxsecurity_policy_group_bind). Derived from: `cloudify.relationships.connected_to`.
+
 **Examples:**
 
 * [Simple example](tests/platformtests/resources/security_policy.yaml):
-
 ```yaml
   security_policy:
     type: cloudify.nsx.security_policy
@@ -470,17 +462,7 @@ is implied by their order in the list.
                   isEnabled: "true" # Boolean should be in quotes, type: string
 
 ```
-
-* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
-
-**Relationships**
-
-#### cloudify.nsx.relationships.is_applied_to
-
-**Derived From:** cloudify.relationships.connected_to
-
-You can use `is_applied_to` for apply policy to security group without [separate node](README.md#cloudifynsxsecurity_policy_group_bind).
-
+* With relationship reuse:
 ```yaml
   master_security_group:
     type: cloudify.nsx.security_group
@@ -509,6 +491,7 @@ You can use `is_applied_to` for apply policy to security group without [separate
       - type: cloudify.nsx.relationships.is_applied_to
         target: security_group
 ```
+* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ### cloudify.nsx.security_policy_group_bind
 
@@ -529,6 +512,7 @@ Bind [security group](README.md#cloudifynsxsecurity_group) to [security policy](
 
 **Examples:**
 
+* [Simple example](tests/platformtests/resources/bind_policy_group.yaml):
 ```yaml
   master_security_policy_bind:
     type: cloudify.nsx.security_policy_group_bind
@@ -542,8 +526,6 @@ Bind [security group](README.md#cloudifynsxsecurity_group) to [security policy](
               security_policy_id: <Security policy id>
               security_group_id: <Security group id>
 ```
-
-* [Simple example](tests/platformtests/resources/bind_policy_group.yaml):
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ### cloudify.nsx.security_policy_section
@@ -567,6 +549,7 @@ If such a section already exists, it will be replaced, otherwise it will be inse
 
 **Examples:**
 
+* [Simple example](tests/platformtests/resources/security_policy.yaml):
 ```yaml
   update_security_policy:
     type: cloudify.nsx.security_policy_section
@@ -588,8 +571,6 @@ If such a section already exists, it will be replaced, otherwise it will be inse
                 isEnabled: "true"
                 isActionEnforced: "false"
 ```
-
-* [Simple example](tests/platformtests/resources/security_policy.yaml):
 * For a more complex example see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 **Relationships**
@@ -653,6 +634,7 @@ Security Tag.
 
 **Examples:**
 
+* [Simple example](tests/platformtests/resources/security_tag.yaml):
 ```yaml
   security_tag:
     type: cloudify.nsx.security_tag
@@ -666,8 +648,6 @@ Security Tag.
               name: Secret tag name
               description: What can i say?
 ```
-
-* [Simple example](tests/platformtests/resources/security_tag.yaml):
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 **Relationships**
@@ -729,6 +709,7 @@ Apply [security tag](README.md#cloudifynsxsecurity_tag) to VM.
 
 **Examples:**
 
+* Simple example:
 ```yaml
   tag_vm:
     type: cloudify.nsx.security_tag_vm
@@ -742,7 +723,6 @@ Apply [security tag](README.md#cloudifynsxsecurity_tag) to VM.
               tag_id: <security tag id>
               vm_id: <vsphere server id>
 ```
-
 * For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ## Network-related functionality
@@ -771,6 +751,7 @@ Logical switches
 
 **Examples:**
 
+* Simple example:
 ```yaml
   slave_lswitch:
     type: cloudify.nsx.lswitch
