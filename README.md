@@ -1108,7 +1108,7 @@ BGP Neighbour Filter.
               neighbour_id: <BGP Neighbour resource id>
               action: deny
               ipPrefixGe: 30
-              ipPrefixLe': 32
+              ipPrefixLe: 32
               direction: in
               network: 192.169.1.0/24
 ```

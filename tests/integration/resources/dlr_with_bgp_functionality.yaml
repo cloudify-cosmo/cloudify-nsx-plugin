@@ -216,7 +216,7 @@ node_templates:
               neighbour_id: { get_attribute: [ bgp_neighbour, resource_id ] }
               action: deny
               ipPrefixGe: 30
-              ipPrefixLe': 32
+              ipPrefixLe: 32
               direction: in
               network: 192.169.1.0/24
     relationships:
