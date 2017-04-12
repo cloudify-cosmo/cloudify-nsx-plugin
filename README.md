@@ -108,10 +108,10 @@ and contains an NSX internal ID. Note that this is not the `name` of an object.
 
 **Examples:**
 
-* `group` might have a `resource_id` such as `securitygroup-426`
-* `policy` might have a `resource_id` such as `policy-108`
-* `tag` might have a `resource_id` such as `securitytag-143`
-* `vcenter vm id` might have a `resource_id` such as `vm-438`
+* `group` might have a `resource_id` such as `securitygroup-426`.
+* `policy` might have a `resource_id` such as `policy-108`.
+* `tag` might have a `resource_id` such as `securitytag-143`.
+* `vcenter vm id` might have a `resource_id` such as `vm-438`.
 
 ## use_external_resource
 
@@ -140,7 +140,7 @@ A security group is a collection of assets or objects group from your vSphere in
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
 * `group`: Merged copy of `group`.
 
 **Examples:**
@@ -426,7 +426,7 @@ is implied by their order in the list.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly created object.
 * `policy`: Merged copy of `policy`.
 
 **Relationships**
@@ -632,7 +632,7 @@ Security Tag.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
 * `tag`: Merged copy of `tag`.
 
 **Relationships**
@@ -746,7 +746,7 @@ Logical switches
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
 * `switch`: Merged copy of `switch`.
 * `vsphere_network_id`: Network ID in vSphere.
 
@@ -781,16 +781,16 @@ Distributed Logical Routers
   * `name`: The name that will be assigned to the new dlr.
   * `dlr_pwd`: The admin password of new dlr.
   * `dlr_size`: The DLR Control VM size.
-  * `datacentermoid`: The vCenter DataCenter ID where dlr control vm will be deployed.
-  * `datastoremoid`: The vCenter datastore ID where dlr control vm will be deployed.
-  * `resourcepoolid`: The vCenter Cluster where dlr control vm will be deployed.
-  * `ha_ls_id`: New dlr ha logical switch id or vds port group.
-  * `uplink_ls_id`: New dlr uplink logical switch id or vds port group.
+  * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where dlr control vm will be deployed.
+  * `datastoremoid`: The [vCenter datastore ID](README.md#resource_id) where dlr control vm will be deployed.
+  * `resourcepoolid`: The [vCenter Cluster](README.md#resource_id) where dlr control vm will be deployed.
+  * `ha_ls_id`: New dlr ha [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
+  * `uplink_ls_id`: New dlr uplink [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
   * `uplink_ip`: New dlr uplink ip.
   * `uplink_subnet`: New dlr uplink subnet.
   * `uplink_dgw`: New dlr default gateway.
 * `firewall`:
-  * `action`: Default action for firewall, possible: `accept` or `deny`.. The default is `accept`.
+  * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
   * `logging`: Log packages, default `false`.
 * `dhcp`:
   * `enabled`: The desired state of the DHCP Server, possible `true` or `false`. The default is `true`.
@@ -799,34 +799,34 @@ Distributed Logical Routers
 * `routing`:
   * `enabled`: The desired state of the routing on device, possible `true` or `false`. The default is `true`.
   * `staticRouting`:
-    * `defaultRoute`: (optional) If no default routes needs to be configured.
+    * `defaultRoute`: (optional, if no default routes needs to be configured).
       * `gatewayAddress`: static ip.
       * `vnic`: uplink nic.
-      * `mtu`: (optional) Valid value:smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured.
+      * `mtu`: (optional) Valid value is smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured.
   * `routingGlobalConfig`:
-    * `routerId`: Required when dynamic routing protocols like OSPF, or BGP is configured.
-    * `logging`: (optional) When absent, enable=false and logLevel=INFO.
-      * `logLevel`: The logging level for routing on this Edge (INFO/WARNING/etc.). The default is `INFO`.
+    * `routerId`: Required when dynamic routing protocols like `OSPF`, or `BGP` is configured.
+    * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
+      * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
       * `enabled`: The desired state of the routing logging, possible `true` or `false`. The default is `false`.
       * `ecmp`: (optional) The default is `false`.
-* `ospf`: Only one of (OSPF/BGP) can be configured as the dynamic routing protocol for Logical Router.
-  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config.
-  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to true.
-  * `gracefulRestart`: The default is `false`, user can enable graceful restart by setting it to true. Its a newly added optional field.
-  * `redistribution`: (optional) The default is `false`.
-  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as ospf.
-  * `forwardingAddress`: ipAddress on the same subnet as the forwardingAddress, only for enabled and use logical switch as ospf.
-* `bgp`: Only one of (OSPF/BGP) can be configured as the dynamic routing protocol for Logical Router.
-  * `enabled`: When not specified, it will be treated as false, When false, it will delete the existing config.
+* `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+  * `enabled`: When not specified, it will be treated as `false`, When false, it will delete the existing config.
   * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
-  * `gracefulRestart`: The default is `false`, user can enable graceful restart by setting it to true. Its a newly added optional field.
+  * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
-  * `localAS`: Valid values are : 1-65534, For disabled it must be also some number.
+  * `protocolAddress`: ipAddress on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
+  * `forwardingAddress`: ipAddress on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as `OSPF`.
+* `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+  * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
+  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
+  * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to true.
+  * `redistribution`: (optional) The default is `false`.
+  * `localAS`: Valid values are : 1-65534, For disabled it must to have some number.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if use_external_resource or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
 * `router`: Merged copy of `router`.
 * `firewall`: Merged copy of `firewall`.
 * `dhcp`: Merged copy of `dhcp`.
