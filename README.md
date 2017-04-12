@@ -1078,11 +1078,42 @@ BGP Neighbour Filter.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `filter`:
+  * `neighbour_id`: `resource_id` from [BGP Neighbour](README.md#cloudifynsxdlrbgpneighbour).
+  * `action`: Valid values are `permit`/`deny`.
+  * `ipPrefixGe`: (optional) "Greater than or equal to" & used for filtering based on prefix length. Valid values are only IPv4 prefixes.
+  * `ipPrefixLe`: Optional. "Less than or equal to" & used for filtering based on prefix length. Valid values are only IPv4 prefixes.
+  * `direction`: Valid values are `in`/`out`
+  * `network`: Valid values are CIDR networks. IPv4 only. IPv6 support is not supported.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `filter`: Merged copy of `filter`.
 
 **Examples:**
+* Simple example:
+```yaml
+  bgp_neighbour_filter:
+    type: cloudify.nsx.esgBGPNeighbourFilter
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            filter:
+              neighbour_id: <BGP Neighbour resource id>
+              action: deny
+              ipPrefixGe: 30
+              ipPrefixLe': 32
+              direction: in
+              network: 192.169.1.0/24
+```
+* For a more complex example see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
 
 ------
 
