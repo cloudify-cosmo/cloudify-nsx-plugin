@@ -924,6 +924,47 @@ Distributed Logical Routers interface OSPF areas. Use only after all interfaces 
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `area`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
+  * `areaId`: Mandatory and unique. Valid values are 0-4294967295.
+  * `type`: (optional) Default is normal. Valid inputs are `normal`, `nssa`.
+  * `authentication`: (optional) When not specified, its `none` authentication.
+    * `type`: Valid values are `none`, `password`, `md5`.
+    * `value`: Value for authentication
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `area`: Merged copy of `area`.
+
+**Examples:**
+
+* Simple example:
+```yaml
+  ospf_areas:
+    type: cloudify.nsx.ospf_areas
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            area:
+              dlr_id: <dlr resource_id>
+              areaId: 1000
+              type: nssa
+              authentication:
+                type: none
+```
+* For a more complex example with `DLR` see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
+* For a more complex example with `ESG` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+
 ------
 
 ### cloudify.nsx.ospf_interfaces
@@ -931,6 +972,14 @@ Distributed Logical Routers interface OSPF areas. Use only after all interfaces 
 Distributed Logical Routers interface OSPF interfaces.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ------
 
@@ -940,6 +989,14 @@ BGP Neighbour.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.esgBGPNeighbourFilter
@@ -947,6 +1004,14 @@ BGP Neighbour.
 BGP Neighbour Filter.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ------
 
@@ -959,6 +1024,14 @@ dynamic routing protocols like ospf, bgp.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.routing_redistribution_rule
@@ -967,6 +1040,14 @@ Distributed Logical Routers interface ospf redistribution rule.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.dlr_interface
@@ -974,6 +1055,14 @@ Distributed Logical Routers interface ospf redistribution rule.
 Distributed Logical Router interface.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ------
 
@@ -984,6 +1073,14 @@ change it only after set all settings for interfaces.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.dlr_dgw
@@ -991,6 +1088,14 @@ change it only after set all settings for interfaces.
 Distributed Logical Router gateway.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ------
 
@@ -1138,6 +1243,14 @@ ESG BGP Neighbour.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.esg_nat
@@ -1145,6 +1258,14 @@ ESG BGP Neighbour.
 Edge Services Gateway NAT.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ------
 
@@ -1154,6 +1275,14 @@ Edge Services Gateways firewall.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.esg_interface
@@ -1161,6 +1290,14 @@ Edge Services Gateways firewall.
 Edge Services Gateway interface.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ------
 
@@ -1170,6 +1307,14 @@ Edge Services Gateway settings.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.esg_route
@@ -1177,6 +1322,14 @@ Edge Services Gateway settings.
 Edge Services Gateways route.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ------
 
@@ -1186,6 +1339,14 @@ Edge DHCP pool.
 
 **Derived From:** cloudify.nodes.Root
 
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
+
 ------
 
 ### cloudify.nsx.dhcp_binding
@@ -1193,6 +1354,14 @@ Edge DHCP pool.
 Edge DHCP binding.
 
 **Derived From:** cloudify.nodes.Root
+
+**Properties:**
+* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+
+**Examples:**
 
 ## Common/supplementary functionality
 
