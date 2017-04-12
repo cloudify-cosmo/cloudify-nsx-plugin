@@ -37,7 +37,7 @@ You can also provide all the properties described in the node also as inputs for
 For example, if you do not have nsx_auth as static properties values or cannot provide it as inputs of blueprint,
 you can also use the get_attributes call in place of a value in a workflow input.
 
-```
+```yaml
     node_templates:
       security_policy:
         type: cloudify.nsx.security_policy
@@ -193,7 +193,7 @@ Provided ability for set security_group_id from parent node.
 
 **Examples:**
 
-Simple version:
+* Simple version:
 
 ```
   update_dynamic_members:
@@ -223,7 +223,7 @@ Simple version:
                     criteria: contains
 ```
 
-With relationship reuse:
+* With relationship reuse:
 
 ```
   security_group:
