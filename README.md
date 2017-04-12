@@ -787,8 +787,8 @@ Distributed Logical Routers
   * `dlr_pwd`: The admin password of new dlr.
   * `dlr_size`: The DLR Control VM size.
   * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `datastoremoid`: The [vCenter datastore ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `resourcepoolid`: The [vCenter Cluster](README.md#resource_id) where dlr control vm will be deployed.
+  * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where dlr control vm will be deployed.
+  * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where dlr control vm will be deployed.
   * `ha_ls_id`: New dlr ha [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
   * `uplink_ls_id`: New dlr uplink [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
   * `uplink_ip`: New dlr uplink ip.
