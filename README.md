@@ -813,7 +813,7 @@ Distributed Logical Routers
     * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
       * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
       * `enabled`: The desired state of the routing logging, possible `true` or `false`. The default is `false`.
-      * `ecmp`: (optional) The default is `false`.
+    * `ecmp`: (optional) The default is `false`.
 * `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When false, it will delete the existing config.
   * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
@@ -1000,7 +1000,6 @@ Edge Services Gateway.
 
 **Derived From:** cloudify.nodes.Root
 
-
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
@@ -1024,64 +1023,42 @@ Edge Services Gateway.
   * `syslog_level`: The logging level for DHCP on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
 * `nat`:
   * `enabled`: The desired state of the NAT service, possible `true` or `false`. The default is `true`.
+* `routing`:
+  * `enabled`: The desired state of the routing on device, possible `true` or `false`. The default is `true`.
+  * `staticRouting`:
+    * `defaultRoute`: (optional, if no default routes needs to be configured).
+      * `gatewayAddress`: static ip.
+      * `vnic`: uplink nic.
+      * `mtu`: (optional) Valid value is smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured.
+  * `routingGlobalConfig`:
+    * `routerId`: Required when dynamic routing protocols like `OSPF`, or `BGP` is configured.
+    * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
+      * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
+      * `enabled`: The desired state of the routing logging, possible `true` or `false`. The default is `false`.
+    * `ecmp`: (optional) The default is `false`.
+* `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+  * `enabled`: When not specified, it will be treated as `false`, When false, it will delete the existing config.
+  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
+  * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
+  * `redistribution`: (optional) The default is `false`.
+* `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+  * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
+  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
+  * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to true.
+  * `redistribution`: (optional) The default is `false`.
+  * `localAS`: Valid values are : 1-65534, For disabled it must to have some number.
 
-```
-      routing:
-        default:
-          enabled: true
-          staticRouting:
-            # Optional, if no default routes needs to be configured
-            defaultRoute:
-              gatewayAddress: ''
-              # uplink nic
-              vnic: ''
-              # Optional. Valid value:smaller than the MTU set on the
-              # interface. Default will be the MTU of the interface on
-              # which this route is configured
-              mtu: ''
-          routingGlobalConfig:
-            # Required when dynamic routing protocols like OSPF,
-            # or BGP is configured
-            routerId: ''
-            # Optional. When absent, enable=false and logLevel=INFO
-            logging:
-              logLevel: INFO
-              enable: false
-            # Optional. Defaults to false.
-            ecmp: false
-      ospf:
-        default:
-          # When not specified, it will be treated as false, When false,
-          # it will delete the existing config
-          enabled: false
-          # default is false, user can configure edge router to publish
-          # default route by setting it to true.
-          defaultOriginate: false
-          # default is false, user can enable graceful restart by
-          # setting it to true. Its a newly added optional field.
-          gracefulRestart: false
-          # Optional. Defaults to false.
-          redistribution: false
-          # ForwardingAddress and protocolAddress are not usable for edge
-      # Only one of (OSPF/BGP) can be configured as the dynamic routing
-      # protocol for Logical Router.
-      bgp:
-        default:
-          # When not specified, it will be treated as false, When false,
-          # it will delete the existing config
-          enabled: false
-          # default is false, user can configure edge router to publish
-          # default route by setting it to true.
-          defaultOriginate: false
-          # default is false, user can enable graceful restart by
-          # setting it to true. Its a newly added optional field.
-          gracefulRestart: false
-          # Optional. Defaults to false.
-          redistribution: false
-          # Valid values are : 1-65534
-          # For disabled it must be also some number
-          localAS: 1
-```
+**Runtime properties:**
+* `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `edge`: Merged copy of `edge`.
+* `firewall`: Merged copy of `firewall`.
+* `dhcp`: Merged copy of `dhcp`.
+* `nat`: Merged copy of `nat`.
+* `routing`: Merged copy of `routing`.
+* `ospf`: Merged copy of `ospf`.
+* `bgp`: Merged copy of `bgp`.
 
 **Relationships**
 * `cloudify.nsx.relationships.deployed_on_datacenter`: Fill `datacentermoid` from `cloudify.vsphere.nodes.Datacenter` node type.
