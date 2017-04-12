@@ -928,7 +928,6 @@ interfaces creation, in other case can be cleanuped.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
-* `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
 * `area`:
@@ -977,9 +976,22 @@ Distributed Logical Routers interface OSPF interfaces.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
+* `interface`:
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
+  * `areaId`: Mandatory and unique. Valid values are 0-4294967295.
+  * `vnic`: NIC id in [DLR](README.md#cloudifynsxdlr)/[ESG](README.md#cloudifynsxesg).
+  * `helloInterval`: (optional) Valid values are 1-255. The default is 10 sec.
+  * `deadInterval`: (optional) Valid values are 1-65535. The default is 40 sec.
+  * `priority`: (optional) Valid values are 0-255. The default is 128.
+  * `cost`: (optional) Auto based on interface speed. Valid values are 1-65535.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `interface`: Merged copy of `interface`.
 
 **Examples:**
 
