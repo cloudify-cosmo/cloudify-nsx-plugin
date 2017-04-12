@@ -183,7 +183,7 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 * `resource_id`: Internal ID used in the plugin for working with `dynamic_set`.
 * `dynamic_member`: Merged copy of `dynamic_member`.
 
-**Relationships**
+**Relationships:**
 
 #### cloudify.nsx.relationships.contained_in
 
