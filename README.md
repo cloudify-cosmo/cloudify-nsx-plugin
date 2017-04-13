@@ -1030,7 +1030,7 @@ BGP Neighbour.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `neighbour`:
-  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
+  * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
   * `ipAddress`: IPv4 only. IPv6 support not supported.
   * `remoteAS`: Valid values are 0-65535.
   * `weight`: (optional) Valid values are 0-65535. The default is 60.
@@ -1495,11 +1495,41 @@ ESG BGP Neighbour.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `neighbour`:
+  * `dlr_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `ipAddress`: IPv4 only. IPv6 support not supported.
+  * `remoteAS`: Valid values are 0-65535.
+  * `weight`: (optional) Valid values are 0-65535. The default is 60.
+  * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
+  * `keepAliveTimer`: (optional) Valid values are : 1-65534. The default is 60 seconds.
+  * `password`: (optional) BGP neighbour password.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `dlrBGPNeighbour`.
+* `neighbour`: Merged copy of `neighbour`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  bgp_neighbour:
+    type: cloudify.nsx.esgBGPNeighbour
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            neighbour:
+              dlr_id: <dlr resource_id>
+              ipAddress: 192.168.2.1
+              remoteAS: 64521
+```
+* For a more complex example see Where ????
 
 ------
 
