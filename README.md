@@ -774,7 +774,10 @@ Logical switches
 
 ### cloudify.nsx.dlr
 
-Distributed Logical Routers
+Distributed Logical Router. The NSX Edge logical router provides East‐West distributed routing with tenant IP address space and data
+path isolation. Virtual machines or workloads that reside on the same host on different subnets can
+communicate with one another without having to traverse a traditional routing interface.
+A logical router can have eight uplink interfaces and up to a thousand internal interfaces.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1351,7 +1354,17 @@ Distributed Logical Router gateway.
 
 ### cloudify.nsx.esg
 
-Edge Services Gateway.
+Edge Services Gateway. The services gateway gives you access to all NSX Edge services such as firewall, NAT, DHCP, VPN, load
+balancing, and high availability. You can install multiple NSX Edge services gateway virtual appliances in a
+datacenter. Each NSX Edge virtual appliance can have a total of ten uplink and internal network interfaces.The
+internal interfaces connect to secured port groups and act as the gateway for all protected virtual machines in
+the port group. The subnet assigned to the internal interface can be a publicly routed IP space or a
+NATed/routed RFC 1918 private space. Firewall rules and other NSX Edge services are enforced on traffic
+between network interfaces.
+
+Uplink interfaces of NSX Edge connect to uplink port groups that have access to a shared corporate network
+or a service that provides access layer networking. Multiple external IP addresses can be configured for load
+balancer, site‐to‐site VPN, and NAT services.
 
 **Derived From:** cloudify.nodes.Root
 
