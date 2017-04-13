@@ -1746,6 +1746,27 @@ Edge Services Gateway settings.
 
 **Examples:**
 
+* Simple example:
+```yaml
+  esg_gateway:
+    type: cloudify.nsx.esg_gateway
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      gateway:
+        dgw_ip: 192.168.3.11
+        vnic: 3
+        mtu: 1500
+        admin_distance: 1
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            gateway:
+              esg_id: <esg resource_id>
+```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
+* For a more complex example with ospf see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+
 ------
 
 ### cloudify.nsx.esg_route
@@ -1774,6 +1795,28 @@ Edge Services Gateways route.
 * `route`: Merged copy of `route`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  esg_route:
+    type: cloudify.nsx.esg_route
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      route:
+          network: 192.168.10.0/24
+          next_hop: 192.168.3.10
+          vnic: 3
+          mtu: 1500
+          admin_distance: 1
+          description: Some cool route
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            route:
+              esg_id: <esg resource_id>
+```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
 
 ------
 
@@ -1805,6 +1848,30 @@ Edge DHCP pool.
 * `pool`: Merged copy of `pool`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  esg_pool:
+    type: cloudify.nsx.dhcp_pool
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      pool:
+        ip_range: 192.168.5.128-192.168.5.250
+        default_gateway: 192.168.5.1
+        subnet_mask: 255.255.255.0
+        domain_name: internal.test
+        dns_server_1: 8.8.8.8
+        dns_server_2: 192.168.5.1
+        lease_time: infinite
+        auto_dns: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            pool:
+              esg_id: <esg resource_id>
+```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
 
 ------
 
@@ -1841,6 +1908,32 @@ Edge DHCP binding.
 
 **Examples:**
 
+* Simple example:
+```yaml
+  esg_pool_bind:
+    type: cloudify.nsx.dhcp_binding
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      bind:
+        mac: 11:22:33:44:55:66
+        hostname: secret.server
+        ip: 192.168.5.251
+        default_gateway: 192.168.5.1
+        subnet_mask: 255.255.255.0
+        domain_name: secret.internal.test
+        dns_server_1: 8.8.8.8
+        dns_server_2: 192.168.5.1
+        lease_time: infinite
+        auto_dns: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            bind:
+              esg_id: <esg resource_id>
+```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
+
 ## Common/supplementary functionality
 
 ### cloudify.nsx.nsx_object
@@ -1855,7 +1948,6 @@ NSX object check. Search NSX object and set `resource_id` in runtime properties 
     * `name`: Name of NSX object to check exists.
     * `type`: Type of object. Can be: [tag](README.md#cloudifynsxsecurity_tag), [policy](README.md#cloudifynsxsecurity_policy) and [group](README.md#cloudifynsxsecurity_group) or [lswitch](README.md#cloudifynsxlswitch).
     * `scopeId`: (optional) Object scope, useful for group search. Default: `globalroot-0`.
-
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
