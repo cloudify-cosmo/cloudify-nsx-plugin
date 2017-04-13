@@ -1123,7 +1123,7 @@ BGP Neighbour Filter.
 
 Distributed logical routers interface routing ip prefixes.
 
-Required only if user wants to define redistribution rules in dynamic routing protocols like `OSPF`, `BGP`.
+Required only if user wants to define redistribution rules in dynamic routing protocols like `OSPF` or `BGP`.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1165,7 +1165,7 @@ Required only if user wants to define redistribution rules in dynamic routing pr
 
 ### cloudify.nsx.routing_redistribution_rule
 
-Distributed Logical Routers interface ospf redistribution rule.
+Distributed Logical Routers interface `OSPF` redistribution rule.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1404,7 +1404,7 @@ balancer, site‐to‐site VPN, and NAT services.
       * `enabled`: The desired state of the routing logging, possible `true` or `false`. The default is `false`.
     * `ecmp`: (optional) The default is `false`.
 * `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
-  * `enabled`: When not specified, it will be treated as `false`, When false, it will delete the existing config.
+  * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
@@ -1624,7 +1624,7 @@ Edge Services Gateways firewall.
   * `destination`: (optional) Default behaviour is like "any". ipsetId or predefined-vnicGroupIds can be used.
   * `application`: (optional) Default behaviour is like "any". applicationsetId or applicationgroupId can be used
   * `matchTranslated`: (optional) Default behaviour is like `false`.
-  * `direction`: (optional) Default behaviour is like "any". Possible values are in|out.
+  * `direction`: (optional) Default behaviour is like `any`. Possible values are `in` and `out`.
   * `action`: (mandatory) Possible values are accept|deny|reject.
   * `enabled`: (optional) Defaults to true.
   * `loggingEnabled`: (optional) Defaults to false.
@@ -1686,11 +1686,11 @@ Edge Services Gateway interface.
   * `prefixlen`: (optional) The prefix length, this takes precedence over the netmask.
   * `name`: (optional) The name assigned to the vnic
   * `mtu`: (optional) The vnic MTU.
-  * `is_connected`: (optional) The vnic connection state (true/false).
+  * `is_connected`: (optional) The vnic connection state (`true`/`false`).
   * `portgroup_id`: (optional) The portgroup id of logical switch id to connenct this vnic to.
   * `vnic_type`: (optional) The vnic type (uplink/internal).
-  * `enable_send_redirects`: (optional) Whether the interface will send icmp redirects (true/false).
-  * `enable_proxy_arp`: (optional) Whether the interface will do proxy arp (true/false).
+  * `enable_send_redirects`: (optional) Whether the interface will send icmp redirects (`true`/`false`).
+  * `enable_proxy_arp`: (optional) Whether the interface will do proxy arp (`true`/`false`).
   * `secondary_ips`: (optional) A list of additional secondary IP addresses in the primary IP's Subnet.
 
 **Runtime properties:**
