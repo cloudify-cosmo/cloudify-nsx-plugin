@@ -922,8 +922,8 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
 
 ### cloudify.nsx.ospf_areas
 
-Distributed Logical Routers interface OSPF areas.
-Use only after all [dlr](README.md#cloudifynsxdlrinterface) or [dlr](README.md#cloudifynsxesginterface)
+Distributed Logical Routers interface `OSPF` areas.
+Use only after all [DLR](README.md#cloudifynsxdlrinterface) or [ESG](README.md#cloudifynsxesginterface)
 interfaces creation, in other case can be cleanuped.
 
 **Derived From:** cloudify.nodes.Root
@@ -938,7 +938,7 @@ interfaces creation, in other case can be cleanuped.
   * `type`: (optional) Default is normal. Valid inputs are `normal`, `nssa`.
   * `authentication`: (optional) When not specified, its `none` authentication.
     * `type`: Valid values are `none`, `password`, `md5`.
-    * `value`: Value for authentication
+    * `value`: Value for authentication.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -972,7 +972,7 @@ interfaces creation, in other case can be cleanuped.
 
 ### cloudify.nsx.ospf_interfaces
 
-Distributed Logical Routers interface OSPF interfaces.
+Distributed Logical Routers interface `OSPF` interfaces.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1040,8 +1040,8 @@ BGP Neighbour.
   * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
   * `keepAliveTimer`: (optional) Valid values are : 1-65534. The default is 60 seconds.
   * `password`: (optional) BGP neighbour password.
-  * `protocolAddress`: IP address on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
-  * `forwardingAddress`: IP address on the same subnet as the forwardingAddress, only for enabled and use logical switch as `OSPF`.
+  * `protocolAddress`: IP address on one of the uplink interfaces, only for enabled and used logical switch as `OSPF`.
+  * `forwardingAddress`: IP address on the same subnet as the forwardingAddress, only for enabled and used logical switch as `OSPF`.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1086,7 +1086,7 @@ BGP Neighbour Filter.
   * `neighbour_id`: `resource_id` from [BGP Neighbour](README.md#cloudifynsxdlrbgpneighbour).
   * `action`: Valid values are `permit`/`deny`.
   * `ipPrefixGe`: (optional) "Greater than or equal to" & used for filtering based on prefix length. Valid values are only IPv4 prefixes.
-  * `ipPrefixLe`: Optional. "Less than or equal to" & used for filtering based on prefix length. Valid values are only IPv4 prefixes.
+  * `ipPrefixLe`: (optional) "Less than or equal to" & used for filtering based on prefix length. Valid values are only IPv4 prefixes.
   * `direction`: Valid values are `in`/`out`
   * `network`: Valid values are CIDR networks. IPv4 only. IPv6 support is not supported.
 
@@ -1123,8 +1123,7 @@ BGP Neighbour Filter.
 
 Distributed logical routers interface routing ip prefixes.
 
-Optional. Required only if user wants to define redistribution rules in
-dynamic routing protocols like ospf, bgp.
+Required only if user wants to define redistribution rules in dynamic routing protocols like `OSPF`, `BGP`.
 
 **Derived From:** cloudify.nodes.Root
 
