@@ -217,7 +217,7 @@ class ComulativeTest(unittest.TestCase):
 
     @pytest.mark.external
     def test_esg_bgp(self):
-        """Dry run: Check edge gateway with ospf routing functionality"""
+        """Dry run: Check edge gateway with bgp routing functionality"""
         inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
 
         if os.environ.get('VCENTER_CLUSTER'):

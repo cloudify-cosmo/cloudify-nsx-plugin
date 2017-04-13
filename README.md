@@ -1946,7 +1946,7 @@ NSX object check. Search NSX object and set `resource_id` in runtime properties 
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `nsx_object`:
     * `name`: Name of NSX object to check exists.
-    * `type`: Type of object. Can be: [tag](README.md#cloudifynsxsecurity_tag), [policy](README.md#cloudifynsxsecurity_policy) and [group](README.md#cloudifynsxsecurity_group) or [lswitch](README.md#cloudifynsxlswitch).
+    * `type`: Type of object. Can be: [tag](README.md#cloudifynsxsecurity_tag), [policy](README.md#cloudifynsxsecurity_policy) and [group](README.md#cloudifynsxsecurity_group) and [lswitch](README.md#cloudifynsxlswitch) or [router](README.md#cloudifynsxdlr).
     * `scopeId`: (optional) Object scope, useful for group search. Default: `globalroot-0`.
 
 **Runtime properties:**
