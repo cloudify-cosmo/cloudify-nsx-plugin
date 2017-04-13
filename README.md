@@ -799,7 +799,7 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
   * `uplink_dgw`: New dlr default gateway.
 * `firewall`:
   * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
-  * `logging`: Log packages, default `false`.
+  * `logging`: Log packages. The default is `false`.
 * `dhcp`:
   * `enabled`: The desired state of the DHCP Server, possible `true` or `false`. The default is `true`.
   * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`. The default is `false`.
