@@ -1511,9 +1511,27 @@ Edge Services Gateway NAT.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `rule`:
+  * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `action`: Actuon type: `dnat`/`snat`.
+  * `originalAddress`: Original address.
+  * `translatedAddress`: Translated address.
+  * `vnic`: (optional) vnic.
+  * `ruleTag`: (optional) Can be used to specify user-controlled ids on VSE. Valid inputs 65537-131072. If not specified, vShield manager will generate ruleId.
+  * `loggingEnabled`: (optional) Default is false.
+  * `enabled`: (optional) Default is true.
+  * `description`: (optional) NAT rule description.
+  * `protocol`: (optional) Default is "any". This tag is not supported for SNAT rule.
+  * `translatedPort`: (optional) Default is "any". This tag is not supported for SNAT rule.
+  * `originalPort`: (optional) Default is "any". This tag is not supported for SNAT rule.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `esg_nat`.
+* `rule`: Merged copy of `rule`.
 
 **Examples:**
 
@@ -1527,9 +1545,29 @@ Edge Services Gateways firewall.
 
 **Properties:**
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
+* `use_external_resource`: (optional) Use external object. The default is `false`.
+* `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
+* `rule`:
+  * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
+  * `ruleTag`: (optional) This can be used to specify user controlled ids on VSE. The inputs here should be 1-65536. If not specified, VSM will generate ruleId.
+  * `name`: (optional) firewall rule name.
+  * `source`: (optional) Default behaviour is like "any". ipsetId or predefined-vnicGroupIds can be used.
+  * `destination`: (optional) Default behaviour is like "any". ipsetId or predefined-vnicGroupIds can be used.
+  * `application`: (optional) Default behaviour is like "any". applicationsetId or applicationgroupId can be used
+  * `matchTranslated`: (optional) Default behaviour is like `false`.
+  * `direction`: (optional) Default behaviour is like "any". Possible values are in|out.
+  * `action`: (mandatory) Possible values are accept|deny|reject.
+  * `enabled`: (optional) Defaults to true.
+  * `loggingEnabled`: (optional) Defaults to false.
+  * `description`: (optional) Rule description.
+
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
+* `use_external_resource`: Merged copy of `use_external_resource`.
+* `resource_id`: Internal ID used in the plugin for working with `esg_firewall`.
+* `rule`: Merged copy of `rule`.
+* `rule_id`: firewall rule id.
 
 **Examples:**
 
