@@ -215,6 +215,24 @@ class ComulativeTest(unittest.TestCase):
 
         self._common_run('esg_with_ospf_functionality.yaml', inputs)
 
+    @pytest.mark.external
+    def test_esg_bgp(self):
+        """Dry run: Check edge gateway with ospf routing functionality"""
+        inputs = {k: self.ext_inputs[k] for k in self.ext_inputs}
+
+        if os.environ.get('VCENTER_CLUSTER'):
+            inputs['vcenter_cluster'] = os.environ.get('VCENTER_CLUSTER')
+        if os.environ.get('VCENTER_DATASTORE'):
+            inputs['vcenter_datastore'] = os.environ.get('VCENTER_DATASTORE')
+        if os.environ.get('VCENTER_DATACENTER'):
+            inputs['vcenter_datacenter'] = os.environ.get('VCENTER_DATACENTER')
+        if os.environ.get('VCENTER_RESOURCE_POOL'):
+            inputs['vcenter_resource_pool'] = os.environ.get(
+                'VCENTER_RESOURCE_POOL'
+            )
+
+        self._common_run('esg_with_bgp_functionality.yaml', inputs)
+
 
 if __name__ == '__main__':
     unittest.main()

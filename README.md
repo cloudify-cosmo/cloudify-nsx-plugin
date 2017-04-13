@@ -1525,11 +1525,11 @@ ESG BGP Neighbour.
         create:
           inputs:
             neighbour:
-              dlr_id: <dlr resource_id>
+              dlr_id: <esg resource_id>
               ipAddress: 192.168.2.1
               remoteAS: 64521
 ```
-* For a more complex example see Where ????
+* For a more complex example see [esg_with_bgp_functionality.yaml](tests/integration/resources/esg_with_bgp_functionality.yaml)
 
 ------
 
@@ -1565,6 +1565,33 @@ Edge Services Gateway NAT.
 
 **Examples:**
 
+* Simple example:
+```yaml
+  nat_rule:
+    type: cloudify.nsx.esg_nat
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      rule:
+        action: dnat
+        translatedAddress: 192.168.10.1
+        originalAddress: 192.168.1.2
+        vnic: 3
+        ruleTag: 65538
+        loggingEnabled: false
+        enabled: true
+        description: some nat rule
+        protocol: any
+        translatedPort: any
+        originalPort: any
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            rule:
+              esg_id: <esg resource_id>
+```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
+
 ------
 
 ### cloudify.nsx.esg_firewall
@@ -1591,7 +1618,6 @@ Edge Services Gateways firewall.
   * `loggingEnabled`: (optional) Defaults to false.
   * `description`: (optional) Rule description.
 
-
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
@@ -1600,6 +1626,33 @@ Edge Services Gateways firewall.
 * `rule_id`: firewall rule id.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  firewall_rule:
+    type: cloudify.nsx.esg_firewall
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      rule:
+        name: http
+        loggingEnabled: false
+        matchTranslated: false
+        enabled: true
+        source: any
+        action: accept
+        description: Some Firewall Rule
+        direction: in
+        application: any
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            rule:
+              esg_id: <esg resource_id>
+              destination:
+                groupingObjectId: <cluster vsphere_cluster_id>
+```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
 
 ------
 
@@ -1636,6 +1689,35 @@ Edge Services Gateway interface.
 * `ifindex`: vnic id of interface in `ESG`.
 
 **Examples:**
+
+* Simple example:
+```yaml
+  esg_interface:
+    type: cloudify.nsx.esg_interface
+    properties:
+      nsx_auth: <authentication credentials for nsx>
+      interface:
+        ifindex: 3
+        ipaddr: 192.168.3.1
+        netmask: 255.255.255.0
+        prefixlen: 24
+        name: <router interface name>
+        mtu: 1500
+        is_connected: "true"
+        vnic_type: internal
+        enable_send_redirects: "true"
+        enable_proxy_arp: "true"
+        secondary_ips: 192.168.3.128
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+              esg_id: <esg resource_id>
+              portgroup_id: <lswitch resource_id>
+```
+* For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
+* For a more complex example with ospf see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
