@@ -194,9 +194,15 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_dlr_interface_uninstall(self):
         """Check delete dlr interface"""
-        self._common_uninstall_external_and_unintialized(
-            'esg_id|nic_id', dlr_interface.delete,
-            {'interface': {}}
+        self._common_uninstall_delete(
+            'id|dlr_id',
+            dlr_interface.delete,
+            {},
+            delete_args=['interfaces'],
+            delete_kwargs={
+                'uri_parameters': {'edgeId': 'dlr_id'},
+                'query_parameters_dict': {'index': 'id'}
+            }
         )
 
     @pytest.mark.internal
@@ -271,8 +277,9 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
             'id|esg_id',
             esg_interface.delete,
             {},
-            read_args=['vnic'],
-            read_kwargs={'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}},
+            read_args=['vnic'], read_kwargs={
+                'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}
+            },
             read_response={
                 'body': test_nsx_base.EDGE_INTERFACE_AFTER,
                 'status': 204

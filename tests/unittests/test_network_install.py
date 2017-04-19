@@ -119,8 +119,9 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
                 "ifindex": "id",
                 "portgroup_id": "portgroup_id"
             }},
-            read_args=['vnic'],
-            read_kwargs={'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}},
+            read_args=['vnic'], read_kwargs={
+                'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}
+            },
             read_response={
                 'status': 204,
                 'body': test_nsx_base.EDGE_INTERFACE_BEFORE
@@ -196,14 +197,37 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_dlr_interface_install(self):
         """Check create dlr interface"""
-        self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
-        dlr_interface.create(
-            ctx=self.fake_ctx,
-            interface={
+        self._common_install_extract_or_read_and_update(
+            'id|dlr_id',
+            dlr_interface.create,
+            {'interface': {
                 "dlr_id": "dlr_id",
                 "interface_ls_id": "interface_ls_id",
                 "interface_ip": "interface_ip",
                 "interface_subnet": "interface_subnet"
+            }},
+            extract_args=['interfaces', 'create'], extract_kwargs={},
+            extract_response={
+                'interfaces': {
+                    'interface': {
+                        'addressGroups': {
+                            'addressGroup': {
+                                'primaryAddress': {
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            create_args=['interfaces'],
+            create_kwargs={
+                'query_parameters_dict': {'action': 'patch'},
+                'request_body_dict': test_nsx_base.DLR_INTERFACE_CREATE,
+                'uri_parameters': {'edgeId': 'dlr_id'}
+            },
+            create_response={
+                'status': 204,
+                'body': test_nsx_base.DLR_INTERFACE_CREATE_RESPONSE
             }
         )
 
