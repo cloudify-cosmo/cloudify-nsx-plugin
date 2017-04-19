@@ -1278,6 +1278,8 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
         not ctx.instance.runtime_properties.get('vsphere_server_id') or
         not ctx.instance.runtime_properties.get('name')
     ):
+        # If you change the following code block you will probably break vRops
+        # integration
 
         parameters = get_edgegateway(client_session, resource_id)
 
@@ -1297,6 +1299,11 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
                 break
 
         ctx.instance.runtime_properties['vsphere_server_id'] = vmId
+
+        if not vmId:
+            raise cfy_exc.RecoverableError(
+                message="We dont have such vm yet", retry_after=10
+            )
 
 
 def add_routing_prefix(client_session, use_existing, esg_id, name, ipAddress):

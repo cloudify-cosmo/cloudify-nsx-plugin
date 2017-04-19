@@ -86,7 +86,10 @@ def create(**kwargs):
 
         ctx.instance.runtime_properties['resource_id'] = resource_id
 
-    if not ctx.instance.runtime_properties.get('vsphere_network_id'):
+    if (
+        not ctx.instance.runtime_properties.get('vsphere_network_id') or
+        not ctx.instance.runtime_properties.get('name')
+    ):
         # read additional info about switch
         if not switch_params:
             switch_params = nsx_lswitch.get_logical_switch(client_session,
@@ -104,11 +107,18 @@ def create(**kwargs):
         # If you change the following line you will probably break vsphere
         # integration
         ctx.instance.runtime_properties['vsphere_network_id'] = dpg_id
-
         ctx.logger.info("Distibuted port group id: %s" % dpg_id)
+
+        # If you change the following line you will probably break vRops
+        # integration
+        ctx.instance.runtime_properties['name'] = switch_params['name']
+
+        ctx.logger.info(
+            "Lswitch name: %s" % ctx.instance.runtime_properties['name']
+        )
 
 
 @operation
 def delete(**kwargs):
     common.delete_object(nsx_lswitch.del_logical_switch, 'switch',
-                         kwargs, ['vsphere_network_id'])
+                         kwargs, ['vsphere_network_id', 'name'])
