@@ -1,0 +1,244 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-nsx-plugin/edge/plugin.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-vsphere-plugin/2.3.0/plugin.yaml
+
+inputs:
+
+  node_name_prefix:
+    type: string
+    description: >
+       Node name prefix
+    default: platform_test_
+
+  nsx_ip:
+    type: string
+    description: >
+       nsx server ip
+    default: 127.0.0.1
+
+  nsx_user:
+    type: string
+    description: >
+       nsx server user
+    default: nsx
+
+  nsx_password:
+    type: string
+    description: >
+       nsx server user password
+    default: nsx
+
+  nsx_raml:
+    type: string
+    description: >
+       raml file path
+    default: ""
+
+  vcenter_ip:
+    type: string
+    description: >
+       vcenter server ip
+    default: 127.0.0.1
+
+  vcenter_user:
+    type: string
+    description: >
+       vcenter server user
+    default: nsx
+
+  vcenter_password:
+    type: string
+    description: >
+       vcenter server user password
+    default: nsx
+
+  vcenter_cluster:
+    type: string
+    description: >
+       vcenter cluster to deploy ESG node on
+    default: Cluster
+
+  vcenter_datastore:
+    type: string
+    description: >
+       vcenter datastore
+    default: datastore1
+
+  vcenter_datacenter:
+    type: string
+    description: >
+       vcenter datacenter
+    default: Datacenter
+
+  vcenter_resource_pool:
+    description: >
+      Resource pool name
+    default: Resources
+
+node_types:
+  connection_configuration:
+     derived_from: cloudify.nodes.Root
+     properties:
+       connection_config: {}
+
+node_templates:
+  connection_configuration:
+    type: connection_configuration
+    properties:
+      connection_config:
+        username: { get_input: vcenter_user }
+        password: { get_input: vcenter_password }
+        host: { get_input: vcenter_ip }
+        port: 443
+        datacenter_name: { get_input: vcenter_datacenter }
+        resource_pool_name: { get_input: vcenter_resource_pool }
+        auto_placement: true
+
+  datacenter:
+    type: cloudify.vsphere.nodes.Datacenter
+    properties:
+      use_existing_resource: true
+      name: { get_input: vcenter_datacenter }
+      connection_config: { get_property: [connection_configuration, connection_config] }
+
+  datastore:
+    type: cloudify.vsphere.nodes.Datastore
+    properties:
+      use_existing_resource: true
+      name: { get_input: vcenter_datastore }
+      connection_config: { get_property: [connection_configuration, connection_config] }
+
+  cluster:
+    type: cloudify.vsphere.nodes.Cluster
+    properties:
+      use_existing_resource: true
+      name: { get_input: vcenter_cluster }
+      connection_config: { get_property: [connection_configuration, connection_config] }
+
+  master_lswitch:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: &nsx_auth
+        username: { get_input: nsx_user }
+        password: { get_input: nsx_password }
+        host: { get_input: nsx_ip }
+        raml: { get_input: nsx_raml }
+      switch:
+        name: {concat:[{get_input: node_name_prefix}, master_switch]}
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
+  esg:
+    type: cloudify.nsx.esg
+    properties:
+      nsx_auth: *nsx_auth
+      edge:
+        name: {concat:[{get_input: node_name_prefix}, real_edge]}
+        esg_pwd: SeCrEt010203!
+        esg_remote_access: true
+      firewall:
+        # accept or deny
+        action: accept
+        # true or false
+        logging: false
+      dhcp:
+        enabled: true
+        syslog_enabled: false
+        syslog_level: INFO
+      nat:
+        enabled: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            edge:
+              default_pg: { get_attribute: [ master_lswitch, vsphere_network_id ] }
+    relationships:
+      # connected as network link
+      - type: cloudify.relationships.connected_to
+        target: master_lswitch
+      - type: cloudify.nsx.relationships.deployed_on_datacenter
+        target: datacenter
+      - type: cloudify.nsx.relationships.deployed_on_datastore
+        target: datastore
+      - type: cloudify.nsx.relationships.deployed_on_cluster
+        target: cluster
+  slave_lswitch:
+    type: cloudify.nsx.lswitch
+    properties:
+      nsx_auth: *nsx_auth
+      switch:
+        name: {concat:[{get_input: node_name_prefix}, slave_switch]}
+        transport_zone: Main_Zone
+        # UNICAST_MODE, MULTYCAST_MODE, HYBRID_MODE
+        mode: UNICAST_MODE
+
+  esg_interface:
+    type: cloudify.nsx.esg_interface
+    properties:
+      nsx_auth: *nsx_auth
+      interface:
+        ifindex: 3
+        ipaddr: 192.168.3.1
+        netmask: 255.255.255.0
+        prefixlen: 24
+        name: {concat:[{get_input: node_name_prefix}, router_interface]}
+        mtu: 1500
+        is_connected: true
+        vnic_type: uplink
+        enable_send_redirects: true
+        enable_proxy_arp: true
+        secondary_ips: 192.168.3.128
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            interface:
+              esg_id: { get_attribute: [ esg, resource_id ] }
+              portgroup_id: { get_attribute: [ slave_lswitch, resource_id ] }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: esg
+      - type: cloudify.relationships.connected_to
+        target: slave_lswitch
+
+  bgp_neighbour:
+    type: cloudify.nsx.esgBGPNeighbour
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            neighbour:
+              dlr_id: { get_attribute: [ esg, resource_id ] }
+              ipAddress: 192.168.2.1
+              remoteAS: 64521
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: esg
+      - type: cloudify.relationships.contained_in
+        target: esg_interface
+
+  bgp_neighbour_filter:
+    type: cloudify.nsx.esgBGPNeighbourFilter
+    properties:
+      nsx_auth: *nsx_auth
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            filter:
+              neighbour_id: { get_attribute: [ bgp_neighbour, resource_id ] }
+              action: deny
+              ipPrefixGe: 30
+              ipPrefixLe': 32
+              direction: in
+              network: 192.169.1.0/24
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: bgp_neighbour
