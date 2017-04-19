@@ -169,6 +169,20 @@ EDGE_INTERFACE_BEFORE = {
     }
 }
 
+EDGE_INTERFACE_AFTER = {
+    'vnic': {
+        'enableProxyArp': 'false',
+        'name': 'vnicid',
+        'addressGroups': None,
+        'isConnected': 'false',
+        'mtu': 1500,
+        'enableSendRedirects': 'false',
+        'type': 'internal',
+        'portgroupId': "portgroup_id",
+        'portgroupName': None
+    }
+}
+
 class NSXBaseTest(unittest.TestCase):
 
     def _regen_ctx(self):

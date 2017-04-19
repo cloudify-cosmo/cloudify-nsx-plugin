@@ -274,9 +274,7 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
             read_args=['vnic'],
             read_kwargs={'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}},
             read_response={
-                'body': {
-                    'vnic': {}
-                },
+                'body': test_nsx_base.EDGE_INTERFACE_AFTER,
                 'status': 204
             },
             update_args=['vnic'],
