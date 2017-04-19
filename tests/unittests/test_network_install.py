@@ -17,6 +17,7 @@ import pytest
 import mock
 import copy
 import cloudify_nsx.network.esg_firewall as esg_firewall
+import cloudify_nsx.network.esg_interface as esg_interface
 import cloudify_nsx.network.esg_nat as esg_nat
 import cloudify_nsx.network.lswitch as lswitch
 import cloudify_nsx.network.relay as relay
@@ -104,6 +105,15 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
             },
             create_response=test_nsx_base.SUCCESS_RESPONSE_ID
         )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_interface_install(self):
+        """Check create esg interface"""
+        self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
+        esg_interface.create(ctx=self.fake_ctx,
+                             interface={"esg_id": "esg_id",
+                                        "ifindex": "ifindex"})
 
     @pytest.mark.internal
     @pytest.mark.unit

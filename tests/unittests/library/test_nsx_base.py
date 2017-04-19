@@ -155,6 +155,19 @@ EDGE_LIST = [{
     'objectId': 'id'
 }]
 
+EDGE_INTERFACE_BEFORE = {
+    'vnic': {
+        'enableProxyArp': 'false',
+        'name': 'vnicid',
+        'addressGroups': None,
+        'isConnected': 'false',
+        'mtu': '1500',
+        'portgroupId': None,
+        'type': 'internal',
+        'portgroupName': None,
+        'enableSendRedirects': 'false'
+    }
+}
 
 class NSXBaseTest(unittest.TestCase):
 

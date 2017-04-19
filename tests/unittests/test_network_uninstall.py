@@ -267,9 +267,23 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_esg_interface_uninstall(self):
         """Check delete esg interface"""
-        self._common_uninstall_external_and_unintialized(
-            'esg_id|id', esg_interface.delete,
-            {'interface': {}}
+        self._common_uninstall_read_update(
+            'id|esg_id',
+            esg_interface.delete,
+            {},
+            read_args=['vnic'],
+            read_kwargs={'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}},
+            read_response={
+                'body': {
+                    'vnic': {}
+                },
+                'status': 204
+            },
+            update_args=['vnic'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.EDGE_INTERFACE_BEFORE,
+                'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}
+            }
         )
 
     @pytest.mark.internal
