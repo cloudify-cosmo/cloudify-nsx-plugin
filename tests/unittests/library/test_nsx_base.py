@@ -155,6 +155,59 @@ EDGE_LIST = [{
     'objectId': 'id'
 }]
 
+EDGE_INTERFACE_BEFORE = {
+    'vnic': {
+        'enableProxyArp': 'false',
+        'name': 'vnicid',
+        'addressGroups': None,
+        'isConnected': 'false',
+        'mtu': '1500',
+        'portgroupId': None,
+        'type': 'internal',
+        'portgroupName': None,
+        'enableSendRedirects': 'false'
+    }
+}
+
+EDGE_INTERFACE_AFTER = {
+    'vnic': {
+        'enableProxyArp': 'false',
+        'name': 'vnicid',
+        'addressGroups': None,
+        'isConnected': 'false',
+        'mtu': 1500,
+        'enableSendRedirects': 'false',
+        'type': 'internal',
+        'portgroupId': "portgroup_id",
+        'portgroupName': None
+    }
+}
+
+DLR_INTERFACE_CREATE = {
+    'interfaces': {
+        'interface': {
+            'connectedToId': 'interface_ls_id',
+            'index': None,
+            'addressGroups': {
+                'addressGroup': {
+                    'subnetMask': 'interface_subnet',
+                    'primaryAddress': 'interface_ip'
+                }
+            },
+            'isConnected': 'true',
+            'name': ''
+        }
+    }
+}
+
+DLR_INTERFACE_CREATE_RESPONSE = {
+    'interfaces': {
+        'interface': {
+            'index': 'id'
+        }
+    }
+}
+
 
 class NSXBaseTest(unittest.TestCase):
 
@@ -530,6 +583,7 @@ class NSXBaseTest(unittest.TestCase):
         self, resource_id, func_call, func_kwargs,
         extract_args=None, extract_kwargs=None, extract_response=None,
         read_args=None, read_kwargs=None, read_response=None,
+        create_args=None, create_kwargs=None, create_response=None,
         update_args=None, update_kwargs=None, update_response=None,
         relationships=None
     ):
@@ -549,6 +603,7 @@ class NSXBaseTest(unittest.TestCase):
                 fake_cs_result,
                 extract_response=extract_response,
                 read_response=read_response,
+                create_response=create_response,
                 update_response=update_response
             )
 
@@ -565,6 +620,9 @@ class NSXBaseTest(unittest.TestCase):
                 # read
                 read_response=read_response,
                 read_args=read_args, read_kwargs=read_kwargs,
+                # create
+                create_response=create_response,
+                create_args=create_args, create_kwargs=create_kwargs,
                 # update
                 update_response=update_response,
                 update_args=update_args, update_kwargs=update_kwargs
