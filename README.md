@@ -752,8 +752,9 @@ Logical switches
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
 * `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `name`: lswitch name.
 * `switch`: Merged copy of `switch`.
-* `vsphere_network_id`: Network ID in vSphere.
+* `vsphere_network_id`: [Network ID](README.md#resource_id) in vSphere.
 
 **Examples:**
 
@@ -835,6 +836,8 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
 * `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `name`: DLR name.
+* `vsphere_server_id`: [VM ID](README.md#resource_id) in vSphere.
 * `router`: Merged copy of `router`.
 * `firewall`: Merged copy of `firewall`.
 * `dhcp`: Merged copy of `dhcp`.
@@ -1419,6 +1422,8 @@ balancer, site‐to‐site VPN, and NAT services.
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
 * `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `name`: ESG name.
+* `vsphere_server_id`: [VM ID](README.md#resource_id) in vCenter.
 * `edge`: Merged copy of `edge`.
 * `firewall`: Merged copy of `firewall`.
 * `dhcp`: Merged copy of `dhcp`.
