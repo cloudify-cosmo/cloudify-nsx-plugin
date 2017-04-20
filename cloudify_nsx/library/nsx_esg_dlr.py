@@ -1026,6 +1026,8 @@ def esg_clear_interface(client_session, resource_id):
 
 
 def remove_properties_edges():
+    common.remove_properties('name')
+    common.remove_properties('vsphere_server_id')
     common.remove_properties('edge')
     common.remove_properties('router')
     common.remove_properties('firewall')
@@ -1271,6 +1273,37 @@ def update_common_edges(client_session, resource_id, kwargs, esg_restriction):
             resource_id,
             nat['enabled']
         )
+
+    if (
+        not ctx.instance.runtime_properties.get('vsphere_server_id') or
+        not ctx.instance.runtime_properties.get('name')
+    ):
+        # If you change the following code block you will probably break vRops
+        # integration
+
+        parameters = get_edgegateway(client_session, resource_id)
+
+        ctx.instance.runtime_properties['name'] = parameters['name']
+
+        ctx.logger.info(
+            "Edge name: %s" % ctx.instance.runtime_properties['name']
+        )
+
+        appliances = common.nsx_struct_get_list(parameters,
+                                                "appliances/appliance")
+        vmId = None
+        for appliance in appliances:
+            if 'vmId' in appliance:
+                vmId = appliance['vmId']
+                ctx.logger.info("Base VM: %s" % appliance['vmId'])
+                break
+
+        ctx.instance.runtime_properties['vsphere_server_id'] = vmId
+
+        if not vmId:
+            raise cfy_exc.RecoverableError(
+                message="We dont have such vm yet", retry_after=10
+            )
 
 
 def add_routing_prefix(client_session, use_existing, esg_id, name, ipAddress):

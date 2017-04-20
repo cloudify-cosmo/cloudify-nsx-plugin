@@ -17,7 +17,9 @@ import pytest
 import mock
 import copy
 import cloudify_nsx.network.esg_firewall as esg_firewall
+import cloudify_nsx.network.esg_interface as esg_interface
 import cloudify_nsx.network.esg_nat as esg_nat
+import cloudify_nsx.network.dlr_interface as dlr_interface
 import cloudify_nsx.network.lswitch as lswitch
 import cloudify_nsx.network.relay as relay
 import cloudify_nsx.network.routing_ip_prefix as routing_ip_prefix
@@ -107,6 +109,33 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_esg_interface_install(self):
+        """Check create esg interface"""
+        self._common_install_extract_or_read_and_update(
+            'id|esg_id',
+            esg_interface.create,
+            {'interface': {
+                "esg_id": "esg_id",
+                "ifindex": "id",
+                "portgroup_id": "portgroup_id"
+            }},
+            read_args=['vnic'], read_kwargs={
+                'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}
+            },
+            read_response={
+                'status': 204,
+                'body': test_nsx_base.EDGE_INTERFACE_BEFORE
+            },
+            update_args=['vnic'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.EDGE_INTERFACE_AFTER,
+                'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_esg_nat_install(self):
         """Check create esg nat rule"""
         self._common_install(
@@ -162,6 +191,44 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
         self.assertEqual(
             self.fake_ctx.instance.runtime_properties['resource_id'],
             "some_id"
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dlr_interface_install(self):
+        """Check create dlr interface"""
+        self._common_install_extract_or_read_and_update(
+            'id|dlr_id',
+            dlr_interface.create,
+            {'interface': {
+                "dlr_id": "dlr_id",
+                "interface_ls_id": "interface_ls_id",
+                "interface_ip": "interface_ip",
+                "interface_subnet": "interface_subnet"
+            }},
+            extract_args=['interfaces', 'create'], extract_kwargs={},
+            extract_response={
+                'interfaces': {
+                    'interface': {
+                        'addressGroups': {
+                            'addressGroup': {
+                                'primaryAddress': {
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            create_args=['interfaces'],
+            create_kwargs={
+                'query_parameters_dict': {'action': 'patch'},
+                'request_body_dict': test_nsx_base.DLR_INTERFACE_CREATE,
+                'uri_parameters': {'edgeId': 'dlr_id'}
+            },
+            create_response={
+                'status': 204,
+                'body': test_nsx_base.DLR_INTERFACE_CREATE_RESPONSE
+            }
         )
 
     @pytest.mark.internal
