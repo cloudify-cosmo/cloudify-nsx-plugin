@@ -802,9 +802,9 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
   * `action`: The default action for firewall, possible: `accept` or `deny`. The default is `accept`.
   * `logging`: Log packages. The default is `false`.
 * `dhcp`:
-  * `enabled`: The required state of the `DHCP` Server, possible `true` or `false`. The default is `true`.
-  * `syslog_enabled`: The required logging state of the `DHCP` Server, possible `true` or `false`. The default is `false`.
-  * `syslog_level`: The logging level for `DHCP` on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
+  * `enabled`: The required state of the [DHCP](README.md#cloudifynsxdlr_dhcp_relay) Server, possible `true` or `false`. The default is `true`.
+  * `syslog_enabled`: The required logging state of the [DHCP](README.md#cloudifynsxdlr_dhcp_relay) Server, possible `true` or `false`. The default is `false`.
+  * `syslog_level`: The logging level for [DHCP](README.md#cloudifynsxdlr_dhcp_relay) on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
 * `routing`:
   * `enabled`: The required state of the routing on device, possible `true` or `false`. The default is `true`.
   * `staticRouting`:
@@ -813,19 +813,19 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
       * `vnic`: uplink `NIC`.
       * `mtu`: (optional) Valid value is smaller than the `MTU` set on the interface. Default will be the `MTU` of the interface on which this route is configured.
   * `routingGlobalConfig`:
-    * `routerId`: Required when dynamic routing protocols like `OSPF`, or `BGP` is configured.
+    * `routerId`: Required when dynamic routing protocols like [OSPF](README.md#cloudifynsxospf_areas), or [BGP](README.md#cloudifynsxdlrbgpneighbour) is configured.
     * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
       * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
       * `enabled`: The required state of the routing logging, possible `true` or `false`. The default is `false`.
     * `ecmp`: (optional) The default is `false`.
-* `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+* `ospf`: Only one of [OSPF](README.md#cloudifynsxospf_areas)/[BGP](README.md#cloudifynsxdlrbgpneighbour) can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: The default is `false`. When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`. User can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
-  * `protocolAddress`: `IP` address on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
-  * `forwardingAddress`: `IP` address on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as `OSPF`.
-* `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+  * `protocolAddress`: `IP` address on one of the uplink interfaces, only for enabled and use logical switch as [OSPF](README.md#cloudifynsxospf_areas).
+  * `forwardingAddress`: `IP` address on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as [OSPF](README.md#cloudifynsxospf_areas).
+* `bgp`: Only one of [OSPF](README.md#cloudifynsxospf_areas)/[BGP](README.md#cloudifynsxdlrbgpneighbour) can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`. User can enable graceful restart by setting it to `true`.
@@ -919,13 +919,13 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
 
 ```
 * For a more complex example see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
-* For a more complex example with `BGP` see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
+* For a more complex example with [BGP](README.md#cloudifynsxdlrbgpneighbour) see [dlr_with_bgp_functionality.yaml](tests/integration/resources/dlr_with_bgp_functionality.yaml)
 
 ------
 
 ### cloudify.nsx.ospf_areas
 
-Distributed Logical Routers interface `OSPF` areas.
+Distributed Logical Routers interface OSPF areas.
 Use only after all [DLR](README.md#cloudifynsxdlrinterface) or [ESG](README.md#cloudifynsxesginterface)
 interfaces creation, in other case can be cleanuped.
 
@@ -975,7 +975,7 @@ interfaces creation, in other case can be cleanuped.
 
 ### cloudify.nsx.ospf_interfaces
 
-Distributed Logical Routers interface `OSPF` interfaces.
+Distributed Logical Routers interface [OSPF](README.md#cloudifynsxospf_areas) interfaces.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1042,9 +1042,9 @@ BGP Neighbour.
   * `weight`: (optional) Valid values are 0-65535. The default is 60.
   * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
   * `keepAliveTimer`: (optional) Valid values are : 1-65534. The default is 60 seconds.
-  * `password`: (optional) `BGP` neighbour password.
-  * `protocolAddress`: `IP` address on one of the uplink interfaces for use with `OSPF` protocol on [logical switch](README.md#cloudifynsxlswitch).
-  * `forwardingAddress`: `IP` address on the same subnet as the `forwardingAddress` for use with `OSPF` protocol on [logical switch](README.md#cloudifynsxlswitch).
+  * `password`: (optional) [BGP](README.md#cloudifynsxdlrbgpneighbour) neighbour password.
+  * `protocolAddress`: `IP` address on one of the uplink interfaces for use with [OSPF](README.md#cloudifynsxospf_areas) protocol on [logical switch](README.md#cloudifynsxlswitch).
+  * `forwardingAddress`: `IP` address on the same subnet as the `forwardingAddress` for use with [OSPF](README.md#cloudifynsxospf_areas) protocol on [logical switch](README.md#cloudifynsxlswitch).
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1077,7 +1077,7 @@ BGP Neighbour.
 
 ### cloudify.nsx.esgBGPNeighbourFilter
 
-`BGP` Neighbour Filter.
+[BGP Neighbour](README.md#cloudifynsxesgbgpneighbour) Filter.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1126,7 +1126,7 @@ BGP Neighbour.
 
 Distributed logical routers interface routing ip prefixes.
 
-Required only if user wants to define redistribution rules in dynamic routing protocols like `OSPF` or `BGP`.
+Required only if user wants to define redistribution rules in dynamic routing protocols like [OSPF](README.md#cloudifynsxospf_areas) or [BGP](README.md#cloudifynsxdlrbgpneighbour).
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1168,7 +1168,7 @@ Required only if user wants to define redistribution rules in dynamic routing pr
 
 ### cloudify.nsx.routing_redistribution_rule
 
-Distributed Logical Routers interface `OSPF` redistribution rule.
+Distributed Logical Routers interface [OSPF](README.md#cloudifynsxospf_areas) redistribution rule.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1356,12 +1356,12 @@ Distributed Logical Router gateway.
 
 ### cloudify.nsx.esg
 
-Edge Services Gateway. The services gateway gives you access to all `NSX Edge` services such as firewall, `NAT`, `DHCP`, `VPN`, load
-balancing, and high availability. You can install multiple NSX Edge services gateway virtual appliances in a
+Edge Services Gateway. The services gateway gives you access to all `NSX Edge` services such as [firewall](README.md#cloudifynsxesg_firewall),
+[NAT](README.md#cloudifynsxesg_nat), [DHCP](README.md#cloudifynsxdhcp_pool), `VPN`, load balancing, and high availability. You can install multiple NSX Edge services gateway virtual appliances in a
 datacenter. Each NSX Edge virtual appliance can have a total of ten uplink and internal network interfaces.The
 internal interfaces connect to secured port groups and act as the gateway for all protected virtual machines in
 the port group. The subnet assigned to the internal interface can be a publicly routed `IP` space or a
-NATed/routed RFC 1918 private space. Firewall rules and other NSX Edge services are enforced on traffic
+NATed/routed RFC 1918 private space. [Firewall](README.md#cloudifynsxesg_firewall) rules and other NSX Edge services are enforced on traffic
 between network interfaces.
 
 Uplink interfaces of NSX Edge connect to uplink port groups that have access to a shared corporate network
@@ -1385,14 +1385,14 @@ balancer, site‐to‐site VPN, and NAT services.
   * `esg_username`: The Username for the CLI and SSH access. The default is `admin`.
   * `esg_remote_access`: Enables / Disables SSH access to the Edge Host. The default is `false`.
 * `firewall`:
-  * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
+  * `action`: Default action for [firewall](README.md#cloudifynsxesg_firewall), possible: `accept` or `deny`. The default is `accept`.
   * `logging`: Log packages. The default is `false`.
 * `dhcp`:
-  * `enabled`: The required state of the `DHCP` Server, possible `true` or `false`. The default is `true`.
-  * `syslog_enabled`: The required logging state of the `DHCP` Server, possible `true` or `false`. The default is `false`.
-  * `syslog_level`: The logging level for `DHCP` on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
+  * `enabled`: The required state of the [DHCP](README.md#cloudifynsxdhcp_pool) Server, possible `true` or `false`. The default is `true`.
+  * `syslog_enabled`: The required logging state of the [DHCP](README.md#cloudifynsxdhcp_pool) Server, possible `true` or `false`. The default is `false`.
+  * `syslog_level`: The logging level for [DHCP](README.md#cloudifynsxdhcp_pool) on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
 * `nat`:
-  * `enabled`: The required state of the `NAT` service, possible `true` or `false`. The default is `true`.
+  * `enabled`: The required state of the [NAT](README.md#cloudifynsxesg_nat) service, possible `true` or `false`. The default is `true`.
 * `routing`:
   * `enabled`: The required state of the routing on device, possible `true` or `false`. The default is `true`.
   * `staticRouting`:
@@ -1401,17 +1401,17 @@ balancer, site‐to‐site VPN, and NAT services.
       * `vnic`: uplink `NIC`.
       * `mtu`: (optional) Valid value is smaller than the `MTU` set on the interface. Default will be the `MTU` of the interface on which this route is configured.
   * `routingGlobalConfig`:
-    * `routerId`: Required when dynamic routing protocols like `OSPF`, or `BGP` is configured.
+    * `routerId`: Required when dynamic routing protocols like [OSPF](README.md#cloudifynsxospf_areas), or [BGP](README.md#cloudifynsxesgbgpneighbour) is configured.
     * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
       * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
       * `enabled`: The required state of the routing logging, possible `true` or `false`. The default is `false`.
     * `ecmp`: (optional) The default is `false`.
-* `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+* `ospf`: Only one of [OSPF](README.md#cloudifynsxospf_areas)/[BGP](README.md#cloudifynsxdesesgbgpneighbour) can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
-* `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
+* `bgp`: Only one of [OSPF](README.md#cloudifynsxospf_areas)/[BGP](README.md#cloudifynsxesgbgpneighbour) can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`. User can enable graceful restart by setting it to `true`.
@@ -1500,13 +1500,13 @@ balancer, site‐to‐site VPN, and NAT services.
         target: cluster
 ```
 * For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
-* For a more complex example with `OSPF` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+* For a more complex example with [OSPF](README.md#cloudifynsxospf_areas) see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
 ### cloudify.nsx.esgBGPNeighbour
 
-[ESG](README.md#cloudifynsxesg) `BGP` Neighbour.
+[ESG](README.md#cloudifynsxesg) BGP Neighbour.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1734,7 +1734,7 @@ Edge Services Gateway interface.
               portgroup_id: <lswitch resource_id>
 ```
 * For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
-* For a more complex example with `OSPF` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+* For a more complex example with [OSPF](README.md#cloudifynsxospf_areas) see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
@@ -1782,7 +1782,7 @@ Edge Services Gateway settings.
               esg_id: <esg resource_id>
 ```
 * For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
-* For a more complex example with `OSPF` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+* For a more complex example with [OSPF](README.md#cloudifynsxospf_areas) see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
@@ -1839,7 +1839,7 @@ Edge Services Gateways route.
 
 ### cloudify.nsx.dhcp_pool
 
-Edge `DHCP` pool.
+Edge DHCP pool.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1855,7 +1855,7 @@ Edge `DHCP` pool.
   * `domain_name`: (optional) The DNS domain name (e.g. vmware.com) for the specified subnet.
   * `dns_server_1`: (optional) The primary DNS Server.
   * `dns_server_2`: (optional) The secondary DNS Server.
-  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of `DHCP` leases.
+  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases.
   * `auto_dns`: (optional) If set to `true`, the DNS servers and domain name set for NSX-Manager will be used.
 
 **Runtime properties:**
@@ -1914,7 +1914,7 @@ Edge DHCP binding.
   * `domain_name`: (optional) The DNS domain name (e.g. vmware.com) for the specified binding.
   * `dns_server_1`: (optional) The primary DNS Server.
   * `dns_server_2`: (optional) The secondary DNS Server.
-  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of `DHCP` leases.
+  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases.
   * `auto_dns`: (optional) If set to `true`, the DNS servers and domain name set for NSX-Manager will be used.
 
 **Runtime properties:**
