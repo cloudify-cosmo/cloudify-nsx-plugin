@@ -165,7 +165,7 @@ A security group is a collection of assets or objects group from your vSphere in
               member:
                 objectId: <child id>
 ```
-* For more complicated example look to [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
+* For a more complex example, see [security_functionality.yaml](tests/integration/resources/security_functionality.yaml)
 
 ------
 
@@ -641,7 +641,7 @@ Security Tag.
 * `tag`: Merged copy of `tag`.
 
 **Relationships**
-* `cloudify.nsx.relationships.is_tagged_by`: You can use `is_tagged_by` for attach tag to several vm's without separate
+* `cloudify.nsx.relationships.is_tagged_by`: You can use `is_tagged_by` for attach tag to several `VM`'s without separate
   node for [each](README.md#cloudifynsxsecurity_tag_vm). Derived from `cloudify.relationships.connected_to`.
 
 **Examples:**
@@ -775,7 +775,7 @@ Logical switches
 
 ### cloudify.nsx.dlr
 
-Distributed Logical Router. The NSX Edge logical router provides East‐West distributed routing with tenant IP address space and data
+Distributed Logical Router. The NSX Edge logical router provides East‐West distributed routing with tenant `IP` address space and data
 path isolation. Virtual machines or workloads that reside on the same host on different subnets can
 communicate with one another without having to traverse a traditional routing interface.
 A logical router can have eight uplink interfaces and up to a thousand internal interfaces.
@@ -787,50 +787,50 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
 * `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
 * `router`:
-  * `name`: The name that will be assigned to the new dlr.
-  * `dlr_pwd`: The admin password of new dlr.
-  * `dlr_size`: The DLR Control VM size, possible values: `compact`, `large`, `quadlarge`, `xlarge`.
-  * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `ha_ls_id`: New dlr ha [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
-  * `uplink_ls_id`: New dlr uplink [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
-  * `uplink_ip`: New dlr uplink ip.
-  * `uplink_subnet`: New dlr uplink subnet.
-  * `uplink_dgw`: New dlr default gateway.
+  * `name`: The name that will be assigned to the new [DLR](README.md#cloudifynsxdlr).
+  * `dlr_pwd`: The admin password of new [DLR](README.md#cloudifynsxdlr).
+  * `dlr_size`: The [DLR](README.md#cloudifynsxdlr) Control `VM` size, possible values: `compact`, `large`, `quadlarge`, `xlarge`.
+  * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
+  * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
+  * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
+  * `ha_ls_id`: New [DLR](README.md#cloudifynsxdlr) HA [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
+  * `uplink_ls_id`: New [DLR](README.md#cloudifynsxdlr) uplink [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
+  * `uplink_ip`: New [DLR](README.md#cloudifynsxdlr) uplink `IP`.
+  * `uplink_subnet`: New [DLR](README.md#cloudifynsxdlr) uplink subnet.
+  * `uplink_dgw`: New [DLR](README.md#cloudifynsxdlr) default gateway.
 * `firewall`:
   * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
   * `logging`: Log packages. The default is `false`.
 * `dhcp`:
-  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`. The default is `true`.
-  * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`. The default is `false`.
-  * `syslog_level`: The logging level for DHCP on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
+  * `enabled`: The required state of the `DHCP` Server, possible `true` or `false`. The default is `true`.
+  * `syslog_enabled`: The required logging state of the `DHCP` Server, possible `true` or `false`. The default is `false`.
+  * `syslog_level`: The logging level for `DHCP` on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
 * `routing`:
-  * `enabled`: The desired state of the routing on device, possible `true` or `false`. The default is `true`.
+  * `enabled`: The required state of the routing on device, possible `true` or `false`. The default is `true`.
   * `staticRouting`:
     * `defaultRoute`: (optional, if no default routes needs to be configured).
-      * `gatewayAddress`: static ip.
-      * `vnic`: uplink nic.
-      * `mtu`: (optional) Valid value is smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured.
+      * `gatewayAddress`: static `IP`.
+      * `vnic`: uplink `NIC`.
+      * `mtu`: (optional) Valid value is smaller than the `MTU` set on the interface. Default will be the `MTU` of the interface on which this route is configured.
   * `routingGlobalConfig`:
     * `routerId`: Required when dynamic routing protocols like `OSPF`, or `BGP` is configured.
     * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
       * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
-      * `enabled`: The desired state of the routing logging, possible `true` or `false`. The default is `false`.
+      * `enabled`: The required state of the routing logging, possible `true` or `false`. The default is `false`.
     * `ecmp`: (optional) The default is `false`.
 * `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
-  * `enabled`: When not specified, it will be treated as `false`, When false, it will delete the existing config.
-  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
+  * `enabled`: The default is `false`. When `false`, it will delete the existing config.
+  * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
-  * `protocolAddress`: IP address on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
-  * `forwardingAddress`: IP address on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as `OSPF`.
+  * `protocolAddress`: `IP` address on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
+  * `forwardingAddress`: `IP` address on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as `OSPF`.
 * `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to true.
   * `redistribution`: (optional) The default is `false`.
-  * `localAS`: Valid values are : 1-65534, For disabled it must to have some number.
+  * `localAS`: Valid values are : 1-65534. To be disabled, a number must be specified.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -844,7 +844,7 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
 * `routing`: Merged copy of `routing`.
 * `ospf`: Merged copy of `ospf`.
 * `bgp`: Merged copy of `bgp`.
-* `uplink_vnic`: vnic id for uplink.
+* `uplink_vnic`: `VNIC ID` for uplink.
 
 **Relationships**
 * `cloudify.nsx.relationships.deployed_on_datacenter`: Fill `datacentermoid` from `cloudify.vsphere.nodes.Datacenter` node type.
@@ -939,7 +939,7 @@ interfaces creation, in other case can be cleanuped.
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
   * `areaId`: Mandatory and unique. Valid values are 0-4294967295.
   * `type`: (optional) Default is normal. Valid inputs are `normal`, `nssa`.
-  * `authentication`: (optional) When not specified, its `none` authentication.
+  * `authentication`: (optional) When not specified, the default is `none` and authentication is not performed.
     * `type`: Valid values are `none`, `password`, `md5`.
     * `value`: Value for authentication.
 
@@ -968,8 +968,8 @@ interfaces creation, in other case can be cleanuped.
               authentication:
                 type: none
 ```
-* For a more complex example with `DLR` see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
-* For a more complex example with `ESG` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+* For a more complex example with [DLR](README.md#cloudifynsxdlr) see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
+* For a more complex example with [ESG](README.md#cloudifynsxesg) see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
@@ -986,7 +986,7 @@ Distributed Logical Routers interface `OSPF` interfaces.
 * `interface`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
   * `areaId`: Mandatory and unique. Valid values are 0-4294967295.
-  * `vnic`: NIC id in [DLR](README.md#cloudifynsxdlr)/[ESG](README.md#cloudifynsxesg).
+  * `vnic`: `NIC ID` in [DLR](README.md#cloudifynsxdlr)/[ESG](README.md#cloudifynsxesg).
   * `helloInterval`: (optional) Valid values are 1-255. The default is 10 sec.
   * `deadInterval`: (optional) Valid values are 1-65535. The default is 40 sec.
   * `priority`: (optional) Valid values are 0-255. The default is 128.
@@ -1020,8 +1020,8 @@ Distributed Logical Routers interface `OSPF` interfaces.
               deadInterval: 40
               mtuIgnore: false
 ```
-* For a more complex example with `DLR` see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
-* For a more complex example with `ESG` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+* For a more complex example with [DLR](README.md#cloudifynsxdlr) see [dlr_functionality.yaml](tests/integration/resources/dlr_functionality.yaml)
+* For a more complex example with [ESG](README.md#cloudifynsxesg) see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
@@ -1042,9 +1042,9 @@ BGP Neighbour.
   * `weight`: (optional) Valid values are 0-65535. The default is 60.
   * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
   * `keepAliveTimer`: (optional) Valid values are : 1-65534. The default is 60 seconds.
-  * `password`: (optional) BGP neighbour password.
-  * `protocolAddress`: IP address on one of the uplink interfaces, only for enabled and used logical switch as `OSPF`.
-  * `forwardingAddress`: IP address on the same subnet as the forwardingAddress, only for enabled and used logical switch as `OSPF`.
+  * `password`: (optional) `BGP` neighbour password.
+  * `protocolAddress`: `IP` address on one of the uplink interfaces for use with `OSPF` protocol on [logical switch](README.md#cloudifynsxlswitch).
+  * `forwardingAddress`: `IP` address on the same subnet as the `forwardingAddress` for use with `OSPF` protocol on [logical switch](README.md#cloudifynsxlswitch).
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1077,7 +1077,7 @@ BGP Neighbour.
 
 ### cloudify.nsx.esgBGPNeighbourFilter
 
-BGP Neighbour Filter.
+`BGP` Neighbour Filter.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1088,10 +1088,10 @@ BGP Neighbour Filter.
 * `filter`:
   * `neighbour_id`: `resource_id` from [BGP Neighbour](README.md#cloudifynsxdlrbgpneighbour).
   * `action`: Valid values are `permit`/`deny`.
-  * `ipPrefixGe`: (optional) "Greater than or equal to" & used for filtering based on prefix length. Valid values are only IPv4 prefixes.
-  * `ipPrefixLe`: (optional) "Less than or equal to" & used for filtering based on prefix length. Valid values are only IPv4 prefixes.
+  * `ipPrefixGe`: (optional) "Greater than or equal to" & used for filtering based on prefix length. Valid values are only `IPv4` prefixes.
+  * `ipPrefixLe`: (optional) "Less than or equal to" & used for filtering based on prefix length. Valid values are only `IPv4` prefixes.
   * `direction`: Valid values are `in`/`out`
-  * `network`: Valid values are CIDR networks. IPv4 only. IPv6 support is not supported.
+  * `network`: Valid values are CIDR networks. `IPv4` only. `IPv6` support is not supported.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1136,8 +1136,8 @@ Required only if user wants to define redistribution rules in dynamic routing pr
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `prifix`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
-  * `name`: All the defined IP prefixes must have unique names.
-  * `ipAddress`: IP address like 10.112.196.160/24
+  * `name`: All the defined `IP` prefixes must have unique names.
+  * `ipAddress`: `IP` address like 10.112.196.160/24
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1232,17 +1232,17 @@ Distributed Logical Router interface.
 * `interface`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
   * `interface_ls_id`: [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id)
-  * `interface_ip`: interface ip address
-  * `interface_subnet`: interface subnet
+  * `interface_ip`: interface `IP` address.
+  * `interface_subnet`: interface subnet.
   * `name`: name for interface
-  * `vnic`: (optional) vnic for interface
+  * `vnic`: (optional) `VNIC` for interface
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
 * `resource_id`: Internal ID used in the plugin for working with `dlr_interface`.
 * `interface`: Merged copy of `interface`.
-* `ifindex`: vnic id of interface in DLR.
+* `ifindex`: `VNIC ID` of interface in DLR.
 
 **Examples:**
 
@@ -1280,8 +1280,8 @@ change it only after set all settings for interfaces.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `relay`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
-  * `relayServer`: relay servers settings.
-  * `relayAgents`: relay agents settings.
+  * `relayServer`: Relay servers settings.
+  * `relayAgents`: Relay agents settings.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1326,7 +1326,7 @@ Distributed Logical Router gateway.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `gateway`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
-  * `address`: default gateway ip address.
+  * `address`: Default gateway `IP` address.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1356,16 +1356,16 @@ Distributed Logical Router gateway.
 
 ### cloudify.nsx.esg
 
-Edge Services Gateway. The services gateway gives you access to all NSX Edge services such as firewall, NAT, DHCP, VPN, load
+Edge Services Gateway. The services gateway gives you access to all `NSX Edge` services such as firewall, `NAT`, `DHCP`, `VPN`, load
 balancing, and high availability. You can install multiple NSX Edge services gateway virtual appliances in a
 datacenter. Each NSX Edge virtual appliance can have a total of ten uplink and internal network interfaces.The
 internal interfaces connect to secured port groups and act as the gateway for all protected virtual machines in
-the port group. The subnet assigned to the internal interface can be a publicly routed IP space or a
+the port group. The subnet assigned to the internal interface can be a publicly routed `IP` space or a
 NATed/routed RFC 1918 private space. Firewall rules and other NSX Edge services are enforced on traffic
 between network interfaces.
 
 Uplink interfaces of NSX Edge connect to uplink port groups that have access to a shared corporate network
-or a service that provides access layer networking. Multiple external IP addresses can be configured for load
+or a service that provides access layer networking. Multiple external `IP` addresses can be configured for load
 balancer, site‐to‐site VPN, and NAT services.
 
 **Derived From:** cloudify.nodes.Root
@@ -1375,36 +1375,36 @@ balancer, site‐to‐site VPN, and NAT services.
 * `use_external_resource`: (optional) Use external object. The default is `false`.
 * `resource_id`: (optional) [NSX object ID](README.md#resource_id), used to identify the object when `use_external_resource` is `true`.
 * `edge`:
-  * `name`: The name of the ESG to be created.
-  * `esg_pwd`: The CLI password of the ESG.
-  * `esg_size`: The size of the ESG, possible values: `compact`, `large`, `quadlarge`, `xlarge`.
-  * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where dlr control vm will be deployed.
-  * `default_pg`: The managed object id of the port group for the first vnic (on creation the first vnic must be connected to a valid portgroup in NSX).
+  * `name`: The name of the [ESG](README.md#cloudifynsxesg) to be created.
+  * `esg_pwd`: The CLI password of the [ESG](README.md#cloudifynsxesg).
+  * `esg_size`: The size of the [ESG](README.md#cloudifynsxesg), possible values: `compact`, `large`, `quadlarge`, `xlarge`.
+  * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
+  * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
+  * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
+  * `default_pg`: The managed object id of the port group for the first vnic (on creation the first `VNIC` must be connected to a valid portgroup in NSX).
   * `esg_username`: The Username for the CLI and SSH access. The default is `admin`.
   * `esg_remote_access`: Enables / Disables SSH access to the Edge Host. The default is `false`.
 * `firewall`:
   * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
   * `logging`: Log packages, default `false`.
 * `dhcp`:
-  * `enabled`: The desired state of the DHCP Server, possible `true` or `false`. The default is `true`.
-  * `syslog_enabled`: The desired logging state of the DHCP Server, possible `true` or `false`. The default is `false`.
-  * `syslog_level`: The logging level for DHCP on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
+  * `enabled`: The required state of the `DHCP` Server, possible `true` or `false`. The default is `true`.
+  * `syslog_enabled`: The required logging state of the `DHCP` Server, possible `true` or `false`. The default is `false`.
+  * `syslog_level`: The logging level for `DHCP` on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
 * `nat`:
-  * `enabled`: The desired state of the NAT service, possible `true` or `false`. The default is `true`.
+  * `enabled`: The required state of the `NAT` service, possible `true` or `false`. The default is `true`.
 * `routing`:
-  * `enabled`: The desired state of the routing on device, possible `true` or `false`. The default is `true`.
+  * `enabled`: The required state of the routing on device, possible `true` or `false`. The default is `true`.
   * `staticRouting`:
     * `defaultRoute`: (optional, if no default routes needs to be configured).
-      * `gatewayAddress`: static ip.
-      * `vnic`: uplink nic.
-      * `mtu`: (optional) Valid value is smaller than the MTU set on the interface. Default will be the MTU of the interface on which this route is configured.
+      * `gatewayAddress`: static `IP`.
+      * `vnic`: uplink `NIC`.
+      * `mtu`: (optional) Valid value is smaller than the `MTU` set on the interface. Default will be the `MTU` of the interface on which this route is configured.
   * `routingGlobalConfig`:
     * `routerId`: Required when dynamic routing protocols like `OSPF`, or `BGP` is configured.
     * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
       * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
-      * `enabled`: The desired state of the routing logging, possible `true` or `false`. The default is `false`.
+      * `enabled`: The required state of the routing logging, possible `true` or `false`. The default is `false`.
     * `ecmp`: (optional) The default is `false`.
 * `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
@@ -1422,7 +1422,7 @@ balancer, site‐to‐site VPN, and NAT services.
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
 * `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
-* `name`: ESG name.
+* `name`: [ESG](README.md#cloudifynsxesg) name.
 * `vsphere_server_id`: [VM ID](README.md#resource_id) in vCenter.
 * `edge`: Merged copy of `edge`.
 * `firewall`: Merged copy of `firewall`.
@@ -1506,7 +1506,7 @@ balancer, site‐to‐site VPN, and NAT services.
 
 ### cloudify.nsx.esgBGPNeighbour
 
-ESG BGP Neighbour.
+[ESG](README.md#cloudifynsxesg) `BGP` Neighbour.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1565,7 +1565,7 @@ Edge Services Gateway NAT.
   * `action`: Actuon type: `dnat`/`snat`.
   * `originalAddress`: Original address.
   * `translatedAddress`: Translated address.
-  * `vnic`: (optional) vnic.
+  * `vnic`: (optional) `VNIC`.
   * `ruleTag`: (optional) Can be used to specify user-controlled ids on VSE. Valid inputs 65537-131072. If not specified, vShield manager will generate ruleId.
   * `loggingEnabled`: (optional) Default is false.
   * `enabled`: (optional) Default is true.
@@ -1685,16 +1685,16 @@ Edge Services Gateway interface.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `interface`:
   * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
-  * `ifindex`: The vnic index, e.g. vnic3 and the index 3
+  * `ifindex`: The `VNIC` index, e.g. vnic3 and the index 3
   * `ipaddr`: (optional) The primary IP Address to be configured for this interface.
   * `netmask`: (optional) The netmask in the x.x.x.x format.
   * `prefixlen`: (optional) The prefix length, this takes precedence over the netmask.
-  * `name`: (optional) The name assigned to the vnic
-  * `mtu`: (optional) The vnic MTU.
-  * `is_connected`: (optional) The vnic connection state (`true`/`false`).
-  * `portgroup_id`: (optional) The portgroup id of logical switch id to connenct this vnic to.
-  * `vnic_type`: (optional) The vnic type (uplink/internal).
-  * `enable_send_redirects`: (optional) Whether the interface will send icmp redirects (`true`/`false`).
+  * `name`: (optional) The name assigned to the `VNIC`.
+  * `mtu`: (optional) The `VNIC` `MTU`.
+  * `is_connected`: (optional) The `VNIC` connection state (`true`/`false`).
+  * `portgroup_id`: (optional) The portgroup id of logical switch id to connenct this `VNIC` to.
+  * `vnic_type`: (optional) The `VNIC` type (`uplink`/`internal`).
+  * `enable_send_redirects`: (optional) Whether the interface will send `ICMP` redirects (`true`/`false`).
   * `enable_proxy_arp`: (optional) Whether the interface will do proxy arp (`true`/`false`).
   * `secondary_ips`: (optional) A list of additional secondary IP addresses in the primary IP's Subnet.
 
@@ -1703,7 +1703,7 @@ Edge Services Gateway interface.
 * `use_external_resource`: Merged copy of `use_external_resource`.
 * `resource_id`: Internal ID used in the plugin for working with `esg_interface`.
 * `interface`: Merged copy of `interface`.
-* `ifindex`: vnic id of interface in `ESG`.
+* `ifindex`: `VNIC` id of interface in [ESG](README.md#cloudifynsxesg).
 
 **Examples:**
 
@@ -1734,7 +1734,7 @@ Edge Services Gateway interface.
               portgroup_id: <lswitch resource_id>
 ```
 * For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
-* For a more complex example with ospf see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+* For a more complex example with `OSPF` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
@@ -1750,10 +1750,10 @@ Edge Services Gateway settings.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `gateway`:
   * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
-  * `dgw_ip`: The default gateway ip (next hop).
-  * `vnic`: (optional) The vnic index of were the default gateway is reachable on.
-  * `mtu`: (optional) The MTU of the defautl gateway (default=1500).
-  * `admin_distance`: (optional) Admin distance of the defautl route (default=1).
+  * `dgw_ip`: The default gateway `IP` (next hop).
+  * `vnic`: (optional) The `VNIC` index of were the default gateway is reachable on.
+  * `mtu`: (optional) The `MTU` of the default gateway. The default is `1500`.
+  * `admin_distance`: (optional) Admin distance of the default route. . The default is `1`.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1782,7 +1782,7 @@ Edge Services Gateway settings.
               esg_id: <esg resource_id>
 ```
 * For a more complex example see [esg_functionality.yaml](tests/integration/resources/esg_functionality.yaml)
-* For a more complex example with ospf see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
+* For a more complex example with `OSPF` see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml)
 
 ------
 
@@ -1799,10 +1799,10 @@ Edge Services Gateways route.
 * `route`:
   * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
   * `network`: The routes network in the x.x.x.x/yy format, e.g. 192.168.1.0/24.
-  * `next_hop`: The next hop ip.
-  * `vnic`: (optional) The vnic index of were this route is reachable on.
-  * `mtu`: (optional) The MTU of the route (default=1500).
-  * `admin_distance`: (optional) Admin distance of the defautl route (default=1).
+  * `next_hop`: The next hop `IP`.
+  * `vnic`: (optional) The `VNIC` index of were this route is reachable on.
+  * `mtu`: (optional) The `MTU` of the route (default=1500).
+  * `admin_distance`: (optional) Admin distance of the default route. The default is `1`.
   * `description`: (optional) A description for this route.
 
 **Runtime properties:**
@@ -1839,7 +1839,7 @@ Edge Services Gateways route.
 
 ### cloudify.nsx.dhcp_pool
 
-Edge DHCP pool.
+Edge `DHCP` pool.
 
 **Derived From:** cloudify.nodes.Root
 
@@ -1849,13 +1849,13 @@ Edge DHCP pool.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `pool`:
   * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
-  * `ip_range`: An IP range, e.g. 192.168.178.10-192.168.178.100 for this IP Pool.
+  * `ip_range`: An IP range, e.g. 192.168.178.10-192.168.178.100 for this `IP` Pool.
   * `default_gateway`: (optional) The default gateway for the specified subnet.
   * `subnet_mask`: (optional) The subnet mask (e.g. 255.255.255.0) for the specified subnet.
   * `domain_name`: (optional) The DNS domain name (e.g. vmware.com) for the specified subnet.
   * `dns_server_1`: (optional) The primary DNS Server.
   * `dns_server_2`: (optional) The secondary DNS Server.
-  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases.
+  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of `DHCP` leases.
   * `auto_dns`: (optional) If set to `true`, the DNS servers and domain name set for NSX-Manager will be used.
 
 **Runtime properties:**
@@ -1904,17 +1904,17 @@ Edge DHCP binding.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `bind`:
   * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
-  * `vm_id`: (optional, case vm_id/vnic_id) The VM managed object Id in vCenter for the VM to be attached to this binding entry.
-  * `vnic_id`: (optional, case vm_id/vnic_id) The vnic index for the VM interface attached to this binding entry (e.g. vnic0 has index 0).
-  * `mac`: (optional, case without vm_id/vnic_id) The MAC Address of the static binding.
+  * `vm_id`: (optional, case `vm_id`/`vnic_id`) The `VM` managed object Id in vCenter for the `VM` to be attached to this binding entry.
+  * `vnic_id`: (optional, case `vm_id`/`vnic_id`) The `VNIC` index for the `VM` interface attached to this binding entry (e.g. vnic0 has index 0).
+  * `mac`: (optional, case without `vm_id`/`vnic_id`) The MAC Address of the static binding.
   * `hostname`: The hostname for this static binding.
-  * `ip`: The IP Address for this static binding.
+  * `ip`: The `IP` Address for this static binding.
   * `default_gateway`: (optional) The default gateway for the specified binding.
   * `subnet_mask`: (optional) The subnet mask (e.g. 255.255.255.0) for the specified binding.
   * `domain_name`: (optional) The DNS domain name (e.g. vmware.com) for the specified binding.
   * `dns_server_1`: (optional) The primary DNS Server.
   * `dns_server_2`: (optional) The secondary DNS Server.
-  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of DHCP leases.
+  * `lease_time`: (optional) The lease time in seconds, use 'infinite' to disable expiry of `DHCP` leases.
   * `auto_dns`: (optional) If set to `true`, the DNS servers and domain name set for NSX-Manager will be used.
 
 **Runtime properties:**
@@ -2006,7 +2006,7 @@ Create tag only in the event that it doesn't exist.
         target: tag_check
 ```
 
-* For more complicated example look to [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml).
+* For a more complex example, see [esg_with_ospf_functionality.yaml](tests/integration/resources/esg_with_ospf_functionality.yaml).
 
 # Infrastructure tests before deployments
 ## Check platform example
