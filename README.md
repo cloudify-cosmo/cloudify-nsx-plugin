@@ -799,7 +799,7 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
   * `uplink_subnet`: New [DLR](README.md#cloudifynsxdlr) uplink subnet.
   * `uplink_dgw`: New [DLR](README.md#cloudifynsxdlr) default gateway.
 * `firewall`:
-  * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
+  * `action`: The default action for firewall, possible: `accept` or `deny`. The default is `accept`.
   * `logging`: Log packages. The default is `false`.
 * `dhcp`:
   * `enabled`: The required state of the `DHCP` Server, possible `true` or `false`. The default is `true`.
@@ -821,14 +821,14 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
 * `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: The default is `false`. When `false`, it will delete the existing config.
   * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
-  * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
+  * `gracefulRestart`: (optional) The default is `false`. User can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
   * `protocolAddress`: `IP` address on one of the uplink interfaces, only for enabled and use logical switch as `OSPF`.
   * `forwardingAddress`: `IP` address on the same subnet as the `forwardingAddress`, only for enabled and use logical switch as `OSPF`.
 * `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
-  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
-  * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to true.
+  * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
+  * `gracefulRestart`: (optional) The default is `false`. User can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
   * `localAS`: Valid values are : 1-65534. To be disabled, a number must be specified.
 
@@ -938,7 +938,7 @@ interfaces creation, in other case can be cleanuped.
 * `area`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr) or [ESG](README.md#cloudifynsxesg).
   * `areaId`: Mandatory and unique. Valid values are 0-4294967295.
-  * `type`: (optional) Default is normal. Valid inputs are `normal`, `nssa`.
+  * `type`: (optional) The default is `normal`. Valid inputs are `normal`, `nssa`.
   * `authentication`: (optional) When not specified, the default is `none` and authentication is not performed.
     * `type`: Valid values are `none`, `password`, `md5`.
     * `value`: Value for authentication.
@@ -1037,7 +1037,7 @@ BGP Neighbour.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `neighbour`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
-  * `ipAddress`: IPv4 only. IPv6 support not supported.
+  * `ipAddress`: `IPv4` only. `IPv6` is not supported.
   * `remoteAS`: Valid values are 0-65535.
   * `weight`: (optional) Valid values are 0-65535. The default is 60.
   * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
@@ -1091,7 +1091,7 @@ BGP Neighbour.
   * `ipPrefixGe`: (optional) "Greater than or equal to" & used for filtering based on prefix length. Valid values are only `IPv4` prefixes.
   * `ipPrefixLe`: (optional) "Less than or equal to" & used for filtering based on prefix length. Valid values are only `IPv4` prefixes.
   * `direction`: Valid values are `in`/`out`
-  * `network`: Valid values are CIDR networks. `IPv4` only. `IPv6` support is not supported.
+  * `network`: Valid values are `CIDR` networks. `IPv4` only. `IPv6` is not supported.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1179,7 +1179,7 @@ Distributed Logical Routers interface `OSPF` redistribution rule.
 * `rule`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
   * `type`: resdistribute section can be `ospf`/`bgp`.
-  * `prefixName`: (optional) [Prefix name](README.md#cloudifynsxdlr_routing_ip_prefix) used here should be defined in the routingGlobalConfig->ipPrefixes. The default is "any".
+  * `prefixName`: (optional) [Prefix name](README.md#cloudifynsxdlr_routing_ip_prefix) used here should be defined in the routingGlobalConfig->ipPrefixes. The default is `any`.
   * `from`:
     * `isis`: (optional) The default is `false`.
     * `ospf`: (optional) The default is `false`.
@@ -1386,7 +1386,7 @@ balancer, site‐to‐site VPN, and NAT services.
   * `esg_remote_access`: Enables / Disables SSH access to the Edge Host. The default is `false`.
 * `firewall`:
   * `action`: Default action for firewall, possible: `accept` or `deny`. The default is `accept`.
-  * `logging`: Log packages, default `false`.
+  * `logging`: Log packages. The default is `false`.
 * `dhcp`:
   * `enabled`: The required state of the `DHCP` Server, possible `true` or `false`. The default is `true`.
   * `syslog_enabled`: The required logging state of the `DHCP` Server, possible `true` or `false`. The default is `false`.
@@ -1408,13 +1408,13 @@ balancer, site‐to‐site VPN, and NAT services.
     * `ecmp`: (optional) The default is `false`.
 * `ospf`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
-  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
+  * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
   * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
 * `bgp`: Only one of `OSPF`/`BGP` can be configured as the dynamic routing protocol for Logical Router.
   * `enabled`: When not specified, it will be treated as `false`, When `false`, it will delete the existing config.
-  * `defaultOriginate`: The default is `false`, user can configure edge router to publish default route by setting it to `true`.
-  * `gracefulRestart`: (optional) The default is `false`, user can enable graceful restart by setting it to true.
+  * `defaultOriginate`: The default is `false`. User can configure edge router to publish default route by setting it to `true`.
+  * `gracefulRestart`: (optional) The default is `false`. User can enable graceful restart by setting it to `true`.
   * `redistribution`: (optional) The default is `false`.
   * `localAS`: Valid values are : 1-65534, For disabled it must to have some number.
 
@@ -1516,7 +1516,7 @@ balancer, site‐to‐site VPN, and NAT services.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `neighbour`:
   * `dlr_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
-  * `ipAddress`: IPv4 only. IPv6 support not supported.
+  * `ipAddress`: `IPv4` only. `IPv6` is not supported.
   * `remoteAS`: Valid values are 0-65535.
   * `weight`: (optional) Valid values are 0-65535. The default is 60.
   * `holdDownTimer`: (optional) Valid values are : 2-65535. The default is 180 seconds.
@@ -1567,12 +1567,12 @@ Edge Services Gateway NAT.
   * `translatedAddress`: Translated address.
   * `vnic`: (optional) `VNIC`.
   * `ruleTag`: (optional) Can be used to specify user-controlled ids on VSE. Valid inputs 65537-131072. If not specified, vShield manager will generate ruleId.
-  * `loggingEnabled`: (optional) Default is false.
-  * `enabled`: (optional) Default is true.
+  * `loggingEnabled`: (optional) Default is `false`.
+  * `enabled`: (optional) The default is `true`.
   * `description`: (optional) NAT rule description.
-  * `protocol`: (optional) Default is "any". This tag is not supported for SNAT rule.
-  * `translatedPort`: (optional) Default is "any". This tag is not supported for SNAT rule.
-  * `originalPort`: (optional) Default is "any". This tag is not supported for SNAT rule.
+  * `protocol`: (optional) The default is `any`. This tag is not supported for `SNAT` rule.
+  * `translatedPort`: (optional) The default is `any`. This tag is not supported for `SNAT` rule.
+  * `originalPort`: (optional) The default is `any`. This tag is not supported for `SNAT` rule.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1625,14 +1625,14 @@ Edge Services Gateways firewall.
   * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
   * `ruleTag`: (optional) This can be used to specify user controlled ids on VSE. The inputs here should be 1-65536. If not specified, VSM will generate ruleId.
   * `name`: (optional) firewall rule name.
-  * `source`: (optional) Default behaviour is like "any". ipsetId or predefined-vnicGroupIds can be used.
-  * `destination`: (optional) Default behaviour is like "any". ipsetId or predefined-vnicGroupIds can be used.
-  * `application`: (optional) Default behaviour is like "any". applicationsetId or applicationgroupId can be used
+  * `source`: (optional) Default behaviour is like `any`. `IPSetID` or predefined-vnicGroupIds can be used.
+  * `destination`: (optional) Default behaviour is like `any`. `IPSetID` or predefined-vnicGroupIds can be used.
+  * `application`: (optional) Default behaviour is like `any`. `ApplicationSetId` or applicationgroupId can be used
   * `matchTranslated`: (optional) Default behaviour is like `false`.
   * `direction`: (optional) Default behaviour is like `any`. Possible values are `in` and `out`.
-  * `action`: (mandatory) Possible values are accept|deny|reject.
-  * `enabled`: (optional) Defaults to true.
-  * `loggingEnabled`: (optional) Defaults to false.
+  * `action`: (mandatory) Possible values are `accept`|`deny`|`reject`.
+  * `enabled`: (optional) The default is `true`.
+  * `loggingEnabled`: (optional) The default is `false`.
   * `description`: (optional) Rule description.
 
 **Runtime properties:**
@@ -1753,7 +1753,7 @@ Edge Services Gateway settings.
   * `dgw_ip`: The default gateway `IP` (next hop).
   * `vnic`: (optional) The `VNIC` index of were the default gateway is reachable on.
   * `mtu`: (optional) The `MTU` of the default gateway. The default is `1500`.
-  * `admin_distance`: (optional) Admin distance of the default route. . The default is `1`.
+  * `admin_distance`: (optional) Admin distance of the default route. The default is `1`.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -1798,10 +1798,10 @@ Edge Services Gateways route.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `route`:
   * `esg_id`: `resource_id` from [ESG](README.md#cloudifynsxesg).
-  * `network`: The routes network in the x.x.x.x/yy format, e.g. 192.168.1.0/24.
+  * `network`: The routes network in the `x.x.x.x/yy` format, e.g. `192.168.1.0/24`.
   * `next_hop`: The next hop `IP`.
   * `vnic`: (optional) The `VNIC` index of were this route is reachable on.
-  * `mtu`: (optional) The `MTU` of the route (default=1500).
+  * `mtu`: (optional) The `MTU` of the route. The default is `1500`.
   * `admin_distance`: (optional) Admin distance of the default route. The default is `1`.
   * `description`: (optional) A description for this route.
 
@@ -1964,7 +1964,7 @@ NSX object check. Search NSX object and set `resource_id` in runtime properties 
 * `nsx_object`:
     * `name`: Name of NSX object to check exists.
     * `type`: Type of object. Can be: [tag](README.md#cloudifynsxsecurity_tag), [policy](README.md#cloudifynsxsecurity_policy) and [group](README.md#cloudifynsxsecurity_group) and [lswitch](README.md#cloudifynsxlswitch) or [router](README.md#cloudifynsxdlr).
-    * `scopeId`: (optional) Object scope, useful for group search. Default: `globalroot-0`.
+    * `scopeId`: (optional) Object scope, useful for group search. The default is `globalroot-0`.
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
