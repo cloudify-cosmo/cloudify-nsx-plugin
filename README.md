@@ -145,7 +145,7 @@ A security group is a collection of assets or objects group from your vSphere in
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [ID](README.md#resource_id) of newly-created object.
 * `group`: Merged copy of `group`.
 
 **Examples:**
@@ -275,7 +275,7 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `group_member`:
-    * `objectId`: Member ID. Can be another security group or [vm](README.md#resource_id).
+    * `objectId`: Member ID. Can be another security group or [VM](README.md#resource_id).
     * `security_group_id`: `resource_id` from parent [security group](README.md#cloudifynsxsecurity_group).
 
 **Runtime properties:**
@@ -344,7 +344,7 @@ Set an object as explicitly excluded from [Security Group](README.md#cloudifynsx
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `group_exclude_member`:
-    * `objectId`: Member ID. Can be another security group or [vm](README.md#resource_id).
+    * `objectId`: Member ID. Can be another security group or [VM](README.md#resource_id).
     * `security_group_id`: `resource_id` from parent [security group](README.md#cloudifynsxsecurity_group).
 
 **Runtime properties:**
@@ -431,7 +431,7 @@ is implied by their order in the list.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [ID](README.md#resource_id) of newly created object.
 * `policy`: Merged copy of `policy`.
 
 **Relationships**
@@ -637,7 +637,7 @@ Security Tag.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [ID](README.md#resource_id) of newly-created object.
 * `tag`: Merged copy of `tag`.
 
 **Relationships**
@@ -706,7 +706,7 @@ Apply [security tag](README.md#cloudifynsxsecurity_tag) to VM.
 * `nsx_auth`: The NSX authentication, [see above](README.md#nsx_auth) for information.
 * `vm_tag`:
     * `tag_id`: Security tag ID.
-    * `vm_id`: vCenter/vSphere VM ID.
+    * `vm_id`: vCenter/vSphere [VM ID](README.md#resource_id).
 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
@@ -751,7 +751,7 @@ Logical switches
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [ID](README.md#resource_id) of newly-created object.
 * `name`: lswitch name.
 * `switch`: Merged copy of `switch`.
 * `vsphere_network_id`: [Network ID](README.md#resource_id) in vSphere.
@@ -793,8 +793,8 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
   * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
   * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
   * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
-  * `ha_ls_id`: New [DLR](README.md#cloudifynsxdlr) HA [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
-  * `uplink_ls_id`: New [DLR](README.md#cloudifynsxdlr) uplink [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id) or vds port group.
+  * `ha_ls_id`: New [DLR](README.md#cloudifynsxdlr) HA [logical switch](README.md#cloudifynsxlswitch) [ID](README.md#resource_id) or vds port group.
+  * `uplink_ls_id`: New [DLR](README.md#cloudifynsxdlr) uplink [logical switch](README.md#cloudifynsxlswitch) [ID](README.md#resource_id) or vds port group.
   * `uplink_ip`: New [DLR](README.md#cloudifynsxdlr) uplink `IP`.
   * `uplink_subnet`: New [DLR](README.md#cloudifynsxdlr) uplink subnet.
   * `uplink_dgw`: New [DLR](README.md#cloudifynsxdlr) default gateway.
@@ -813,7 +813,7 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
       * `vnic`: uplink `NIC`.
       * `mtu`: (optional) Valid value is smaller than the `MTU` set on the interface. Default will be the `MTU` of the interface on which this route is configured.
   * `routingGlobalConfig`:
-    * `routerId`: Required when dynamic routing protocols like [OSPF](README.md#cloudifynsxospf_areas), or [BGP](README.md#cloudifynsxdlrbgpneighbour) is configured.
+    * `routerId`: Required when dynamic routing protocols like [OSPF](README.md#cloudifynsxospf_areas), or [BGP](README.md#cloudifynsxdlrbgpneighbour) are configured.
     * `logging`: (optional) When absent, `enable`=`false` and `logLevel`=`INFO`.
       * `logLevel`: The logging level for routing on this Edge (`INFO`/`WARNING`/etc.). The default is `INFO`.
       * `enabled`: The required state of the routing logging, possible `true` or `false`. The default is `false`.
@@ -835,7 +835,7 @@ A logical router can have eight uplink interfaces and up to a thousand internal 
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [ID](README.md#resource_id) of newly-created object.
 * `name`: DLR name.
 * `vsphere_server_id`: [VM ID](README.md#resource_id) in vSphere.
 * `router`: Merged copy of `router`.
@@ -1231,7 +1231,7 @@ Distributed Logical Router interface.
 * `resource_id`: (optional) Internal ID used in the plugin for working with the object when `use_external_resource` is `true`.
 * `interface`:
   * `dlr_id`: `resource_id` from [DLR](README.md#cloudifynsxdlr).
-  * `interface_ls_id`: [logical switch](README.md#cloudifynsxlswitch) [id](README.md#resource_id)
+  * `interface_ls_id`: [logical switch](README.md#cloudifynsxlswitch) [ID](README.md#resource_id)
   * `interface_ip`: interface `IP` address.
   * `interface_subnet`: interface subnet.
   * `name`: name for interface
@@ -1381,7 +1381,7 @@ balancer, site‐to‐site VPN, and NAT services.
   * `datacentermoid`: The [vCenter DataCenter ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
   * `datastoremoid`: The [vCenter DataStore ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
   * `resourcepoolid`: The [vCenter Cluster ID](README.md#resource_id) where the [DLR](README.md#cloudifynsxdlr) control `VM` will be deployed.
-  * `default_pg`: The managed object id of the port group for the first vnic (on creation the first `VNIC` must be connected to a valid portgroup in NSX).
+  * `default_pg`: The managed object [ID](README.md#resource_id) of the port group for the first `VNIC`(on creation the first `VNIC` must be connected to a valid portgroup in NSX).
   * `esg_username`: The Username for the CLI and SSH access. The default is `admin`.
   * `esg_remote_access`: Enables / Disables SSH access to the Edge Host. The default is `false`.
 * `firewall`:
@@ -1421,7 +1421,7 @@ balancer, site‐to‐site VPN, and NAT services.
 **Runtime properties:**
 * `nsx_auth`: Merged copy of [nsx_auth](README.md#nsx_auth).
 * `use_external_resource`: Merged copy of `use_external_resource`.
-* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [id](README.md#resource_id) of newly-created object.
+* `resource_id`: Merged copy of `resource_id` if `use_external_resource` or [ID](README.md#resource_id) of newly-created object.
 * `name`: [ESG](README.md#cloudifynsxesg) name.
 * `vsphere_server_id`: [VM ID](README.md#resource_id) in vCenter.
 * `edge`: Merged copy of `edge`.
@@ -1640,7 +1640,7 @@ Edge Services Gateways firewall.
 * `use_external_resource`: Merged copy of `use_external_resource`.
 * `resource_id`: Internal ID used in the plugin for working with `esg_firewall`.
 * `rule`: Merged copy of `rule`.
-* `rule_id`: firewall rule id.
+* `rule_id`: firewall rule ID.
 
 **Examples:**
 
