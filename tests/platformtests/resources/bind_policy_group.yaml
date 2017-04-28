@@ -72,7 +72,7 @@ node_templates:
             policy:
               name: { concat: [ { get_input: node_name_prefix }, { get_input: policy_name } ] }
               description: "Policy description"
-              precedence: 6302
+              precedence: 6309
               actionsByCategory:
                 category: firewall
                 action:
@@ -116,6 +116,17 @@ node_templates:
               security_policy_id: { get_attribute: [ security_policy, resource_id ] }
               security_group_id: { get_attribute: [ security_group, resource_id ] }
 
+  security_group_external:
+    type: cloudify.nsx.security_group
+    properties:
+      use_external_resource: true
+      nsx_auth: *nsx_auth
+      group:
+        name: { concat: [ { get_input: node_name_prefix }, { get_input: security_group_name } ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: security_group
+
   empty_policy:
     type: cloudify.nsx.security_policy
     properties:
@@ -127,7 +138,7 @@ node_templates:
             policy:
               name:  { concat: [ { get_input: node_name_prefix }, "EmptyPolicy" ] }
               description: "Policy description"
-              precedence: 6500
+              precedence: 6522
     relationships:
       - type: cloudify.nsx.relationships.is_applied_to
-        target: security_group
+        target: security_group_external
