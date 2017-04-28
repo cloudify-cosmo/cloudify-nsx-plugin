@@ -272,6 +272,7 @@ Partially update [Security Group](README.md#cloudifynsxsecurity_group) with new 
 Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 
 **Derived From:** cloudify.nodes.ApplicationModule
+
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `group_member`:
@@ -341,6 +342,7 @@ Attach a member to [Security Group](README.md#cloudifynsxsecurity_group).
 Set an object as explicitly excluded from [Security Group](README.md#cloudifynsxsecurity_group).
 
 **Derived From:** cloudify.nodes.ApplicationModule
+
 **Properties:**
 * `nsx_auth`: The NSX authentication, look [above](README.md#nsx_auth) for information.
 * `group_exclude_member`:
@@ -413,6 +415,9 @@ When creating a security policy, a parent security policy can be specified if re
 services from the parent security policy. [Security group](README.md#cloudifynsxsecurity_group) bindings and actions
 can also be specified while creating the policy. Note that execution order of actions in a category
 is implied by their order in the list.
+
+If a virtual machine belongs to more than one security group, the services that are applied to the virtual
+machine depends on the precedence of the security policy mapped to the security groups.
 
 **Derived From:** cloudify.nodes.ApplicationServer
 

@@ -155,9 +155,8 @@ class SecurityUninstallTest(test_nsx_base.NSXBaseTest):
             },
             update_args=['securityPolicyID'],
             update_kwargs={
-                'request_body_dict':
-                    test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE,
-                'uri_parameters': {'ID': 'security_policy_id'}
+                'uri_parameters': {'ID': 'security_policy_id'},
+                'request_body_dict': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
             }
         )
 
@@ -177,9 +176,8 @@ class SecurityUninstallTest(test_nsx_base.NSXBaseTest):
             },
             update_args=['securityPolicyID'],
             update_kwargs={
-                'request_body_dict':
-                    test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE,
-                'uri_parameters': {'ID': 'security_policy_id'}
+                'uri_parameters': {'ID': 'security_policy_id'},
+                'request_body_dict': test_nsx_base.SEC_GROUP_POLICY_BIND_BEFORE
             },
             update_response=test_nsx_base.SUCCESS_RESPONSE
         )

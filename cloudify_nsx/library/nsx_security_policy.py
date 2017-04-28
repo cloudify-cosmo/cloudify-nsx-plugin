@@ -81,7 +81,7 @@ def add_policy_group_bind(client_session, security_policy_id,
                 )
             )
 
-    bindings.append({'objectId': security_group_id})
+    bindings.append({'objectId': str(security_group_id)})
 
     raw_result = client_session.update(
         'securityPolicyID', uri_parameters={'ID': security_policy_id},
