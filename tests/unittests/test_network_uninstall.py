@@ -176,18 +176,26 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_dlr_uninstall(self):
         """Check delete dlr"""
-        self._common_uninstall_external_and_unintialized(
-            'some_id', dlr.delete,
-            {'router': {}}
+        self._common_uninstall_delete(
+            'dlr_id', dlr.delete,
+            {'router': {}},
+            delete_args=['nsxEdge'],
+            delete_kwargs={
+                'uri_parameters': {'edgeId': 'dlr_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_dlr_dgw_uninstall(self):
         """Check delete dlr dgw"""
-        self._common_uninstall_external_and_unintialized(
-            'some_id', dlr_dgw.delete,
-            {'gateway': {}}
+        self._common_uninstall_delete(
+            'dlr_id', dlr_dgw.delete,
+            {'gateway': {}},
+            delete_args=['routingConfig'],
+            delete_kwargs={
+                'uri_parameters': {'edgeId': 'dlr_id'}
+            }
         )
 
     @pytest.mark.internal
@@ -209,27 +217,39 @@ class NetworkUninstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_dhcp_bind_uninstall(self):
         """Check remove binding rule vm to dhcp ip"""
-        self._common_uninstall_external_and_unintialized(
+        self._common_uninstall_delete(
             'esg_id|bind_id', dhcp_bind.delete,
-            {'bind': {}}
+            {'bind': {}},
+            delete_args=['dhcpStaticBindingID'],
+            delete_kwargs={
+                'uri_parameters': {'edgeId': 'esg_id', 'bindingID': 'bind_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_dhcp_pool_uninstall(self):
         """Check delete dhcp pool"""
-        self._common_uninstall_external_and_unintialized(
+        self._common_uninstall_delete(
             'esg_id|pool_id', dhcp_pool.delete,
-            {'pool': {}}
+            {'pool': {}},
+            delete_args=['dhcpPoolID'],
+            delete_kwargs={
+                'uri_parameters': {'edgeId': 'esg_id', 'poolID': 'pool_id'}
+            }
         )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_esg_uninstall(self):
         """Check delete esg"""
-        self._common_uninstall_external_and_unintialized(
+        self._common_uninstall_delete(
             'esg_id', esg.delete,
-            {'edge': {}}
+            {'edge': {}},
+            delete_args=['nsxEdge'],
+            delete_kwargs={
+                'uri_parameters': {'edgeId': 'esg_id'}
+            }
         )
 
     @pytest.mark.internal

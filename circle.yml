@@ -1,3 +1,7 @@
+machine:
+  python:
+    version: 2.7.9
+
 checkout:
   post:
     - >
@@ -8,18 +12,13 @@ checkout:
       fi
 
 dependencies:
-  pre:
-    - pyenv local 2.7.9
   override:
-    - pip install tox
+    - pip install --upgrade tox virtualenv
 
 test:
   override:
     - tox -e pep8
     - tox -e py27
-
-deployment:
-  release:
-    tag: /.*/
-    commands:
-      - (true)
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/reports
+    - cp nosetests.xml $CIRCLE_TEST_REPORTS

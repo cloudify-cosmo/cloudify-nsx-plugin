@@ -413,6 +413,21 @@ class NSXBaseTest(unittest.TestCase):
                 update_args=update_args, update_kwargs=update_kwargs
             )
 
+    def _common_use_existing_without_run(self, resource_id, func_call,
+                                         func_kwargs):
+        """Check skip install logic if we have use_existing and don't have
+           additional checks inside"""
+        # check already existed
+        kwargs = self._kwargs_regen(func_kwargs)
+        kwargs['use_external_resource'] = True
+        kwargs['resource_id'] = resource_id
+
+        func_call(**kwargs)
+
+        self.assertTrue(
+            self.fake_ctx.instance.runtime_properties['use_external_resource']
+        )
+
     def _common_install(self, resource_id, func_call, func_kwargs,
                         relationships=None):
         """Check skip install logic if we have resource_id
