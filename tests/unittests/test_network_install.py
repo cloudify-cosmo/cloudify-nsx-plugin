@@ -16,11 +16,20 @@ import library.test_nsx_base as test_nsx_base
 import pytest
 import mock
 import copy
+import cloudify_nsx.network.dhcp_bind as dhcp_bind
+import cloudify_nsx.network.dhcp_pool as dhcp_pool
+import cloudify_nsx.network.dlr_dgw as dlr_dgw
+import cloudify_nsx.network.bgp_neighbour_filter as bgp_neighbour_filter
 import cloudify_nsx.network.esg_firewall as esg_firewall
+import cloudify_nsx.network.esg_gateway as esg_gateway
 import cloudify_nsx.network.esg_interface as esg_interface
 import cloudify_nsx.network.esg_nat as esg_nat
+import cloudify_nsx.network.dlr_bgp_neighbour as dlr_bgp_neighbour
 import cloudify_nsx.network.dlr_interface as dlr_interface
 import cloudify_nsx.network.lswitch as lswitch
+import cloudify_nsx.network.ospf_area as ospf_area
+import cloudify_nsx.network.ospf_interface as ospf_interface
+import cloudify_nsx.network.esg_route as esg_route
 import cloudify_nsx.network.relay as relay
 import cloudify_nsx.network.routing_ip_prefix as routing_ip_prefix
 import cloudify_nsx.network.routing_redistribution as routing_redistribution
@@ -193,10 +202,118 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
             "some_id"
         )
 
+    @pytest.mark.unit
+    def test_dlr_bgp_neighbour_dlr_install(self):
+        """Check define dlr bgp neighbour"""
+        self._common_use_existing_without_run(
+            'some_id',
+            dlr_bgp_neighbour.create_dlr,
+            {'neighbour': {"dlr_id": "dlr_id",
+                           "ipAddress": "ipAddress",
+                           'remoteAS': 'remoteAS',
+                           'protocolAddress': 'protocolAddress',
+                           'forwardingAddress': 'forwardingAddress'}})
+
+        self._common_install(
+            'some_id',
+            dlr_bgp_neighbour.create_dlr,
+            {'neighbour': {"dlr_id": "dlr_id",
+                           "ipAddress": "ipAddress",
+                           'remoteAS': 'remoteAS',
+                           'protocolAddress': 'protocolAddress',
+                           'forwardingAddress': 'forwardingAddress'}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dlr_bgp_neighbour_esg_install(self):
+        """Check define esg bgp neighbour"""
+        self._common_use_existing_without_run(
+            'some_id',
+            dlr_bgp_neighbour.create_esg,
+            {'neighbour': {"dlr_id": "dlr_id",
+                           "ipAddress": "ipAddress",
+                           'remoteAS': 'remoteAS'}})
+
+        self._common_install(
+            'some_id',
+            dlr_bgp_neighbour.create_esg,
+            {'neighbour': {"dlr_id": "dlr_id",
+                           "ipAddress": "ipAddress",
+                           'remoteAS': 'remoteAS'}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dlr_dgw_install(self):
+        """Check create dlr dgw"""
+        self._common_install(
+            'some_id', dlr_dgw.create,
+            {'gateway': {"dlr_id": "dlr_id", "address": "address"}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dhcp_pool_install(self):
+        """Check create dhcp pool"""
+        self._common_use_existing_without_run(
+            "some_id", dhcp_pool.create,
+            {'pool': {"esg_id": "esg_id",
+                      "ip_range": "ip_range"}})
+
+        self._common_install(
+            "some_id", dhcp_pool.create,
+            {'pool': {"esg_id": "esg_id",
+                      "ip_range": "ip_range"}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dhcp_bind_install(self):
+        """Check insert binding rule to dhcp ip"""
+        self._common_use_existing_without_run(
+            "some_id", dhcp_bind.create,
+            {'bind': {"esg_id": "esg_id",
+                      "hostname": "hostname",
+                      "ip": "ip"}})
+
+        self._common_install(
+            "some_id", dhcp_bind.create,
+            {'bind': {"esg_id": "esg_id",
+                      "hostname": "hostname",
+                      "ip": "ip"}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_bgp_neighbour_filter_install(self):
+        """Check create bgp_neighbour_filter"""
+        self._common_use_existing_without_run(
+            'some_id', bgp_neighbour_filter.create,
+            {'filter': {
+                "neighbour_id": "neighbour_id",
+                "action": "deny",
+                "direction": "in",
+                "network": "network"}})
+
+        self._common_install(
+            'some_id',
+            bgp_neighbour_filter.create,
+            {'filter': {
+                "neighbour_id": "neighbour_id",
+                "action": "deny",
+                "direction": "in",
+                "network": "network"}})
+
     @pytest.mark.internal
     @pytest.mark.unit
     def test_dlr_interface_install(self):
         """Check create dlr interface"""
+        self._common_use_existing_without_run(
+            'id|dlr_id',
+            dlr_interface.create,
+            {'interface': {
+                "dlr_id": "dlr_id",
+                "interface_ls_id": "interface_ls_id",
+                "interface_ip": "interface_ip",
+                "interface_subnet": "interface_subnet"
+            }})
+
         self._common_install_extract_or_read_and_update(
             'id|dlr_id',
             dlr_interface.create,
@@ -299,6 +416,42 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
         fake_dlr_esg.update_dhcp_relay.assert_called_with(
             fake_client, 'dlr_id', {}, {}
         )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_route_install(self):
+        """Check create esg route"""
+        self._common_install(
+            "some_id", esg_route.create,
+            {'route': {"esg_id": "esg_id", "network": "network"}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_esg_gateway_install(self):
+        """Check create esg gateway"""
+        self._common_install(
+            "some_id", esg_gateway.create,
+            {"gateway": {"esg_id": "esg_id", "dgw_ip": "dgw_ip"}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_ospf_interface_install(self):
+        """Check create ospf interface"""
+        self._common_install(
+            "some_id", ospf_interface.create,
+            {'interface': {"dlr_id": "dlr_id",
+                           "areaId": "areaId",
+                           "vnic": "vnic"}})
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_ospf_area_install(self):
+        """Check create ospf area"""
+        self._common_install(
+            "some_id", ospf_area.create,
+            {"area": {"dlr_id": "dlr_id",
+                      "areaId": "areaId",
+                      "type": "nssa"}})
 
     @pytest.mark.internal
     @pytest.mark.unit
