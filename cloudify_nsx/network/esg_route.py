@@ -28,7 +28,7 @@ def create(**kwargs):
             "required": True
         },
         "next_hop": {
-            "set_none": True
+            "required": True
         },
         "vnic": {
             "set_none": True,

@@ -145,61 +145,127 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_esg_interface_install_all_fields(self):
+        """Check create esg interface"""
+        self._common_install_extract_or_read_and_update(
+            'id|esg_id',
+            esg_interface.create,
+            {'interface': {
+                "esg_id": "esg_id",
+                "ifindex": "id",
+                "name": "name",
+                "netmask": "255.255.255.0",
+                "ipaddr": "192.168.3.127",
+                "secondary_ips": "192.168.3.128",
+                'prefixlen': "24",
+                'enable_send_redirects': 'true',
+                'is_connected': 'true',
+                'enable_proxy_arp': 'true',
+                "portgroup_id": "portgroup_id"
+            }},
+            read_args=['vnic'], read_kwargs={
+                'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}
+            },
+            read_response={
+                'status': 204,
+                'body': test_nsx_base.EDGE_INTERFACE_BEFORE
+            },
+            update_args=['vnic'],
+            update_kwargs={
+                'request_body_dict': {
+                    'vnic': {
+                        'portgroupId': 'portgroup_id',
+                        'portgroupName': None,
+                        'type': 'internal',
+                        'enableProxyArp': 'true',
+                        'name': 'name',
+                        'addressGroups': {
+                            'addressGroup': {
+                                'secondaryAddresses': {
+                                    'ipAddress': '192.168.3.128'
+                                },
+                                'primaryAddress': '192.168.3.127',
+                                'subnetMask': '255.255.255.0',
+                                'subnetPrefixLength': '24'
+                            }
+                        },
+                        'isConnected': 'true',
+                        'enableSendRedirects': 'true',
+                        'mtu': 1500
+                    }
+                },
+                'uri_parameters': {'index': 'id', 'edgeId': 'esg_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_esg_nat_install(self):
         """Check create esg nat rule"""
-        self._common_install(
-            "some_id", esg_nat.create,
-            {
-                'rule': {
-                    "esg_id": "esg_id",
-                    "action": "action",
-                    "originalAddress": "originalAddress",
-                    "translatedAddress": "translatedAddress"
+        self._common_install_extract_or_read_and_update(
+            'esg_id|id', esg_nat.create,
+            {'rule': {
+                "esg_id": "esg_id",
+                "action": "action",
+                "originalAddress": "originalAddress",
+                "translatedAddress": "translatedAddress"
+            }},
+            extract_args=['edgeNatRules', 'create'], extract_kwargs={},
+            extract_response={
+                'natRules': {
+                    'natRule': {}
                 }
-            }
+            },
+            create_args=['edgeNatRules'],
+            create_kwargs={
+                'uri_parameters': {'edgeId': "esg_id"},
+                'request_body_dict': test_nsx_base.ESG_NAT_AFTER
+            },
+            create_response=test_nsx_base.SUCCESS_RESPONSE_ID
         )
 
-        self.fake_ctx.instance.runtime_properties['resource_id'] = "some_id"
-
-        esg_nat.create(ctx=self.fake_ctx,
-                       rule={"esg_id": "esg_id",
-                             "action": "action",
-                             "originalAddress": "originalAddress",
-                             "translatedAddress": "translatedAddress"})
-
-        # without resource_id
-        fake_client, _, kwargs = self._kwargs_regen_client(
-            None, {
-                'rule': {
-                    "esg_id": "esg_id",
-                    "action": "action",
-                    "originalAddress": "originalAddress",
-                    "translatedAddress": "translatedAddress"
+        self._common_install_extract_or_read_and_update(
+            'esg_id|id', esg_nat.create,
+            {'rule': {
+                "esg_id": "esg_id",
+                "action": "action",
+                "originalAddress": "originalAddress",
+                "translatedAddress": "translatedAddress",
+                "description": "3",
+                'vnic': '1',
+                'ruleTag': '2',
+                "loggingEnabled": 'true',
+                'enabled': 'false'
+            }},
+            extract_args=['edgeNatRules', 'create'], extract_kwargs={},
+            extract_response={
+                'natRules': {
+                    'natRule': {}
                 }
-            }
-        )
-
-        fake_nsx_nat = mock.Mock()
-        fake_nsx_nat.add_nat_rule = mock.MagicMock(
-            return_value="some_id"
-        )
-        with mock.patch(
-            'cloudify_nsx.library.nsx_common.NsxClient',
-            mock.MagicMock(return_value=fake_client)
-        ):
-            with mock.patch(
-                'cloudify_nsx.network.esg_nat.nsx_nat',
-                fake_nsx_nat
-            ):
-                esg_nat.create(**kwargs)
-        fake_nsx_nat.add_nat_rule.assert_called_with(
-            fake_client, 'esg_id', 'action', 'originalAddress',
-            'translatedAddress', None, None, False, True, None, 'any',
-            'any', 'any'
-        )
-        self.assertEqual(
-            self.fake_ctx.instance.runtime_properties['resource_id'],
-            "some_id"
+            },
+            create_args=['edgeNatRules'],
+            create_kwargs={
+                'uri_parameters': {'edgeId': "esg_id"},
+                'request_body_dict': {
+                    'natRules': {
+                        'natRule': {
+                            'translatedPort': 'any',
+                            'action': 'action',
+                            'originalAddress': 'originalAddress',
+                            'translatedAddress': 'translatedAddress',
+                            'vnic': '1',
+                            'ruleTag': '2',
+                            'description': '3',
+                            'enabled': 'false',
+                            'protocol': 'any',
+                            'originalPort': 'any',
+                            'loggingEnabled': 'true'
+                        }
+                    }
+                }
+            },
+            create_response=test_nsx_base.SUCCESS_RESPONSE_ID
         )
 
     @pytest.mark.unit
@@ -214,54 +280,116 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
                            'protocolAddress': 'protocolAddress',
                            'forwardingAddress': 'forwardingAddress'}})
 
-        self._common_install(
-            'some_id',
+        self._common_install_extract_or_read_and_update(
+            'dlr_id|ip|remoteAS|protocolIp|forwardingIp',
             dlr_bgp_neighbour.create_dlr,
             {'neighbour': {"dlr_id": "dlr_id",
-                           "ipAddress": "ipAddress",
+                           "ipAddress": "ip",
                            'remoteAS': 'remoteAS',
-                           'protocolAddress': 'protocolAddress',
-                           'forwardingAddress': 'forwardingAddress'}})
+                           'forwardingAddress': 'forwardingIp',
+                           'protocolAddress': 'protocolIp'}},
+            read_args=['routingBGP'],
+            read_kwargs={'uri_parameters': {'edgeId': 'dlr_id'}},
+            read_response={
+                'body': test_nsx_base.DLR_BGP_NEIGHBOUR_BEFORE,
+                'status': 204
+            },
+            update_args=['routingBGP'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.DLR_BGP_NEIGHBOUR_AFTER,
+                'uri_parameters': {'edgeId': 'dlr_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_dlr_bgp_neighbour_esg_install(self):
         """Check define esg bgp neighbour"""
         self._common_use_existing_without_run(
-            'some_id',
+            'esg_id|ip|remoteAS||',
             dlr_bgp_neighbour.create_esg,
             {'neighbour': {"dlr_id": "dlr_id",
                            "ipAddress": "ipAddress",
                            'remoteAS': 'remoteAS'}})
 
-        self._common_install(
-            'some_id',
+        self._common_install_extract_or_read_and_update(
+            'esg_id|ip|remoteAS||',
             dlr_bgp_neighbour.create_esg,
-            {'neighbour': {"dlr_id": "dlr_id",
-                           "ipAddress": "ipAddress",
-                           'remoteAS': 'remoteAS'}})
+            {'neighbour': {"dlr_id": "esg_id",
+                           "ipAddress": "ip",
+                           'remoteAS': 'remoteAS'}},
+            read_args=['routingBGP'],
+            read_kwargs={'uri_parameters': {'edgeId': 'esg_id'}},
+            read_response={
+                'body': test_nsx_base.EDGE_BGP_NEIGHBOUR_BEFORE,
+                'status': 204
+            },
+            update_args=['routingBGP'],
+            update_kwargs={
+                'request_body_dict': test_nsx_base.EDGE_BGP_NEIGHBOUR_AFTER,
+                'uri_parameters': {'edgeId': 'esg_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_dlr_dgw_install(self):
         """Check create dlr dgw"""
-        self._common_install(
-            'some_id', dlr_dgw.create,
-            {'gateway': {"dlr_id": "dlr_id", "address": "address"}})
+        self._common_install_extract_or_read_and_update(
+            'dlr_id', dlr_dgw.create,
+            {'gateway': {"dlr_id": "dlr_id", "address": "address"}},
+            extract_args=['routingConfig', 'update'], extract_kwargs={},
+            extract_response=test_nsx_base.ROUTING_CONFIG_UPDATE_EXTRACT,
+            update_args=['routingConfig'],
+            update_kwargs={
+                'uri_parameters': {'edgeId': "dlr_id"},
+                'request_body_dict': {
+                    'routing': test_nsx_base.EDG_STATIC_ROUTING_GATEWAY_AFTER
+                }
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_dhcp_pool_install(self):
         """Check create dhcp pool"""
         self._common_use_existing_without_run(
-            "some_id", dhcp_pool.create,
-            {'pool': {"esg_id": "esg_id",
-                      "ip_range": "ip_range"}})
+            'some_id', dhcp_pool.create,
+            {'pool': {'esg_id': 'esg_id',
+                      'ip_range': 'ip_range'}})
 
-        self._common_install(
-            "some_id", dhcp_pool.create,
-            {'pool': {"esg_id": "esg_id",
-                      "ip_range": "ip_range"}})
+        self._common_install_create(
+            'esg_id|id', dhcp_pool.create,
+            {'pool': {'esg_id': 'esg_id',
+                      'ip_range': '192.168.5.128-192.168.5.250',
+                      'default_gateway': '192.168.5.1',
+                      'subnet_mask': '255.255.255.0',
+                      'domain_name': 'internal.test',
+                      'dns_server_1': '8.8.8.8',
+                      'dns_server_2': '192.168.5.1',
+                      'lease_time': 'infinite',
+                      'auto_dns': 'true'}},
+            create_args=['dhcpPool'],
+            create_kwargs={
+                'request_body_dict': {
+                    'ipPool': {
+                        'domainName': 'internal.test',
+                        'leaseTime': 'infinite',
+                        'primaryNameServer': '8.8.8.8',
+                        'secondaryNameServer': '192.168.5.1',
+                        'autoConfigureDNS': 'true',
+                        'subnetMask': '255.255.255.0',
+                        'ipRange': '192.168.5.128-192.168.5.250',
+                        'defaultGateway': '192.168.5.1'
+                    }
+                },
+                'uri_parameters': {'edgeId': 'esg_id'}
+            },
+            create_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
@@ -281,24 +409,122 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
 
     @pytest.mark.internal
     @pytest.mark.unit
+    def test_dhcp_bind_install_mac(self):
+        """Check insert binding rule to dhcp ip"""
+        self._common_install_create(
+            'esg_id|id', dhcp_bind.create,
+            {'bind': {'esg_id': 'esg_id',
+                      'mac': '11:22:33:44:55:66',
+                      'hostname': 'secret.server',
+                      'ip': '192.168.5.251',
+                      'default_gateway': '192.168.5.1',
+                      'subnet_mask': '255.255.255.0',
+                      'domain_name': 'secret.internal.test',
+                      'dns_server_1': '8.8.8.8',
+                      'dns_server_2': '192.168.5.1',
+                      'lease_time': 'infinite',
+                      'auto_dns': 'true'}},
+            create_args=['dhcpStaticBinding'],
+            create_kwargs={
+                'request_body_dict': {
+                    'staticBinding': {
+                        'subnetMask': '255.255.255.0',
+                        'domainName': 'secret.internal.test',
+                        'primaryNameServer': '8.8.8.8',
+                        'macAddress': '11:22:33:44:55:66',
+                        'leaseTime': 'infinite',
+                        'secondaryNameServer': '192.168.5.1',
+                        'hostname': 'secret.server',
+                        'defaultGateway': '192.168.5.1',
+                        'ipAddress': '192.168.5.251',
+                        'autoConfigureDNS': 'true'
+                    }
+                },
+                'uri_parameters': {'edgeId': 'esg_id'}
+            },
+            create_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
+    def test_dhcp_bind_install_vm(self):
+        """Check insert binding rule to dhcp ip"""
+        self._common_install_create(
+            'esg_id|id', dhcp_bind.create,
+            {'bind': {'esg_id': 'esg_id',
+                      'vm_id': 'vm_id',
+                      'vnic_id': 'vnic_id',
+                      'hostname': 'secret.server',
+                      'ip': '192.168.5.251',
+                      'default_gateway': '192.168.5.1',
+                      'subnet_mask': '255.255.255.0',
+                      'domain_name': 'secret.internal.test',
+                      'dns_server_1': '8.8.8.8',
+                      'dns_server_2': '192.168.5.1',
+                      'lease_time': 'infinite',
+                      'auto_dns': 'true'}},
+            create_args=['dhcpStaticBinding'],
+            create_kwargs={
+                'request_body_dict': {
+                    'staticBinding': {
+                        'subnetMask': '255.255.255.0',
+                        'domainName': 'secret.internal.test',
+                        'primaryNameServer': '8.8.8.8',
+                        'vnicId': 'vnic_id',
+                        'vmId': 'vm_id',
+                        'secondaryNameServer': '192.168.5.1',
+                        'hostname': 'secret.server',
+                        'ipAddress': '192.168.5.251',
+                        'defaultGateway': '192.168.5.1',
+                        'leaseTime': 'infinite',
+                        'autoConfigureDNS': 'true'
+                    }
+                },
+                'uri_parameters': {'edgeId': 'esg_id'}
+            },
+            create_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
+
+    @pytest.mark.internal
+    @pytest.mark.unit
     def test_bgp_neighbour_filter_install(self):
         """Check create bgp_neighbour_filter"""
         self._common_use_existing_without_run(
-            'some_id', bgp_neighbour_filter.create,
-            {'filter': {
-                "neighbour_id": "neighbour_id",
-                "action": "deny",
-                "direction": "in",
-                "network": "network"}})
-
-        self._common_install(
-            'some_id',
+            'net|esg_id|ip|remoteAS|protocolIp|forwardingIp',
             bgp_neighbour_filter.create,
             {'filter': {
                 "neighbour_id": "neighbour_id",
                 "action": "deny",
                 "direction": "in",
                 "network": "network"}})
+
+        self._common_install_extract_or_read_and_update(
+            'net|esg_id|ip|remoteAS|protocolIp|forwardingIp',
+            bgp_neighbour_filter.create,
+            {'filter': {
+                "neighbour_id": "esg_id|ip|remoteAS|protocolIp|forwardingIp",
+                "action": "deny",
+                "direction": "in",
+                "network": "net",
+                "ipPrefixGe": "ipPrefixGe",
+                "ipPrefixLe": "ipPrefixLe"
+            }},
+            # read
+            read_args=['routingBGP'],
+            read_kwargs={'uri_parameters': {'edgeId': 'esg_id'}},
+            read_response={
+                'body': test_nsx_base.DLR_BGP_NEIGHBOUR_WITH_FILTER_BEFORE,
+                'status': 204
+            },
+            # update
+            update_args=['routingBGP'],
+            update_kwargs={
+                'request_body_dict':
+                    test_nsx_base.DLR_BGP_NEIGHBOUR_WITH_FILTER_AFTER,
+                'uri_parameters': {'edgeId': 'esg_id'}
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
@@ -421,17 +647,77 @@ class NetworkInstallTest(test_nsx_base.NSXBaseTest):
     @pytest.mark.unit
     def test_esg_route_install(self):
         """Check create esg route"""
-        self._common_install(
-            "some_id", esg_route.create,
-            {'route': {"esg_id": "esg_id", "network": "network"}})
+        self._common_install_extract_or_read_and_update(
+            "esg_id|network|192.168.3.10", esg_route.create,
+            {'route': {"esg_id": "esg_id", "network": "network",
+                       "next_hop": "192.168.3.10"}},
+            # read
+            read_args=['routingConfigStatic'],
+            read_kwargs={'uri_parameters': {'edgeId': "esg_id"}},
+            read_response={
+                'status': 204,
+                'body': test_nsx_base.EDG_STATIC_ROUTING_BEFORE
+            },
+            # update
+            update_args=['routingConfigStatic'],
+            update_kwargs={
+                'uri_parameters': {'edgeId': "esg_id"},
+                'request_body_dict': {
+                    'staticRouting': {
+                        'staticRoutes': {
+                            'route': [{
+                                'description': None,
+                                'network': 'network',
+                                'mtu': '1500',
+                                'vnic': None,
+                                'nextHop': "192.168.3.10",
+                                'adminDistance': '1'
+                            }]
+                        },
+                        'defaultRoute': {
+                            'vnic': None,
+                            'gatewayAddress': 'address',
+                            'description': None,
+                            'mtu': None
+                        }
+                    }
+                }
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
     def test_esg_gateway_install(self):
         """Check create esg gateway"""
-        self._common_install(
-            "some_id", esg_gateway.create,
-            {"gateway": {"esg_id": "esg_id", "dgw_ip": "dgw_ip"}})
+        self._common_install_extract_or_read_and_update(
+            "esg_id|dgw_ip", esg_gateway.create,
+            {"gateway": {"esg_id": "esg_id", "dgw_ip": "dgw_ip"}},
+            # read
+            read_args=['routingConfigStatic'],
+            read_kwargs={'uri_parameters': {'edgeId': "esg_id"}},
+            read_response={
+                'status': 204,
+                'body': test_nsx_base.EDG_STATIC_ROUTING_BEFORE
+            },
+            # update
+            update_args=['routingConfigStatic'],
+            update_kwargs={
+                'uri_parameters': {'edgeId': "esg_id"},
+                'request_body_dict': {
+                    'staticRouting': {
+                        'staticRoutes': {},
+                        'defaultRoute': {
+                            'mtu': '1500',
+                            'vnic': None,
+                            'adminDistance': '1',
+                            'gatewayAddress': 'dgw_ip'
+                        }
+                    }
+                }
+            },
+            update_response=test_nsx_base.SUCCESS_RESPONSE_ID
+        )
 
     @pytest.mark.internal
     @pytest.mark.unit
