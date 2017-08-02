@@ -183,6 +183,140 @@ EDGE_INTERFACE_AFTER = {
     }
 }
 
+ESG_NAT_AFTER = {
+    'natRules': {
+        'natRule': {
+            'translatedPort': 'any',
+            'action': 'action',
+            'originalAddress': 'originalAddress',
+            'translatedAddress': 'translatedAddress',
+            'vnic': None,
+            'ruleTag': None,
+            'description': None,
+            'enabled': 'true',
+            'protocol': 'any',
+            'originalPort': 'any',
+            'loggingEnabled': 'false'
+        }
+    }
+}
+
+EDGE_BGP_NEIGHBOUR_BEFORE = {
+    'bgp': {
+        'bgpNeighbours': {
+            'bgpNeighbour': [{
+                'ipAddress': 'other_ip',
+                'remoteAS': 'other_remoteAS'
+            }]
+        }
+    }
+}
+
+DLR_BGP_NEIGHBOUR_BEFORE = {
+    'bgp': {
+        'bgpNeighbours': {
+            'bgpNeighbour': [{
+                'forwardingAddress': 'other_forwardingIp',
+                'protocolAddress': 'other_protocolIp',
+                'ipAddress': 'other_ip',
+                'remoteAS': 'other_remoteAS',
+                'bgpFilters': {}
+            }]
+        }
+    }
+}
+
+EDGE_BGP_NEIGHBOUR_AFTER = {
+    'bgp': {
+        'bgpNeighbours': {
+            'bgpNeighbour': [{
+                'ipAddress': 'other_ip',
+                'remoteAS': 'other_remoteAS',
+            }, {
+                'ipAddress': 'ip',
+                'remoteAS': 'remoteAS',
+                'holdDownTimer': '180',
+                'weight': '60',
+                'keepAliveTimer': '60',
+                'password': None
+            }]
+        }
+    }
+}
+
+DLR_BGP_NEIGHBOUR_AFTER = {
+    'bgp': {
+        'bgpNeighbours': {
+            'bgpNeighbour': [{
+                'ipAddress': 'other_ip',
+                'remoteAS': 'other_remoteAS',
+                'forwardingAddress': 'other_forwardingIp',
+                'protocolAddress': 'other_protocolIp',
+                'bgpFilters': {}
+            }, {
+                'forwardingAddress': 'forwardingIp',
+                'ipAddress': 'ip',
+                'password': None,
+                'holdDownTimer': '180',
+                'protocolAddress': 'protocolIp',
+                'weight': '60',
+                'keepAliveTimer': '60',
+                'remoteAS': 'remoteAS'
+            }]
+        }
+    }
+}
+
+DLR_BGP_NEIGHBOUR_WITH_FILTER_BEFORE = {
+    'bgp': {
+        'bgpNeighbours': {
+            'bgpNeighbour': [{
+                'forwardingAddress': 'forwardingIp',
+                'protocolAddress': 'protocolIp',
+                'ipAddress': 'ip',
+                'bgpFilters': {
+                    'bgpFilter': []
+                },
+                'remoteAS': 'remoteAS'
+            }, {
+                'forwardingAddress': 'other_forwardingIp',
+                'protocolAddress': 'other_protocolIp',
+                'ipAddress': 'other_ip',
+                'bgpFilters': {},
+                'remoteAS': 'other_remoteAS'
+            }]
+        }
+    }
+}
+
+DLR_BGP_NEIGHBOUR_WITH_FILTER_AFTER = {
+    'bgp': {
+        'bgpNeighbours': {
+            'bgpNeighbour': [{
+                'ipAddress': 'ip',
+                'remoteAS': 'remoteAS',
+                'forwardingAddress': 'forwardingIp',
+                'protocolAddress': 'protocolIp',
+                'bgpFilters': {
+                    'bgpFilter': [{
+                        'network': 'net',
+                        'action': 'deny',
+                        'ipPrefixGe': 'ipPrefixGe',
+                        'ipPrefixLe': 'ipPrefixLe',
+                        'direction': 'in'
+                    }]
+                }
+            }, {
+                'ipAddress': 'other_ip',
+                'remoteAS': 'other_remoteAS',
+                'forwardingAddress': 'other_forwardingIp',
+                'protocolAddress': 'other_protocolIp',
+                'bgpFilters': {}
+            }]
+        }
+    }
+}
+
 DLR_INTERFACE_CREATE = {
     'interfaces': {
         'interface': {
@@ -205,6 +339,55 @@ DLR_INTERFACE_CREATE_RESPONSE = {
         'interface': {
             'index': 'id'
         }
+    }
+}
+
+EDG_STATIC_ROUTING_BEFORE = {
+    'staticRouting': {
+        'defaultRoute': {
+            'vnic': None,
+            'gatewayAddress': 'address',
+            'mtu': None,
+            'description': None
+        },
+        'staticRoutes': {}
+    }
+}
+
+EDG_STATIC_ROUTING_GATEWAY_AFTER = {
+    'staticRouting': {
+        'defaultRoute': {
+            'vnic': None,
+            'gatewayAddress': 'address',
+            'mtu': None,
+            'description': None
+        }
+    }
+}
+
+ROUTING_CONFIG_UPDATE_EXTRACT = {
+    'routing': {
+        'staticRouting': {
+            'staticRoutes': {
+                'route': {
+                    'vnic': None,
+                    'network': None,
+                    'nextHop': None,
+                    'description': None,
+                    'mtu': None
+                }
+            },
+            'defaultRoute': {
+                'vnic': None,
+                'gatewayAddress': None,
+                'description': None,
+                'mtu': None
+            }
+        },
+        'routingGlobalConfig': {},
+        'ospf': {},
+        'isis': {},
+        'bgp': {}
     }
 }
 

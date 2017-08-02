@@ -1,6 +1,6 @@
 machine:
   python:
-    version: 2.7.9
+    version: 2.7.10
 
 checkout:
   post:
@@ -19,6 +19,7 @@ test:
   override:
     - tox -e pep8
     - tox -e py27
+    - tox -e validate
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/reports
     - cp nosetests.xml $CIRCLE_TEST_REPORTS
